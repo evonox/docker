@@ -1,2 +1,5 @@
+import "reflect-metadata"
 
-console.log("Hello, world, GOOGdLE");
+
+console.log("INITIALIZED");
+
