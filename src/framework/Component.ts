@@ -48,7 +48,7 @@ export abstract class Component {
     }
 
     protected bind(dom: HTMLElement, eventName: string, handler: DOMEventHandler<Event>): DOMEventSubscription {
-        return this.domEventManager.bind(dom, eventName, handler, {capture: false});
+        return this.domEventManager.bind(dom, eventName, handler.bind(this), {capture: false});
     }
 
     protected abstract onInitialized(): void;

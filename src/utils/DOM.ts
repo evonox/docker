@@ -1,5 +1,4 @@
 
-
 export class DOM<T extends HTMLElement> {
 
     constructor(private element: T) {}
@@ -19,8 +18,33 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
+    getText(): string {
+        return this.element.innerText;
+    }
+
+    getHtml(): string {
+        return this.element.innerHTML;
+    }
+
+    getWidth(): number {
+        return this.element.clientWidth;
+    }
+
+    getHeight(): number {
+        return this.element.clientHeight;
+    }
+
+    getBounds(): DOMRect {
+        return this.element.getBoundingClientRect();
+    }
+
     html(html: string): DOM<T> {
         this.element.innerHTML = html;
+        return this;
+    }
+    
+    attr(name: string, value: string): DOM<T> {
+        this.element.setAttribute(name, value);
         return this;
     }
 
@@ -45,8 +69,33 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
-    appendTo(container: HTMLElement): DOM<T> {
-        container.appendChild(this.element);
+    css(propertyName: string, propertyValue: string): DOM<T> {
+        this.element.style.setProperty(propertyName, propertyValue);
+        return this;
+    }
+
+    appendTo(container: HTMLElement | DOM<HTMLElement>): DOM<T> {
+        if(container instanceof DOM) {
+            container.get().appendChild(this.element);
+        } else {
+            container.appendChild(this.element);
+        }
+        return this;
+    }
+
+    appendChild(child: HTMLElement | DOM<HTMLElement>): DOM<T> {
+        if(child instanceof DOM) {
+            this.element.appendChild(child.get());
+        } else {
+            this.element.appendChild(child);
+        }
+        return this;
+    }
+
+    appendChildren(children: (HTMLElement | DOM<HTMLElement>)[]): DOM<T> {
+        for(const child of children) {
+            this.appendChild(child);
+        }
         return this;
     }
 

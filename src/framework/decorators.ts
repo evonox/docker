@@ -1,4 +1,5 @@
 
+// Note: Will this be needed to decorate a component?
 export function component() {
     return function(target: any) {
         return target;
@@ -15,8 +16,10 @@ export function property(opts?: {defaultValue?: any}) {
             enumerable: true,
             get: () => target[attributeSymbol],
             set: (value) => {
-                target[attributeSymbol] = value;
-                target.requestUpdate();
+                if(value !== target[attributeSymbol]) {
+                    target[attributeSymbol] = value;
+                    target.requestUpdate();  
+                }
             }
         })
 
@@ -34,8 +37,10 @@ export function state(opts?: {defaultValue?: any}) {
             enumerable: false,
             get: () => target[attributeSymbol],
             set: (value) => {
-                target[attributeSymbol] = value;
-                target.requestUpdate();
+                if(value !== target[attributeSymbol]) {
+                    target[attributeSymbol] = value;
+                    target.requestUpdate();   
+                }
             }
         })
 
