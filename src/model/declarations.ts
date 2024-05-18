@@ -4,16 +4,22 @@ export enum OrientationKind { Row, Column };
 
 export enum TabHostDirection { Top, Bottom, Left, Right };
 
-export enum ContainerType { Panel }
+export enum ContainerType { Panel, RowLayout, ColumnLayout, FillLayout }
 
+/**
+ * TODO: PERSISTENCE OF UI
+ */
 export interface IDockContainer {
+
+    getDOM(): HTMLElement;
+
     hasChanges(): boolean;
 
     setVisible(visible: boolean): void;
 
     getMinWidth(): number;
     getMinHeight(): number;
-    
+
     getWidth(): number;
     getHeight(): number;
 
