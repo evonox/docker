@@ -1,0 +1,64 @@
+
+.ResizeHandler--North {
+    position: absolute;
+    left: var(--rh-corner-size);
+    right: var(--rh-corner-size);
+    top: 0;
+    height: var(--rh-handle-size);
+}
+
+.ResizeHandler--South {
+    position: absolute;
+    left: var(--rh-corner-size);
+    right: var(--rh-corner-size);
+    bottom: 0;
+    height: var(--rh-handle-size);
+}
+
+.ResizeHandler--West {
+    position: absolute;
+    top: var(--rh-corner-size);
+    bottom: var(--rh-corner-size);
+    left: 0;
+    width: var(--rh-handle-size);
+}
+
+.ResizeHandler--East {
+    position: absolute;
+    top: var(--rh-corner-size);
+    bottom: var(--rh-corner-size);
+    right: 0;
+    width: var(--rh-handle-size);
+}
+
+.ResizeHandler--NorthEast {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--rh-corner-size);
+    height: var(--rh-corner-size);
+}
+
+.ResizeHandler--NorthWest {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--rh-corner-size);
+    height: var(--rh-corner-size);
+}
+
+.ResizeHandler--SouthEast {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: var(--rh-corner-size);
+    height: var(--rh-corner-size);
+}
+
+.ResizeHandler--SouthWest {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: var(--rh-corner-size);
+    height: var(--rh-corner-size);
+}
