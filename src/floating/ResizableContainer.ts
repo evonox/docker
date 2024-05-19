@@ -3,6 +3,7 @@ import { ContainerType, IDeltaRect, IDockContainer, IPoint, IRect } from "../com
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ResizeHandle, ResizeHandleType } from "./ResizeHandle";
+import { IState } from "../common/serialization";
 
 
 export class ResizableContainer implements IDockContainer {
@@ -12,6 +13,18 @@ export class ResizableContainer implements IDockContainer {
     constructor(private delegate: IDockContainer, private topElement: HTMLElement, private disableResize: boolean = false) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
+    }
+    getMinimumChildNodeCount(): number {
+        throw new Error("Method not implemented.");
+    }
+    setActiveChild(container: IDockContainer): void {
+        throw new Error("Method not implemented.");
+    }
+    saveState(state: IState): void {
+        throw new Error("Method not implemented.");
+    }
+    loadState(state: IState): void {
+        throw new Error("Method not implemented.");
     }
 
     private buildResizeHandles() {
@@ -35,8 +48,8 @@ export class ResizableContainer implements IDockContainer {
         resizeHandle.on("mousedown", this.handleMouseDown);
     }
 
-    performLayout(children: IDockContainer[]) {
-        this.delegate.performLayout(children);
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
+        this.delegate.performLayout(children, relayoutEvenIfEqual);
     }
 
     dispose() {

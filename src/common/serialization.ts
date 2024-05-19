@@ -18,7 +18,7 @@ export interface IPanelInfo {
 }
 
 export interface IState {
-    panelName: string,
+    panelName?: string,
     width?: number;
     height?: number;
     documentManager?: boolean;

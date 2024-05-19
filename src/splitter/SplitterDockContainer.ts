@@ -1,6 +1,7 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { ContainerType, IDockContainer, OrientationKind } from "../common/declarations";
 import { SplitterPanel } from "./SplitterPanel";
+import { IState } from "../common/serialization";
 
 /**
  * This class is a pure adapter for the SplitterPanel to apply it easily to the docking facilities
@@ -11,6 +12,18 @@ export abstract class SplitterDockContainer implements IDockContainer {
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         this.splitterPanel = new SplitterPanel(this.childContainers, this.orientation);
+    }
+    getMinimumChildNodeCount(): number {
+        throw new Error("Method not implemented.");
+    }
+    setActiveChild(container: IDockContainer): void {
+        throw new Error("Method not implemented.");
+    }
+    saveState(state: IState): void {
+        throw new Error("Method not implemented.");
+    }
+    loadState(state: IState): void {
+        throw new Error("Method not implemented.");
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean = false)  {
