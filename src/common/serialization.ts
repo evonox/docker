@@ -21,7 +21,7 @@ export interface IState {
     width?: number;
     height?: number;
     documentManager?: boolean;
-    element?: string;
+    element?: string; // NOTE: WILL THIS BE NEEDED????
     canUndock?: boolean;
     hideCloseButton?: boolean;
     panelType?: PanelType;

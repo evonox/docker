@@ -53,8 +53,7 @@ export interface IDockContainer {
     getContainerType(): ContainerType;
 
     saveState(state: IState): void;
-    
-
+    loadState(state: IState): void;   
 
     // Event Handling
     on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
