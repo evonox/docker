@@ -1,3 +1,4 @@
+import { DockManager } from "../DockManager";
 
 
 /**
@@ -5,5 +6,6 @@
  */
 export class FillDockContainer {
 
+    constructor(private dockManager: DockManager) {}
 
 }

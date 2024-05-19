@@ -1,4 +1,5 @@
 import { DockManager } from "../DockManager";
+import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
 import { PanelState } from "../api/PanelState";
 import { ContainerType, IDockContainer, IPoint, PanelType } from "../common/declarations";
 import { IPanelAPI } from "../common/panel-api";
@@ -25,14 +26,17 @@ export class PanelContainer extends Component implements IDockContainer {
     private domContentHost: DOM<HTMLElement>;
 
     private domContentWrapper: DOM<HTMLElement>;
+    private domContent: HTMLElement;
 
+    private domContentContainer: DOM<HTMLElement>;
     private domGrayingPlaceholder: HTMLElement;
+
+    private _hasChanges: boolean = false;
 
     constructor(
         private dockManager: DockManager, 
         private panelName: string,
         private api: IPanelAPI,
-        private content: HTMLElement,
         private title: string,
         private panelType: PanelType,
         private hideCloseButton: boolean = false
@@ -40,11 +44,15 @@ export class PanelContainer extends Component implements IDockContainer {
         super();
     }
 
-    protected onInitialized(): void {
-        DOM.from(this.content).css("position", "absolute")
+    public setContent(content: HTMLElement) {
+        this.domContent = content;
+        DOM.from(this.domContent).css("position", "absolute")
             .css("left", "0").css("top", "0")
             .css("width", "100%").css("height", "100%");
+        this.domContentContainer.appendChild(this.domContent);
     }
+
+    protected onInitialized(): void {}
 
     protected onDisposed(): void {
         throw new Error("Method not implemented.");
@@ -54,7 +62,6 @@ export class PanelContainer extends Component implements IDockContainer {
         const domContentContainer = DOM.create("div").addClass("anel-element-content-container")
                 .css("position", "absolute");
         this.bind(domContentContainer.get(), "mousedown", this.handleMouseFocusEvent.bind(this));
-        domContentContainer.appendChild(this.content);
         this.dockManager.getDialogRootElement().appendChild(domContentContainer.get());
 
         this.domPanel = DOM.create("div").attr("tabIndex", "0").addClass("panel-base");
@@ -83,9 +90,10 @@ export class PanelContainer extends Component implements IDockContainer {
 
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
         const api = dockManager.queryPanelAPI(state.panelName);
-        const contentElement = await api.initialize(null, null);
-        // TODO: QUERY PANEL TITLE
-        const container = new PanelContainer(dockManager, state.panelName, api, contentElement, "", state.panelType, state.hideCloseButton);
+        const container = new PanelContainer(dockManager, state.panelName, api, "", state.panelType, state.hideCloseButton);
+        const contentElement = await api.initialize(new PanelContainerAdapter(container), null);
+        container.setContent(contentElement);
+        // TODO: QUERY PANEL TITLE - RESPONSIBILITY OF THE FACTORY METHOD
         container.loadState(state);
         return container;
     }
@@ -178,15 +186,20 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     setTitle(title: string) {
-
+        this.title = title;
+        // TODO: UPDATE TITLE
+        // TODO: NOTIFY ABOUT TITLE CHANGED
     }
 
     setTitleIcon(icon: string) {
-
+        // TODO: UPDATE TITLE
+        // TODO: NOTIFY ABOUT TITLE CHANGED
     }
 
     setHasChanges(flag: boolean) {
-
+        this._hasChanges = flag;
+        // TODO: UPDATE TITLE
+        // TODO: NOTIFY ABOUT TITLE CHANGED
     }
 
     async close() {

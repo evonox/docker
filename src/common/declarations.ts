@@ -1,7 +1,9 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { IState } from "./serialization";
 
-export enum OrientationKind { Row = "row", Column = "column" };
+export enum DockKind { Left, Right, Up, Down, Fill };
+
+export enum OrientationKind { Row = "row", Column = "column", Fill = "fill" };
 
 export enum TabHostDirection { Top = "top", Bottom = "bottom", Left = "left", Right = "right" };
 
@@ -38,6 +40,9 @@ export interface IDockContainer {
     getDOM(): HTMLElement;
 
     hasChanges(): boolean;
+
+    getMinimumChildNodeCount(): number;
+    setActiveChild(container: IDockContainer): void;
 
     setVisible(visible: boolean): void;
 
