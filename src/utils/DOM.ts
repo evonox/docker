@@ -1,7 +1,16 @@
 
+const COORDINATE_PRECISION = 3;
+
+/**
+ * TODO: INTRODUCE VALUE CACHING
+ */
 export class DOM<T extends HTMLElement> {
 
     constructor(private element: T) {}
+
+    removeFromDOM() {
+        this.element.remove();
+    }
 
     addClass(name: string): DOM<T> {
         this.element.classList.add(name);
@@ -16,6 +25,10 @@ export class DOM<T extends HTMLElement> {
     text(text: string): DOM<T> {
         this.element.innerText = text;
         return this;
+    }
+
+    getCss(name: string): string {
+        return this.element.style.getPropertyValue(name);
     }
 
     getText(): string {
@@ -45,6 +58,42 @@ export class DOM<T extends HTMLElement> {
     
     attr(name: string, value: string): DOM<T> {
         this.element.setAttribute(name, value);
+        return this;
+    }
+
+    left(value: number | string) {
+        if(typeof value === "string") {
+            this.css("left", value);
+        } else {
+            this.css("left", value.toFixed(COORDINATE_PRECISION) + "px");
+        }
+        return this;
+    }
+
+    top(value: number | string) {
+        if(typeof value === "string") {
+            this.css("top", value);
+        } else {
+            this.css("top", value.toFixed(COORDINATE_PRECISION) + "px");
+        }
+        return this;
+    }
+
+    width(value: number | string) {
+        if(typeof value === "string") {
+            this.css("width", value);
+        } else {
+            this.css("width", value.toFixed(COORDINATE_PRECISION) + "px");
+        }
+        return this;
+    }
+
+    height(value: number | string) {
+        if(typeof value === "string") {
+            this.css("height", value);
+        } else {
+            this.css("height", value.toFixed(COORDINATE_PRECISION) + "px");
+        }
         return this;
     }
 

@@ -1,7 +1,7 @@
 import { DockManager } from "../DockManager";
 import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
 import { PanelState } from "../api/PanelState";
-import { ContainerType, IDockContainer, IPoint, PanelType } from "../common/declarations";
+import { ContainerType, IDockContainer, IPoint, ISize, PanelType } from "../common/declarations";
 import { IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
@@ -43,6 +43,12 @@ export class PanelContainer extends Component implements IDockContainer {
     ) {
         super();
     }
+    getMinimumChildNodeCount(): number {
+        throw new Error("Method not implemented.");
+    }
+    setActiveChild(container: IDockContainer): void {
+        throw new Error("Method not implemented.");
+    }
 
     public setContent(content: HTMLElement) {
         this.domContent = content;
@@ -50,6 +56,10 @@ export class PanelContainer extends Component implements IDockContainer {
             .css("left", "0").css("top", "0")
             .css("width", "100%").css("height", "100%");
         this.domContentContainer.appendChild(this.domContent);
+    }
+
+    public getHeaderElement(): HTMLElement {
+        return this.domTitle.get();
     }
 
     protected onInitialized(): void {}
@@ -177,11 +187,15 @@ export class PanelContainer extends Component implements IDockContainer {
         throw new Error("Method not implemented.");
     }
 
+    saveLastDialogSize(size: ISize) {
+        
+    }
+
     private setPanelDimensions(width: number, heigth: number) {
 
     }
 
-    private setDialogPosition(x: number, y: number) {
+    setDialogPosition(x: number, y: number) {
 
     }
 

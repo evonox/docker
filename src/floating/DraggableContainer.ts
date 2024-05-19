@@ -3,6 +3,7 @@ import { DOMEvent, DOMMouseEvent } from "../framework/dom-events";
 import { ContainerType, IDockContainer, IPoint } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
+import { IState } from "../common/serialization";
 
 
 export class DraggableContainer implements IDockContainer {
@@ -20,6 +21,18 @@ export class DraggableContainer implements IDockContainer {
         DOM.from(this.topElement)
             .css("left", domBounds.left.toFixed(3) + "px")
             .css("top", domBounds.top.toFixed(3) + "px");
+    }
+    getMinimumChildNodeCount(): number {
+        throw new Error("Method not implemented.");
+    }
+    setActiveChild(container: IDockContainer): void {
+        throw new Error("Method not implemented.");
+    }
+    saveState(state: IState): void {
+        throw new Error("Method not implemented.");
+    }
+    loadState(state: IState): void {
+        throw new Error("Method not implemented.");
     }
 
     removeDecorator() {
@@ -102,8 +115,8 @@ export class DraggableContainer implements IDockContainer {
         return this.delegate.getHeight();
     }
 
-    performLayout(children: IDockContainer[]): void {
-        this.delegate.performLayout(children);
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {
+        this.delegate.performLayout(children, relayoutEvenIfEqual);
     }
 
     resize(width: number, height: number): void {

@@ -1,6 +1,10 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { IState } from "./serialization";
 
+export const MOUSE_BTN_LEFT = 0;
+export const MOUSE_BTN_MIDDLE = 1;
+export const MOUSE_BTN_RIGHT = 2;
+
 export enum DockKind { Left, Right, Up, Down, Fill };
 
 export enum OrientationKind { Row = "row", Column = "column", Fill = "fill" };
@@ -14,6 +18,11 @@ export enum PanelType { Document = "document", Panel = "panel" }
 export interface IPoint {
     x: number;
     y: number;
+}
+
+export interface ISize {
+    w: number;
+    h: number;
 }
 
 export interface IRect {
