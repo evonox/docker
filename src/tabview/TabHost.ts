@@ -1,6 +1,6 @@
 import { Component } from "../framework/Component";
 import { property, state } from "../framework/decorators";
-import { ContainerType, IDockContainer, TabHostDirection } from "../model/declarations";
+import { ContainerType, IDockContainer, TabHostDirection } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
 

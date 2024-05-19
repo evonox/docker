@@ -1,6 +1,6 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { DOMEvent, DOMMouseEvent } from "../framework/dom-events";
-import { ContainerType, IDockContainer, IPoint } from "../model/declarations";
+import { ContainerType, IDockContainer, IPoint } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 

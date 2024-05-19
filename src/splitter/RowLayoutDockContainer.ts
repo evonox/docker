@@ -1,4 +1,4 @@
-import { IDockContainer, OrientationKind } from "../model/declarations";
+import { IDockContainer, OrientationKind } from "../common/declarations";
 import { SplitterDockContainer } from "./SplitterDockContainer";
 
 

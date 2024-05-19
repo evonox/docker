@@ -1,10 +1,13 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
+import { IState } from "./serialization";
 
-export enum OrientationKind { Row, Column };
+export enum OrientationKind { Row = "row", Column = "column" };
 
-export enum TabHostDirection { Top, Bottom, Left, Right };
+export enum TabHostDirection { Top = "top", Bottom = "bottom", Left = "left", Right = "right" };
 
-export enum ContainerType { Panel, RowLayout, ColumnLayout, FillLayout }
+export enum ContainerType { Panel = "panel", RowLayout = "row", ColumnLayout = "column", FillLayout = "fill" }
+
+export enum PanelType { Document = "document", Panel = "panel" }
 
 export interface IPoint {
     x: number;
@@ -44,10 +47,13 @@ export interface IDockContainer {
     getWidth(): number;
     getHeight(): number;
 
-    performLayout(children: IDockContainer[]): void;    
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
     resize(width: number, height: number): void;
 
     getContainerType(): ContainerType;
+
+    saveState(state: IState): void;
+    
 
 
     // Event Handling

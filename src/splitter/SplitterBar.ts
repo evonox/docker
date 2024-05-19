@@ -1,5 +1,5 @@
 import { Component } from "../framework/Component";
-import { IDockContainer, OrientationKind } from "../model/declarations";
+import { IDockContainer, OrientationKind } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 

@@ -1,7 +1,7 @@
 import { Component } from "../framework/Component";
 import { ComponentEventSubscription } from "../framework/component-events";
 import { state } from "../framework/decorators";
-import { IDockContainer } from "../model/declarations";
+import { IDockContainer } from "../common/declarations";
 import { TabHandle } from "./TabHandle";
 
 

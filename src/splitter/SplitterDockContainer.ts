@@ -1,5 +1,5 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ContainerType, IDockContainer, OrientationKind } from "../model/declarations";
+import { ContainerType, IDockContainer, OrientationKind } from "../common/declarations";
 import { SplitterPanel } from "./SplitterPanel";
 
 /**

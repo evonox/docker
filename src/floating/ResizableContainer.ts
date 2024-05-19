@@ -1,5 +1,5 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ContainerType, IDeltaRect, IDockContainer, IPoint, IRect } from "../model/declarations";
+import { ContainerType, IDeltaRect, IDockContainer, IPoint, IRect } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ResizeHandle, ResizeHandleType } from "./ResizeHandle";
