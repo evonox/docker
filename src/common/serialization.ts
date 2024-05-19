@@ -18,6 +18,7 @@ export interface IPanelInfo {
 }
 
 export interface IState {
+    panelName: string,
     width?: number;
     height?: number;
     documentManager?: boolean;
@@ -25,4 +26,5 @@ export interface IState {
     canUndock?: boolean;
     hideCloseButton?: boolean;
     panelType?: PanelType;
+    panelClientState?: any;
 }

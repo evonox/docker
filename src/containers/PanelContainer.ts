@@ -1,12 +1,21 @@
 import { DockManager } from "../DockManager";
+import { PanelState } from "../api/PanelState";
 import { ContainerType, IDockContainer, IPoint, PanelType } from "../common/declarations";
+import { IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
 
 
 /**
- * TODO: API
+ * TODO: INTRODUCE BUTTON BAR FOR CUSTOM BUTTONS BASED BY THE ORDER - A SPECIAL DOM ELEMENT
+ * 1. ICON BUTTON ELEMENT - ACTION
+ * 2. CONTEXT MENU - ACTION, ON QUERY API METHOD, CREATES MENUS AND SEPARATORS
+ * 2.A. PERFORMS LAYOUTING USING OPEN TOOLKIT POSITIONING HELPER - COPY IT FROM OPEN TOOLKIT
+ * 3. MENU ITEM - TOOLKIT BUTTON
+ * 4. MENU SEPARATOR
+ * 5. CREATE A WRAPPER FOR PANEL API ADAPTER TO PASS IT TO THE FACTORY METHOD
+ * 
  */
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -17,8 +26,12 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private domContentWrapper: DOM<HTMLElement>;
 
+    private domGrayingPlaceholder: HTMLElement;
+
     constructor(
         private dockManager: DockManager, 
+        private panelName: string,
+        private api: IPanelAPI,
         private content: HTMLElement,
         private title: string,
         private panelType: PanelType,
@@ -69,32 +82,62 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
-        // 1) TODO: INVOKE PANEL API TO CREATE A NEW CONTENT ELEMENT
-        // 2) RETURN A NEW PANEL CONTAINER WITH NEW CONTENT ELEMENT
-        // 3) LOAD STATE FOR THE PANEL CONTENT
-        throw 0;
+        const api = dockManager.queryPanelAPI(state.panelName);
+        const contentElement = await api.initialize(null, null);
+        // TODO: QUERY PANEL TITLE
+        const container = new PanelContainer(dockManager, state.panelName, api, contentElement, "", state.panelType, state.hideCloseButton);
+        container.loadState(state);
+        return container;
     }
 
-    // TODO: INVOKE SAVE AND LOAD STATE OVER THE PANEL API
+    getDockManager(): DockManager {
+        return this.dockManager;
+    }
+
     saveState(state: IState): void {
+        // Save the state of the Panel Container
+        state.panelName = this.panelName;
         state.width = this.getWidth();
         state.height = this.getHeight();
         state.canUndock = this.canUndock();
         state.hideCloseButton = this.hideCloseButton;
         state.panelType = this.panelType;
+
+        // Save the client state of the panel itself
+        const panelClientState = new PanelState();
+        this.api.saveState?.(panelClientState);
+        state.panelClientState = panelClientState.getState();
     }
 
+    // LOAD PANEL API STATE
     loadState(state: IState) {
         const width = state.width;
         const height = state.height;
         // TODO: IF NOT SAVED, FORCE RESIZE SOMEHOW
+        this.panelName = state.panelName;
         this.canUndock(state.canUndock);
         this.hideCloseButton = state.hideCloseButton;
         this.panelType = state.panelType;
+
+        const panelClientState = new PanelState(state.panelClientState ?? {});
+        this.api.loadState?.(panelClientState);
     }
 
-    grayOut(flag: boolean) {
+    grayOut(show: boolean) {
+        if(show && !this.domGrayingPlaceholder) {
+            this.domGrayingPlaceholder.remove();
+            this.domGrayingPlaceholder = undefined;
+            if(! this.hideCloseButton) {
+                // TODO: Notify Close Button Visbility Changed
+                // TODO: SHOW CLOSE BUTTON IF ALLOWED - ALL BUTTONS
+            }
+        } else if(! show && this.domGrayingPlaceholder) {
+            // TODO: HIDE CLOSE BUTTON - ALL BUTTONS
+            this.domGrayingPlaceholder = DOM.create("div").addClass("panel-grayout")
+                .appendTo(this.domContentWrapper).get();
 
+            // TODO: Notify Close Button Visbility Changed
+        }
     }
 
     setCloseButtonVisibility(flag: boolean) {
@@ -154,7 +197,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     }
 
-    
+
 
     private updateTitle() {
 
