@@ -6,15 +6,27 @@ import { DockModel } from "./DockModel";
 
 export class DockManagerContext {
 
-    private model: DockModel;
-    private documentManagerView: DocumentManagerContainer;
+    private _model: DockModel;
+    private _documentManagerView: DocumentManagerContainer;
 
     constructor(private dockManager: DockManager) {
-        this.model = new DockModel();
-        this.documentManagerView = new DocumentManagerContainer(this.dockManager);
+        this._model = new DockModel();
+        this._documentManagerView = new DocumentManagerContainer(this.dockManager);
+    }
+
+    setModel(model: DockModel) {
+        this._model = model;
+    }
+
+    get model() {
+        return this._model;
+    }
+
+    get documentManagerView() {
+        return this._documentManagerView;
     }
 
     appendDialog(dialog: Dialog) {
-        this.model.dialogs.push(dialog);
+        this._model.dialogs.push(dialog);
     }
 }

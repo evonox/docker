@@ -32,6 +32,11 @@ export interface IRect {
     h: number;
 }
 
+export interface IDeltaPoint {
+    dx: number;
+    dy: number;
+}
+
 export interface IDeltaRect {
     dx: number;
     dy: number;

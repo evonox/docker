@@ -191,6 +191,10 @@ export class PanelContainer extends Component implements IDockContainer {
         
     }
 
+    getLastDialogSize(): ISize {
+        throw 0;
+    }
+
     private setPanelDimensions(width: number, heigth: number) {
 
     }
