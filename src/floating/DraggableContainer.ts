@@ -1,4 +1,4 @@
-import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
+import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";
 import { DOMEvent, DOMMouseEvent } from "../framework/dom-events";
 import { ContainerType, IDockContainer, IPoint } from "../common/declarations";
 import { DOM } from "../utils/DOM";
@@ -9,6 +9,7 @@ import { IState } from "../common/serialization";
 export class DraggableContainer implements IDockContainer {
 
     private domEventMouseDown: DOMMouseEvent;
+    private eventManager = new ComponentEventManager();
 
     constructor(private delegate: IDockContainer, private topElement: HTMLElement, private dragHandle: HTMLElement) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -40,8 +41,6 @@ export class DraggableContainer implements IDockContainer {
     }
 
     private handleMouseDown(event: MouseEvent) {
-        event.preventDefault();
-
         this.startDragging(event);
         DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
     }
@@ -51,15 +50,16 @@ export class DraggableContainer implements IDockContainer {
     private handleMouseUp(event: MouseEvent) {
         this.lastMousePosition = {x: event.pageX, y: event.pageY};
         this.stopDragging(event);
-
     }
 
     private startDragging(event: MouseEvent) {
         DOM.from(this.delegate.getDOM()).addClass("draggable-dragging-active");
+        this.eventManager.triggerEvent("onDraggableDragStart", event);
         // TODO: SOME OTHER STUFF
     }
 
     private stopDragging(event: MouseEvent) {
+        this.eventManager.triggerEvent("onDraggableDragStop", event);
         DOM.from(this.delegate.getDOM()).removeClass("draggable-dragging-active");
     }
 
@@ -71,6 +71,7 @@ export class DraggableContainer implements IDockContainer {
         // TODO: CHECK THE BOUNDS USING DOCKER MANAGER
 
         this.performDrag(dx, dy);
+        this.eventManager.triggerEvent("onDraggableDragMove", event);
 
         this.lastMousePosition = {x: event.pageX, y: event.pageY};
     }
@@ -84,6 +85,8 @@ export class DraggableContainer implements IDockContainer {
 
     dispose(): void {
         this.removeDecorator();
+        this.eventManager.disposeAll();
+
         this.delegate.dispose();
     }
 
@@ -128,14 +131,31 @@ export class DraggableContainer implements IDockContainer {
     }
 
     on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        return this.delegate.on(eventName, handler);
+        if(this.isDraggableContainerEvent(eventName)) {
+            return this.eventManager.subscribe(eventName, handler);
+        } else {
+            return this.delegate.on(eventName, handler);
+        }
     }
 
     off(eventName: string): void {
-        this.delegate.off(eventName);
+        if(this.isDraggableContainerEvent(eventName)) {
+            this.eventManager.unsubscribeAll(eventName);
+        } else {
+            this.delegate.off(eventName);
+        }
     }
 
     once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        return this.delegate.once(eventName, handler);
+        if(this.isDraggableContainerEvent(eventName)) {
+            return this.eventManager.subscribeOnce(eventName, handler);
+        } else {
+            return this.delegate.once(eventName, handler);
+        }
+    }
+
+    private isDraggableContainerEvent(eventName: string) {
+        if(eventName.startsWith("onDraggable")) return true;
+        else return false;
     }
 }

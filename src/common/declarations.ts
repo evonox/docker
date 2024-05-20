@@ -15,6 +15,11 @@ export enum ContainerType { Panel = "panel", RowLayout = "row", ColumnLayout = "
 
 export enum PanelType { Document = "document", Panel = "panel" }
 
+export enum WheelTypes {
+    Left = "left", Right = "right", Top = "top", Bottom = "bottom", Fill = "fill",
+    SideLeft = "side-left", SideRight = "side-right", SideTop = "side-top", SideBottom = "side-bottom"
+}
+
 export interface IPoint {
     x: number;
     y: number;
@@ -44,10 +49,15 @@ export interface IDeltaRect {
     dh: number;
 }
 
-/**
- * TODO: PERSISTENCE OF UI
- */
-export interface IDockContainer {
+
+export interface IEventEmitter {
+    on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
+    off(eventName: string): void;
+    once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
+
+}
+
+export interface IDockContainer extends IEventEmitter {
 
     dispose(): void;
 
@@ -73,10 +83,4 @@ export interface IDockContainer {
 
     saveState(state: IState): void;
     loadState(state: IState): void;   
-
-    // Event Handling
-    on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
-    off(eventName: string): void;
-    once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
-
 }

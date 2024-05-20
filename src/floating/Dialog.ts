@@ -1,6 +1,7 @@
 import { DockManager } from "../DockManager";
-import { IPoint, MOUSE_BTN_RIGHT } from "../common/declarations";
+import { IEventEmitter, IPoint, MOUSE_BTN_RIGHT } from "../common/declarations";
 import { PanelContainer } from "../containers/PanelContainer";
+import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";
 import { DOMEvent } from "../framework/dom-events";
 import { DOM } from "../utils/DOM";
 import { DraggableContainer } from "./DraggableContainer";
@@ -9,7 +10,7 @@ import { ResizableContainer } from "./ResizableContainer";
 /**
  * TODO: CONTEXT MENU
  */
-export class Dialog {
+export class Dialog implements IEventEmitter {
 
     private domDialog: DOM<HTMLElement>;
 
@@ -22,6 +23,8 @@ export class Dialog {
     private position: IPoint;
     private isHidden: boolean = false;
 
+    private eventManager = new ComponentEventManager();
+
     constructor(
         private dockManager: DockManager,
         private panel: PanelContainer,
@@ -32,6 +35,16 @@ export class Dialog {
         this.dockManager.getModelContext().appendDialog(this);
         // SET DEFAULT DIALOG POSITION
         this.dockManager.notifyOnCreateDialog(this);
+    }
+
+    on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
+        return this.eventManager.subscribe(eventName, handler);
+    }
+    off(eventName: string): void {
+         this.eventManager.unsubscribeAll(eventName);
+    }
+    once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
+        return this.eventManager.subscribeOnce(eventName, handler);
     }
 
     private initialize() {
@@ -47,6 +60,17 @@ export class Dialog {
         this.mouseDownEvent.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
         this.focusEvent = new DOMEvent<FocusEvent>(this.domDialog.get());
         this.focusEvent.bind("focus", this.handleOnFocus.bind(this), {capture: false});
+
+        // Bind Component Events - Dragging Facilities
+        this.draggable.on("onDraggableDragStart", (event) => {
+            this.eventManager.triggerEvent("onDragStart", {sender: this, event});
+        });
+        this.draggable.on("onDraggableDragStop", (event) => {
+            this.eventManager.triggerEvent("onDragStop", {sender: this, event});
+        })
+        this.draggable.on("onDraggableDragMove", (event) => {
+            this.eventManager.triggerEvent("onDragMove", {sender: this, event});
+        });
 
         // Resize the dialog
         this.resize(this.panel.getWidth(), this.panel.getHeight());
@@ -117,6 +141,8 @@ export class Dialog {
 
         this.mouseDownEvent.unbind();
         this.focusEvent.unbind();
+
+        this.eventManager.disposeAll();
 
         this.domDialog.removeFromDOM();
         // TODO: REMOVE DRAGGABLE AND RESIZABLE

@@ -3,6 +3,7 @@ import { IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect } from "./common
 import { EventKind, EventPayload } from "./common/events-api";
 import { IPanelAPI, ISubscriptionAPI } from "./common/panel-api";
 import { PanelContainer } from "./containers/PanelContainer";
+import { DockWheel } from "./docking-wheel/DockWheel";
 import { Dialog } from "./floating/Dialog";
 import { ComponentEventManager } from "./framework/component-events";
 import { DockManagerContext } from "./model/DockManagerContext";
@@ -23,6 +24,8 @@ export class DockManager {
     private context: DockManagerContext;
     // Layouting Engine
     private layoutEngine: DockLayoutEngine;
+    // Dock Wheel Manager Class
+    private dockWheel: DockWheel;
 
     // Active Document & Panel Management
     private activePanel: PanelContainer;
@@ -43,8 +46,9 @@ export class DockManager {
         this.context.model.setDocumentManagerNode(documentNode);
         this.setRootNode(this.context.model.rootNode);
 
-        // Initialize other internales
+        // Initialize other internals
         this.eventManager = new ComponentEventManager();
+        this.dockWheel = new DockWheel(this);
 
         // Resize to the container
         this.resize(this.container.clientWidth, this.container.clientHeight);
@@ -250,19 +254,36 @@ export class DockManager {
         this.container.appendChild(rootNode.container.getDOM());
     }
 
+    /**
+     * Dock Wheel Management
+     */
 
-    private handleDialogDragStarted(event: MouseEvent) {
-
+    private bindDialogDragEvents(dialog: Dialog) {
+        dialog.on("onDragStart", ({sender, event}) => this.handleDialogDragStarted(sender, event));
+        dialog.on("onDragMove", ({sender, event}) => this.handleDialogDragged(sender, event));
+        dialog.on("onDragStop", ({sender, event}) => this.handleDialogDragEnded(sender, event));
     }
 
-    private handleDialogDragEnded(event: MouseEvent) {
+    private handleDialogDragStarted(sender: Dialog, event: MouseEvent) {
+        const activeNode = this.findNodeOnPoint({x: event.pageX, y: event.pageY});        
+        this.dockWheel.setActiveDialog(sender);
+        this.dockWheel.setActiveNode(activeNode);
 
+        this.dockWheel.showWheel();
     }
 
-    private handleMouseMoved(event: MouseEvent) {
-
+    private handleDialogDragged(sender: Dialog, event: MouseEvent) {
+        const activeNode = this.findNodeOnPoint({x: event.pageX, y: event.pageY});        
+        this.dockWheel.setActiveNode(activeNode);
     }
 
+    private handleDialogDragEnded(sender: Dialog, event: MouseEvent) {
+        this.dockWheel.onDialogDropped(sender);
+        this.dockWheel.hideWheel();
+
+        // TODO: WHY TO SAVE STATE OF DIALOG OFFSET????
+        // sender.saveState(sender.elementDialog.offsetLeft, sender.elementDialog.offsetTop);
+    }
 
     private findNodeOnPoint(point: IPoint): DockNode {
         const stack = [this.context.model.rootNode];
@@ -289,6 +310,9 @@ export class DockManager {
     }
 
 
+    /**
+     * TODO - OTHER MISSING IMPLEMENTATION
+     */
 
 
     // TODO: COMPLEX IMPLEMENTATION
@@ -312,6 +336,8 @@ export class DockManager {
 
         // Construt the dialog
         const dialog = new Dialog(this, panelContainer, null, false);
+        this.bindDialogDragEvents(dialog);
+
         const lastDialogSize = panelContainer.getLastDialogSize();
         if(lastDialogSize) {
             dialog.resize(lastDialogSize.w, lastDialogSize.h);
@@ -346,6 +372,8 @@ export class DockManager {
 
     openInDialog(container: PanelContainer, event: MouseEvent, dragOffset: IPoint, disableResize: boolean) {
         const dialog = new Dialog(this, container, null, disableResize);
+        this.bindDialogDragEvents(dialog);
+
         if(event !== null) {
             const dialogWidth = dialog.getPanel().getWidth();
             if(dragOffset.x > dialogWidth) {
@@ -356,6 +384,7 @@ export class DockManager {
         }
         return dialog;
     }
+
 
     requestUndock(container: PanelContainer) {
         const node = this.findNodeFromContainer(container);
@@ -550,6 +579,10 @@ export class DockManager {
     }
 
     nextDialogZIndex(): number {
+        throw 0;
+    }
+
+    getWheelZIndex(): number {
         throw 0;
     }
     
