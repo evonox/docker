@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { IEventEmitter, IPoint, MOUSE_BTN_RIGHT } from "../common/declarations";
 import { PanelContainer } from "../containers/PanelContainer";
 import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";

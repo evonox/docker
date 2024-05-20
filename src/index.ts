@@ -1,5 +1,3 @@
 import "reflect-metadata"
 
-
-console.log("INITIALIZED");
-
+import "./facade/DockManager";

@@ -1,4 +1,4 @@
-import type { DockManager } from "../DockManager";
+import type { DockManager } from "../facade/DockManager";
 import type { PanelContainer } from "../containers/PanelContainer";
 import type { Dialog } from "../floating/Dialog";
 import type { DockNode } from "../model/DockNode";

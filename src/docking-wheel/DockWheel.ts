@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { IRect, WheelTypes } from "../common/declarations";
 import { Dialog } from "../floating/Dialog";
 import { DockNode } from "../model/DockNode";

@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
 import { IDockManagerAPI, IHeaderButton, ISubscriptionAPI } from "../common/panel-api";
 

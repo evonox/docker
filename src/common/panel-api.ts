@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 
 /**
  * Interface for Options Container containing initial options for a panel type

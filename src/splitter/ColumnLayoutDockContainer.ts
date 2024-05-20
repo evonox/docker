@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { IDockContainer, OrientationKind } from "../common/declarations";
 import { SplitterDockContainer } from "./SplitterDockContainer";
 

@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { ContainerType, IDockContainer } from "../common/declarations";
 import { IState } from "../common/serialization";
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";

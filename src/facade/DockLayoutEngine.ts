@@ -1,10 +1,10 @@
 import { DockManager } from "./DockManager";
-import { ContainerType, DockKind, IDockContainer, IRect, OrientationKind } from "./common/declarations";
-import { DockNode } from "./model/DockNode";
-import { ColumnLayoutDockContainer } from "./splitter/ColumnLayoutDockContainer";
-import { RowLayoutDockContainer } from "./splitter/RowLayoutDockContainer";
-import { FillDockContainer } from "./tabview/FillDockContainer";
-import { TabHandle } from "./tabview/TabHandle";
+import { ContainerType, DockKind, IDockContainer, IRect, OrientationKind } from "../common/declarations";
+import { DockNode } from "../model/DockNode";
+import { ColumnLayoutDockContainer } from "../splitter/ColumnLayoutDockContainer";
+import { RowLayoutDockContainer } from "../splitter/RowLayoutDockContainer";
+import { FillDockContainer } from "../tabview/FillDockContainer";
+import { TabHandle } from "../tabview/TabHandle";
 
 /**
  * DockLayoutEngine - class responsible for layout operations

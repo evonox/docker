@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
 import { PanelState } from "../api/PanelState";
 import { ContainerType, IDockContainer, IPoint, ISize, PanelType } from "../common/declarations";

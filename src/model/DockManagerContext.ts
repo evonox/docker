@@ -1,4 +1,4 @@
-import { DockManager } from "../DockManager";
+import { DockManager } from "../facade/DockManager";
 import { Dialog } from "../floating/Dialog";
 import { DocumentManagerContainer } from "../tabview/DocumentManagerContainer";
 import { DockModel } from "./DockModel";
