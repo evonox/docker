@@ -1,8 +1,10 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
 import { IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect } from "./common/declarations";
-import { IPanelAPI } from "./common/panel-api";
+import { EventKind, EventPayload } from "./common/events-api";
+import { IPanelAPI, ISubscriptionAPI } from "./common/panel-api";
 import { PanelContainer } from "./containers/PanelContainer";
 import { Dialog } from "./floating/Dialog";
+import { ComponentEventManager } from "./framework/component-events";
 import { DockManagerContext } from "./model/DockManagerContext";
 import { DockModel } from "./model/DockModel";
 import { DockNode } from "./model/DockNode";
@@ -22,6 +24,8 @@ export class DockManager {
     private activePanel: PanelContainer;
     private activeDocument: PanelContainer;
 
+    private eventManager: ComponentEventManager;
+
     constructor(private container: HTMLElement, private _config: any = {}) {
         // TODO: MANAGE INITIAL OPTIONS - POPULATE WITH DEFAULTS        
     }
@@ -33,6 +37,9 @@ export class DockManager {
         this.context.model.setRootNode(documentNode);
         this.context.model.setDocumentManagerNode(documentNode);
         this.setRootNode(this.context.model.rootNode);
+
+        // Initialize other internales
+        this.eventManager = new ComponentEventManager();
 
         // Resize to the container
         this.resize(this.container.clientWidth, this.container.clientHeight);
@@ -355,67 +362,83 @@ export class DockManager {
     }
 
     /**
-     * NOTIFICATION TRIGGERS
+     * DockManager Event Handling & Notification Facilities
      */
 
-    listenTo(eventName: string, handler: any): any {
+    listenTo<K extends EventKind>(eventName: K, handler:(payload: EventPayload<K>) => void): ISubscriptionAPI {
+        return this.eventManager.subscribe(eventName, handler);
+    }
 
+    private triggerEvent<K extends EventKind>(eventName: K, payload: EventPayload<K>): void {
+        this.eventManager.triggerEvent(eventName, payload);
     }
 
     suspendLayout(panel: IDockContainer) {
-
+        this.triggerEvent("onSuspendLayout", {dockManager: this, container: panel});
     }
 
     resumeLayout(panel: IDockContainer) {
-
+        this.triggerEvent("onResumeLayout", {dockManager: this, container: panel});
     }
 
     notifyOnDock(node: DockNode) {
-        
+        this.triggerEvent("onDock", {dockManager: this, node: node});      
     }
 
     notifyOnUnDock(node: DockNode) {
-
+        this.triggerEvent("onUndock", {dockManager: this, node: node});      
     }
 
-    notifyOnTabReorder(dockNode: DockNode) {
-
+    notifyOnTabReorder(node: DockNode) {
+        this.triggerEvent("onTabReorder", {dockManager: this, node: node});      
     }
 
     notifyOnClosePanel(panel: PanelContainer) {
-
+        this.triggerEvent("onClosePanel", {dockManager: this, panel: panel});      
     }
 
     notifyOnCreateDialog(dialog: Dialog) {
-
+        this.triggerEvent("onCreateDialog", {dockManager: this, dialog: dialog});      
     }
 
     notifyOnShowDialog(dialog: Dialog) {
-
+        this.triggerEvent("onShowDialog", {dockManager: this, dialog: dialog});      
     }
 
     notifyOnHideDialog(dialog: Dialog) {
-
+        this.triggerEvent("onHideDialog", {dockManager: this, dialog: dialog});      
     }
 
     notifyOnChangeDialogPosition(dialog: Dialog, x: number, y: number) {
-
+        this.triggerEvent("onChangeDialogPosition", {
+            dockManager: this, 
+            dialog: dialog,
+            position: { x: x, y: y }
+        });      
     }
 
     notifyOnContainerResized(dockContainer: IDockContainer) {
-
+        this.triggerEvent("onContainerResized", {dockManager: this, container: dockContainer});      
     }   
     
-    notifyOnTabChange(tabpage: TabPage) {
-
+    notifyOnTabChange(tabPage: TabPage) {
+        this.triggerEvent("onTabChange", {dockManager: this, tabPage: tabPage});      
     }
 
     notifyOnActivePanelChange(panel: PanelContainer, oldActive: PanelContainer) {
-
+        this.triggerEvent("onActivePanelChange", {
+            dockManager: this, 
+            previousActivePanel: oldActive,
+            activePanel: panel
+        });      
     }
     
     notifyOnActiveDocumentChange(panel: PanelContainer, oldActive: PanelContainer) {
-
+        this.triggerEvent("onActiveDocumentChange", {
+            dockManager: this, 
+            previousActivePanel: oldActive,
+            activePanel: panel
+        });      
     }   
     
     /**
