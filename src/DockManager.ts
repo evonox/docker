@@ -18,12 +18,17 @@ import { TabPage } from "./tabview/TabPage";
 export class DockManager {
 
     private defaultDialogPosition: IPoint = {x: 0, y: 0};
+
+    // DockManager Model
     private context: DockManagerContext;
+    // Layouting Engine
     private layoutEngine: DockLayoutEngine;
 
+    // Active Document & Panel Management
     private activePanel: PanelContainer;
     private activeDocument: PanelContainer;
 
+    // DockManager Event Manager
     private eventManager: ComponentEventManager;
 
     constructor(private container: HTMLElement, private _config: any = {}) {
@@ -95,51 +100,85 @@ export class DockManager {
     }
 
     /**
-     * DOCKING FACILITIES
+     * Docking Facilities & Wrapper Methods
      */
+
     dockLeft(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        
+        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+            this.layoutEngine.dockLeft(refNode, newNode);
+        }, false, ratio);              
     }
 
     dockRight(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        
+        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+            this.layoutEngine.dockRight(refNode, newNode);
+        }, true, ratio);              
     }
 
     dockUp(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        
+        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+            this.layoutEngine.dockUp(refNode, newNode);
+        }, false, ratio);       
     }
 
     dockDown(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        
+        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+            this.layoutEngine.dockDown(refNode, newNode);
+        }, true, ratio);
     }
 
     dockFill(referenceNode: DockNode, container: PanelContainer) {
-
+        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+            this.layoutEngine.dockFill(refNode, newNode);
+        }, false);
     }
 
     dockDialogLeft(referenceNode: DockNode, dialog: Dialog) {
-        
+        this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
+            this.layoutEngine.dockLeft(refNode, newNode);
+        });                             
     }
 
     dockDialogRight(referenceNode: DockNode, dialog: Dialog) {
-        
+        this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
+            this.layoutEngine.dockRight(refNode, newNode);
+        });                      
     }
 
     dockDialogUp(referenceNode: DockNode, dialog: Dialog) {
-        
+        this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
+            this.layoutEngine.dockUp(refNode, newNode);
+        });              
     }
 
     dockDialogDown(referenceNode: DockNode, dialog: Dialog) {
-        
+        this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
+            this.layoutEngine.dockDown(refNode, newNode);
+        });       
     }
 
     dockDialogFill(referenceNode: DockNode, dialog: Dialog) {
-        
+        this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
+            this.layoutEngine.dockFill(refNode, newNode);
+        });
     }
 
+    // TODO: COMPLEX IMPLEMENTATION
+    private requestDockContainer(
+        referenceNode: DockNode, container: IDockContainer, 
+        layoutFn: (referenceNode: DockNode, newNode: DockNode) => void,
+        dockedToPrevious: boolean, ratio?: number
+    ) {
 
+    }
 
+    // TODO: COMPLEX IMPLEMENTATION
+    private requestDockDialog(
+        referenceNode: DockNode, dialog: Dialog, 
+        layoutFn: (referenceNode: DockNode, newNode: DockNode) => void
+    ) {
 
+    }
 
     isMoveInsideContainer(element: HTMLElement, delta: IDeltaPoint): boolean {
         const boundsElement = element.getBoundingClientRect();
@@ -257,17 +296,6 @@ export class DockManager {
 
     }
 
-
-    // TODO: COMPLEX IMPLEMENTATION
-    private requestDockDialog() {
-
-    }
-
-    // TODO: COMPLEX IMPLEMENTATION
-    private requestDockContainer() {
-
-    }
-
     requestTabReorder(container: IDockContainer, e: any) {
         // TODO: COMPLETE THIS
     }
@@ -359,6 +387,42 @@ export class DockManager {
         }
 
         return null;
+    }
+
+    /**
+     * Active Panel & Document Management
+     */
+ 
+    getActivePanel(): PanelContainer {
+        return this.activePanel;
+    }
+
+    getActiveDocument(): PanelContainer {
+        return this.activeDocument;
+    }
+
+    /**
+     * TODO: REWORK
+     */
+    setActivePanel(panel: PanelContainer) {
+        if(this.activePanel !== panel) {
+            /**
+             * 1. Zjistit posledni aktivni panel, ktery neni dialog
+             * 2. Uchovat si posledni aktivni panel
+             * 3. Deaktivovat posledni aktivni panel, odejmout CSS a TabPage, pokud existuje 
+             *      (aktivita, ne selection)
+             * 4. Nastavit aktivni panel
+             * 5. Uchovat posledni dokument
+             *      Pokud je posledni panel Dokument, nastavit jej
+             * 6. Nejaky kod pro poslednim aktivnim panelem - CO TO JE?
+             * 7. NOTIFIKACE O ZMENE PANELU, POKUD ZMENA DOKUMENTU, NOTIFIKACE O ZMENE DOKUMENTU
+             * 8. Pokud je hodnota aktivniho panelu?
+             *      1) NASTAVIT CSS NA HEADER AKTIVNIHO PANELU
+             *      2) NASTAVIT TABPAGE V TABHOSTu JAKO ACTIVE, POKUD JE V PARENT FILL DOCKERU
+             */
+        } else {
+            // TODO: SET ACTIVE PANEL IN THE TABHOST - IS IT NECESSARY????
+        }
     }
 
     /**
@@ -482,16 +546,6 @@ export class DockManager {
 
     // TODO: IS THIS USEFUL FOR ANYTHING?
     _allPanels(node: DockNode, panels: PanelContainer[]) {
-
-    }
-
-    /**
-     * 1) GET / SET ACTIVE DOCUMENT
-     * 2) GET / SET ACTIVE PANEL
-     */
- 
-
-    setActivePanel(panel: PanelContainer) {
 
     }
 
