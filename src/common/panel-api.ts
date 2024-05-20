@@ -1,4 +1,16 @@
-import { DockManager } from "../facade/DockManager";
+import type { DockManager } from "../facade/DockManager";
+
+/**
+ * Panel API Enumerations
+ */
+
+export type ViewInstanceType = "singleton" | "transient";
+
+export type ViewKind = "document" | "panel" ;
+
+export interface PanelFactoryFunction {
+    (dockManager: DockManager): IPanelAPI;
+}
 
 /**
  * Interface for Options Container containing initial options for a panel type

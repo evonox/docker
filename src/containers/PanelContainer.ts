@@ -31,13 +31,13 @@ export class PanelContainer extends Component implements IDockContainer {
     private domContentContainer: DOM<HTMLElement>;
     private domGrayingPlaceholder: HTMLElement;
 
+    private title: string = "";
     private _hasChanges: boolean = false;
 
     constructor(
         private dockManager: DockManager, 
         private panelName: string,
         private api: IPanelAPI,
-        private title: string,
         private panelType: PanelType,
         private hideCloseButton: boolean = false
     ) {
@@ -50,7 +50,7 @@ export class PanelContainer extends Component implements IDockContainer {
         throw new Error("Method not implemented.");
     }
 
-    public setContent(content: HTMLElement) {
+    public setContentElement(content: HTMLElement) {
         this.domContent = content;
         DOM.from(this.domContent).css("position", "absolute")
             .css("left", "0").css("top", "0")
@@ -99,10 +99,10 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
-        const api = dockManager.queryPanelAPI(state.panelName);
-        const container = new PanelContainer(dockManager, state.panelName, api, "", state.panelType, state.hideCloseButton);
+        const api = dockManager.gainPanelApiContract(state.panelName);
+        const container = new PanelContainer(dockManager, state.panelName, api, state.panelType, state.hideCloseButton);
         const contentElement = await api.initialize(new PanelContainerAdapter(container), null);
-        container.setContent(contentElement);
+        container.setContentElement(contentElement);
         // TODO: QUERY PANEL TITLE - RESPONSIBILITY OF THE FACTORY METHOD
         container.loadState(state);
         return container;

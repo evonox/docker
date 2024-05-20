@@ -1,7 +1,7 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
-import { IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect } from "../common/declarations";
+import { IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect, PanelType } from "../common/declarations";
 import { EventKind, EventPayload } from "../common/events-api";
-import { IPanelAPI, ISubscriptionAPI } from "../common/panel-api";
+import { IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
 import { DockWheel } from "../docking-wheel/DockWheel";
 import { Dialog } from "../floating/Dialog";
@@ -10,6 +10,9 @@ import { DockManagerContext } from "../model/DockManagerContext";
 import { DockModel } from "../model/DockModel";
 import { DockNode } from "../model/DockNode";
 import { TabPage } from "../tabview/TabPage";
+import { DockPanelTypeRegistry } from "./DockPanelTypeRegistry";
+import { PanelInitConfig } from "../api/PanelInitConfig";
+import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
 
 
 /**
@@ -26,6 +29,8 @@ export class DockManager {
     private layoutEngine: DockLayoutEngine;
     // Dock Wheel Manager Class
     private dockWheel: DockWheel;
+    // Dock Panel Type Registry
+    private panelTypeRegistry: DockPanelTypeRegistry;
 
     // Active Document & Panel Management
     private activePanel: PanelContainer;
@@ -50,6 +55,7 @@ export class DockManager {
         this.eventManager = new ComponentEventManager();
         this.dockWheel = new DockWheel(this);
         this.layoutEngine = new DockLayoutEngine(this);
+        this.panelTypeRegistry = new DockPanelTypeRegistry();
 
         // Resize to the container
         this.resize(this.container.clientWidth, this.container.clientHeight);
@@ -60,9 +66,12 @@ export class DockManager {
     }
 
     /**
-     * SIMPLE QUERY METHODS
+     * Misc Basic Query Methods
      */
 
+    /**
+     * TODO: DEFINE DOCKER OPTIONS
+     */
     get config(): any {
         return this._config;
     }
@@ -72,34 +81,63 @@ export class DockManager {
         throw 0;
     }
 
-    queryPanelAPI(panelName: string): IPanelAPI {
-        throw 0;
-    }
-
-
     getDialogRootElement(): HTMLElement {
         throw 0;
     }
-
-
 
     getModelContext(): DockManagerContext {
         throw 0;
     }
 
     /**
-     * FACTORY METHODS
+     * Panel Type Management
      */
 
-    // TODO: DOCUMENT OR PANEL, SINGLETON OR MULTIPLE, FACTORY METHOD
-    // TODO: INTRODUCE PANEL TYPE REGISTRY
-    registerPanelType(panelTypeName: string) {
-
+    gainPanelApiContract(panelTypeName: string): IPanelAPI {
+        if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
+            throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
+        // We get metadata about the panel type
+        const metadata = this.panelTypeRegistry.getPanelTypeMetadata(panelTypeName);      
+        // Fetch the panel API contract
+        return metadata.factoryFn(this);
     }
 
-    // IN CASE OF SINGLETON RETURNS THE SAME INSTANCE - IF FOUND IN THE REGISTRY
-    createPanel(panelTypeName: string, options: any = {}): PanelContainer {
-        throw 0;
+    registerPanelType(
+        panelTypeName: string, viewKind: ViewKind, 
+        instanceType: ViewInstanceType, factoryFn: PanelFactoryFunction
+    ): void {
+        if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === true)
+            throw new Error(`ERROR: Panel Type with name ${panelTypeName} is ALREADY not registered.`);
+
+        this.panelTypeRegistry.registerPanelType({
+            name: panelTypeName, viewKind: viewKind, instanceType: instanceType, factoryFn: factoryFn
+        });
+    }
+
+    async createPanel(panelTypeName: string, options: any = {}): Promise<PanelContainer> {
+        if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
+            throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
+        
+        // We get metadata about the panel type
+        const metadata = this.panelTypeRegistry.getPanelTypeMetadata(panelTypeName);      
+        // If it is singleton and has already an instance, we return it
+        if(metadata.instanceType === "singleton" && this.panelTypeRegistry.hasPanelTypeAnyInstances(panelTypeName)) {
+            return this.panelTypeRegistry.getViewInstances(panelTypeName)[0];
+        }
+        // Invoke the factory function to get the panel contract
+        const panelTypeContract = metadata.factoryFn(this);        
+        // Create the panel container
+        const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract, 
+                metadata.viewKind === "panel" ? PanelType.Panel : PanelType.Document, true
+        );        
+        // Invoke the constructor function
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new PanelContainerAdapter(panelContainer);
+        const domContentElement = await panelTypeContract.initialize(apiAdapter, initOptions);
+        panelContainer.setContentElement(domContentElement);
+        
+        // Return finally the panel container
+        return panelContainer;
     }
 
     /**
