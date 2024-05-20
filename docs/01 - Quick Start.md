@@ -26,6 +26,6 @@ First of all, you need to create and an empty HTML page template that looks simi
 In the figure above we create an empty **main ** element which will be the container for our DockerTS Library.
 
 >>> Do not forget to remove user agent default CSS styles like paddings and margins from the elements 
->>> as given in the **style** tag. It is also important to include the height property to make the elements
->>> the same height as the browser window.
+as given in the **style** tag. It is also important to include the height property to make the elements
+the same height as the browser window.
 
