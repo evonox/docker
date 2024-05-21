@@ -11,9 +11,12 @@ export class IconButton extends Component {
     @property({defaultValue: true})
     visible: boolean;
 
-    private domRoot: DOM<HTMLElement>;
+    @property({defaultValue: ""})
+    title: string;
 
-    constructor(private actionName: string) {
+    private domButton: DOM<HTMLElement>;
+
+    constructor(private actionName: string, private displayOrder: number) {
         super();
     }
 
@@ -21,20 +24,26 @@ export class IconButton extends Component {
         return this.actionName;
     }
 
+    getDisplayOrder() {
+        return this.displayOrder;
+    }
+
     protected onInitialized(): void {}
 
     protected onDisposed(): void {}
 
     protected onInitialRender(): HTMLElement {
-        this.domRoot = DOM.create("div").addClass("dockspawn-icon-button");
-        this.bind(this.domRoot.get(), "click", this.handleButtonClick.bind(this));
-        return this.domRoot.get();
+        this.domButton = DOM.create("div").addClass("dockspawn-icon-button");
+        this.bind(this.domButton.get(), "click", this.handleButtonClick.bind(this));
+        return this.domButton.get();
     }
     protected onUpdate(element: HTMLElement): void {
-        this.domRoot.html(this.icon).toggleClass("downspawn-icon-button--hidden", ! this.visible);
+        this.domButton.html(this.icon).toggleClass("downspawn-icon-button--hidden", ! this.visible)
+            .attr("title", this.title);
     }
 
     private handleButtonClick(event: MouseEvent) {
+        event.preventDefault();
         this.triggerEvent("onAction", this.actionName);
     }
 }
