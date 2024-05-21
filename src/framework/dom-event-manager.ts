@@ -27,7 +27,10 @@ export class DOMEventManager {
     }
 
     unbindAll() {
-        for(let subscription of this.subscriptions) {
+        // Note: the collection of subscription gets modified, we need to create
+        // a copy of it for iteration
+        const subscriptions = [...this.subscriptions];
+        for(let subscription of subscriptions) {
             subscription.unbind();
         }
         this.subscriptions = [];
