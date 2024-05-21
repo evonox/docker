@@ -70,7 +70,7 @@ export interface IContextMenuAPI {
 /**
  * Interface passed to the panel's factory method with the API to influence its state in runtime
  */
-export interface IDockManagerAPI {
+export interface IPanelStateAPI {
     getDockManager(): DockManager;
 
     activate(): void;
@@ -91,7 +91,7 @@ export interface IDockManagerAPI {
  * The only required method is the factory method "initialize()" to create the panel's content
  */
 export interface IPanelAPI {
-    initialize: (api: IDockManagerAPI, options: IInitOptions) => Promise<HTMLElement>;
+    initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<HTMLElement>;
 
     canClose?: () => boolean;
     onClose?: () => void;

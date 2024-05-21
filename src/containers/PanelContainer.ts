@@ -1,5 +1,5 @@
 import { DockManager } from "../facade/DockManager";
-import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
+import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import { PanelState } from "../api/PanelState";
 import { ContainerType, IDockContainer, IPoint, ISize, PanelType } from "../common/declarations";
 import { IPanelAPI } from "../common/panel-api";
@@ -101,7 +101,7 @@ export class PanelContainer extends Component implements IDockContainer {
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
         const api = dockManager.gainPanelApiContract(state.panelName);
         const container = new PanelContainer(dockManager, state.panelName, api, state.panelType, state.hideCloseButton);
-        const contentElement = await api.initialize(new PanelContainerAdapter(container), null);
+        const contentElement = await api.initialize(new PanelStateAdapter(container), null);
         container.setContentElement(contentElement);
         // TODO: QUERY PANEL TITLE - RESPONSIBILITY OF THE FACTORY METHOD
         container.loadState(state);
@@ -218,6 +218,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this._hasChanges = flag;
         // TODO: UPDATE TITLE
         // TODO: NOTIFY ABOUT TITLE CHANGED
+    }
+
+    activatePanel() {
+
     }
 
     async close() {

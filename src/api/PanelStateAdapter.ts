@@ -1,11 +1,15 @@
 import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
-import { IDockManagerAPI, IHeaderButton, ISubscriptionAPI } from "../common/panel-api";
+import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI } from "../common/panel-api";
 
 
-export class PanelContainerAdapter implements IDockManagerAPI {
+export class PanelStateAdapter implements IPanelStateAPI {
 
     constructor(private panelContainer: PanelContainer) {}
+
+    activate(): void {
+        this.panelContainer.activatePanel();
+    }
 
     getDockManager(): DockManager {
         return this.panelContainer.getDockManager();
@@ -14,6 +18,7 @@ export class PanelContainerAdapter implements IDockManagerAPI {
     setPanelIcon(html: string): void {
         this.panelContainer.setTitleIcon(html);
     }
+
     setPanelTitle(title: string): void {
         this.panelContainer.setTitle(title);
     }

@@ -12,7 +12,7 @@ import { DockNode } from "../model/DockNode";
 import { TabPage } from "../tabview/TabPage";
 import { DockPanelTypeRegistry } from "./DockPanelTypeRegistry";
 import { PanelInitConfig } from "../api/PanelInitConfig";
-import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
+import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
@@ -147,7 +147,7 @@ export class DockManager {
         );        
         // Invoke the constructor function
         const initOptions = new PanelInitConfig(options);
-        const apiAdapter = new PanelContainerAdapter(panelContainer);
+        const apiAdapter = new PanelStateAdapter(panelContainer);
         const domContentElement = await panelTypeContract.initialize(apiAdapter, initOptions);
         panelContainer.setContentElement(domContentElement);
         
