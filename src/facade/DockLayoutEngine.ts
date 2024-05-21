@@ -48,7 +48,6 @@ export class DockLayoutEngine {
         this.performDock(referenceNode, newNode, OrientationKind.Fill, false);                     
     }
 
-
     undock(node: DockNode) {
         // Get the parent node to remove the node from
         const parentNode = node.parent;
@@ -63,12 +62,30 @@ export class DockLayoutEngine {
 
         // If the parent node has less than the minimum allowed nodes, restructure the Dock Node Hierarchy
         if(parentNode.getChildCount() < parentNode.container.getMinimumChildNodeCount()) {
-            /*
+            let grandParent = parentNode.parent;
+            for(let i = 0; i < parentNode.getChildCount(); i++) {
+                const otherChild = parentNode.getChildNodeAt(i);
+                if(grandParent) {
+                    grandParent.addChildAfter(parentNode, otherChild);
+                    parentNode.detachFromParent();
+                    
+                    const width = parentNode.container.getWidth();
+                    const height = parentNode.container.getHeight();
+                    // TODO: CALL DESTROY - IS IT THE SAME???
+                    // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
+                    parentNode.container.dispose();
 
-            // TODO: TO BE DONE - ORIGINAL ALGORITHM WORKS ONLY FOR ONE NODE AND LESS
+                    otherChild.container.resize(width, height);
+                    grandParent.performLayout(false);
+                } else {
+                    parentNode.detachFromParent();
+                    // TODO: CALL DESTROY - IS IT THE SAME???
+                    // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
+                    parentNode.container.dispose();
+                    this.dockManager.setRootNode(otherChild);
+                }
+            }
 
-
-            */
         } else {
             parentNode.performLayout(false);
 
@@ -85,22 +102,169 @@ export class DockLayoutEngine {
     }
 
     close(node: DockNode) {
-        /**
-         *  ORIGINAL CODE COPIED IMPLEMENTATION FROM UNDOCK ENGINE
-         * 
-         */
+        const parentNode = node?.parent;
+        if(! parentNode)
+            throw new Error("Node with no parent");
+
+        let activeTabClosed = false;
+        if(parentNode.getChildCount() > 0) {
+            // TODO: GET ACTIVE CHILD ON IDockContainer and check if active tab closed
+        }
+
+        const siblingIndex = parentNode.getChildNodeIndex(node);
+        node.detachFromParent();
+
+        if(parentNode.getChildCount() < parentNode.container.getMinimumChildNodeCount()) {
+            // TODO: INCORRECT IMPLEMENTATION - STUDY THE REASONS
+            let grandParent = parentNode.parent;
+            for(let i = 0; i < parentNode.getChildCount(); i++) {
+                const otherChild = parentNode.getChildNodeAt(i);
+                if(grandParent) {
+                    grandParent.addChildAfter(parentNode, otherChild);
+                    parentNode.detachFromParent();
+                    const width = parentNode.container.getWidth();
+                    const height = parentNode.container.getHeight();
+                    otherChild.container.resize(width, height);
+                    // TODO: CALL DESTROY - IS IT THE SAME???
+                    // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
+                    parentNode.container.dispose();
+                    grandParent.performLayout(false);
+                } else {
+                    parentNode.detachFromParent();
+                    // TODO: CALL DESTROY - IS IT THE SAME???
+                    // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
+                    parentNode.container.dispose();
+                    this.dockManager.setRootNode(otherChild);
+                }
+            }
+
+        } else {
+            parentNode.performLayout(false);
+
+            if(activeTabClosed) {
+                const nextActiveSibling = parentNode.getChildNodeAt(Math.max(0, siblingIndex - 1));
+                if(nextActiveSibling) {
+                    parentNode.container.setActiveChild(nextActiveSibling.container);
+                }
+            }
+        }
+
+        this.dockManager.invalidate();
+        // TODO: ERROR IN ORIGINAL CODE???
+        this.dockManager.notifyOnUnDock(node);
     }
 
     reorderTabs(node: DockNode, handle: TabHandle, state: string, index: number) {
+        let N = node.getChildCount();
+        let nodeIndexToDelete = state === "left" ? index :  index + 1;
+        if(state === "right" && nodeIndexToDelete >= node.getChildCount()) return;
+        if(state === "left" && nodeIndexToDelete <= 0) return;
 
+        /**
+         * TODO: COMPLETE LATER 
+         */
     }
 
     private performDock(referenceNode: DockNode, newNode: DockNode, orientation: OrientationKind, insertBeforeReference: boolean) {
+        if(referenceNode.parent && referenceNode.parent.container.getContainerType() === ContainerType.FillLayout)    
+            referenceNode = referenceNode.parent;
+        
+        if(orientation === OrientationKind.Fill && referenceNode.container.getContainerType() === ContainerType.FillLayout) {
+            referenceNode.addChild(newNode);
+            referenceNode.performLayout(false);
+            referenceNode.container.setActiveChild(newNode.container);
+            this.dockManager.invalidate();
+            this.dockManager.notifyOnDock(newNode);
+            return;
+        }
 
+        const model = this.dockManager.getModelContext().model;
+        let compositeContainer: IDockContainer;
+        let compositeNode: DockNode;
+        let referenceParent: DockNode;
+        const containerType = this.mapOrientationToContainerType(orientation);
+
+        if(referenceNode === model.rootNode) {
+            if(insertBeforeReference) {
+                compositeContainer = this.createDockContainer(containerType, newNode, referenceNode);
+                compositeNode = new DockNode(compositeContainer);
+                compositeNode.addChild(newNode);
+                compositeNode.addChild(referenceNode);
+            } else {
+                compositeContainer = this.createDockContainer(containerType, referenceNode, newNode);
+                compositeNode = new DockNode(compositeContainer);
+                compositeNode.addChild(referenceNode);
+                compositeNode.addChild(newNode);
+            }
+
+            this.dockManager.setRootNode(compositeNode);
+            this.dockManager.rebuildLayout(this.dockManager.getModelContext().model.rootNode);
+            compositeNode.container.setActiveChild(newNode.container);
+            this.dockManager.invalidate();
+            this.dockManager.notifyOnDock(newNode);
+            return;
+        }
+
+        if(referenceNode.parent.container.getContainerType() !== containerType) {
+            referenceParent = referenceNode.parent;
+
+            let referenceNodeWidth = referenceNode.container.getWidth();
+            let referenceNodeHeight = referenceNode.container.getHeight();
+
+            let referenceParentNodeWidth = referenceParent.container.getWidth();
+            let referenceParentNodeHeight = referenceParent.container.getHeight();
+
+            compositeContainer = this.createDockContainer(containerType, newNode, referenceNode);
+            compositeNode = new DockNode(compositeContainer);
+
+            referenceParent.addChildAfter(referenceNode, compositeNode);
+            referenceNode.detachFromParent();
+            // TODO: WE SHOULD NOT HAVE DOM OPERATIONS HERE - THINK OF IT
+            referenceNode.container.getDOM().remove();
+
+            if(insertBeforeReference) {
+                compositeNode.addChild(newNode)
+                compositeNode.addChild(referenceNode);
+            } else {
+                compositeNode.addChild(referenceNode);
+                compositeNode.addChild(newNode)
+            }
+
+            referenceParent.performLayout(false);
+            compositeNode.performLayout(true);
+
+            compositeNode.container.setActiveChild(newNode.container);
+            compositeNode.container.resize(referenceNodeWidth, referenceNodeHeight);
+            referenceParent.container.resize(referenceNodeWidth, referenceParentNodeHeight);
+        } else {
+            referenceParent = referenceNode.parent;
+            if(insertBeforeReference) {
+                referenceParent.addChildBefore(referenceNode, newNode);
+            } else {
+                referenceParent.addChildAfter(referenceNode, newNode);
+            }
+            referenceParent.performLayout(false);
+            referenceParent.container.setActiveChild(newNode.container);
+        }
+
+        let containerWidth = newNode.container.getWidth();
+        let containerHeight = newNode.container.getHeight();
+        newNode.container.resize(containerWidth, containerHeight);
+
+        this.dockManager.invalidate();
+        this.dockManager.notifyOnDock(newNode);
     }
 
     private forceResizeCompositeContainer(container: IDockContainer) {
+        const width = container.getDOM().clientWidth;
+        const height = container.getDOM().clientHeight;
+        container.resize(width, height);
+    }
 
+    private mapOrientationToContainerType(orientation: OrientationKind): ContainerType {
+        if(orientation === OrientationKind.Fill) return ContainerType.FillLayout;
+        else if(orientation === OrientationKind.Row) return ContainerType.RowLayout;
+        else if(orientation === OrientationKind.Column) return ContainerType.ColumnLayout;
     }
 
     private createDockContainer(containerType: ContainerType, newNode: DockNode, referenceNode: DockNode) {
@@ -115,6 +279,9 @@ export class DockLayoutEngine {
         }
     }
 
+    /**
+     * TODO: CHECK AND REFACTOR THIS LAYOUTING ALGORITHM
+     */
     getDockBounds(referenceNode: DockNode, containerToDock: IDockContainer, direction: OrientationKind, insertBefore: boolean): IRect {
         if(direction === OrientationKind.Fill) {
             const domReferenceElement = referenceNode.container.getDOM();
@@ -127,8 +294,77 @@ export class DockLayoutEngine {
                 h: referenceElementRect.height        
             };
         } else {
+            // If the parent is FillLayout, make it the reference node
+            if(referenceNode.parent && referenceNode.parent.container.getContainerType() === ContainerType.FillLayout)
+                referenceNode = referenceNode.parent;
 
+            let hierarchyModified = false;
+            let compositeNode: DockNode;
+            let childCount: number;
+            let childPosition: number;
+            if(referenceNode.parent && this.hasContainerOrientation(referenceNode.parent.container, direction)) {
+                compositeNode = referenceNode.parent;
+                childCount = compositeNode.getChildCount();
+                childPosition = compositeNode.getChildNodeIndex(referenceNode) + (insertBefore ? 0 : 1);
+            } else {
+                compositeNode = referenceNode;
+                childCount = 1;
+                childPosition = insertBefore ? 0 : 1;
+                hierarchyModified = true;
+            }
 
+            // Compute ratio of the new panel
+            const splitterBarSize = 5; // TODO: GET FROM THE DOCKER CONFIGURATION 
+            let targetPanelSize = 0;
+            let targetPanelStart = 0;
+            if(direction === OrientationKind.Row || direction === OrientationKind.Column) {
+                const compositeSize = this.getVaryingDimension(compositeNode.container, direction)
+                    - (childCount - 1) * splitterBarSize;
+                
+                const newPanelOriginalSize = this.getVaryingDimension(containerToDock, direction);
+                const scaleMultiplier = compositeSize / (compositeSize + newPanelOriginalSize);
+                targetPanelSize = newPanelOriginalSize * scaleMultiplier;
+                if(hierarchyModified) {
+                    targetPanelStart = insertBefore ? 0 : compositeSize * scaleMultiplier;
+                } else {
+                    for(let i = 0; i < childPosition; i++) {
+                        targetPanelStart += this.getVaryingDimension(
+                            compositeNode.getChildNodeAt(i).container, direction
+                        );
+                    }
+                    targetPanelStart *= scaleMultiplier;
+                }
+            }
+
+            // Compute the final dimensions of the virtually docked panel
+            let bounds: IRect = {x: 0, y: 0, w: 0, h: 0};
+            const outerRect = this.dockManager.getContainerBoundingRect();
+            const rect = compositeNode.container.getDOM().getBoundingClientRect();
+            if(direction === OrientationKind.Column) {
+                bounds.x = rect.left - outerRect.left;
+                bounds.y = rect.top - outerRect.top + targetPanelStart;
+                bounds.w = rect.width;
+                bounds.h = targetPanelSize;
+            } else if(direction === OrientationKind.Row) {
+                bounds.x = rect.left - outerRect.left + targetPanelStart;
+                bounds.y = rect.top - outerRect.top;
+                bounds.w = targetPanelSize;
+                bounds.h = rect.height;
+            }
+
+            return bounds;
+        }
+    }
+
+    private hasContainerOrientation(container: IDockContainer, orientation: OrientationKind) {
+        if(
+            (container.getContainerType() === ContainerType.FillLayout && orientation === OrientationKind.Fill) ||
+            (container.getContainerType() === ContainerType.RowLayout && orientation === OrientationKind.Row) ||
+            (container.getContainerType() === ContainerType.ColumnLayout && orientation === OrientationKind.Column)
+        ) {
+                return true;                
+        } else {
+            return false;
         }
     }
 
