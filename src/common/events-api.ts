@@ -3,7 +3,8 @@ import type { PanelContainer } from "../containers/PanelContainer";
 import type { Dialog } from "../floating/Dialog";
 import type { DockNode } from "../model/DockNode";
 import type { TabPage } from "../tabview/TabPage";
-import type { IDockContainer, IPoint } from "./declarations";
+import type { IDockContainer } from "./declarations";
+import { IPoint } from "./dimensions";
 
 /**
  * Various interface definitons of payloads carrying event data

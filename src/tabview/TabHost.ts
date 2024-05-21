@@ -1,8 +1,9 @@
 import { Component } from "../framework/Component";
 import { property, state } from "../framework/decorators";
-import { ContainerType, IDockContainer, TabHostDirection } from "../common/declarations";
+import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
+import { ContainerType, TabHostDirection } from "../common/enumerations";
 
 
 export class TabHost extends Component {

@@ -1,9 +1,10 @@
 import { DockManager } from "../facade/DockManager";
-import { IRect, WheelTypes } from "../common/declarations";
+import { WheelTypes } from "../common/enumerations";
 import { Dialog } from "../floating/Dialog";
 import { DockNode } from "../model/DockNode";
 import { DOM } from "../utils/DOM";
 import { DockWheelItem } from "./DockWheelItem";
+import { IRect } from "../common/dimensions";
 
 
 export class DockWheel {

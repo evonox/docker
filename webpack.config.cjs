@@ -23,6 +23,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
         title: 'Docker Library',
+        template: path.resolve("./public/index.html")
     }),
   ],  
   resolve: {

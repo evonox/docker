@@ -1,4 +1,4 @@
-import { WheelTypes } from "../common/declarations";
+import { WheelTypes } from "../common/enumerations";
 import { Component } from "../framework/Component";
 import { property } from "../framework/decorators";
 

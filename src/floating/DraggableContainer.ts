@@ -1,9 +1,12 @@
 import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";
 import { DOMEvent, DOMMouseEvent } from "../framework/dom-events";
-import { ContainerType, IDockContainer, IPoint } from "../common/declarations";
+import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { IState } from "../common/serialization";
+import { IContextMenuAPI } from "../common/panel-api";
+import { IPoint } from "../common/dimensions";
+import { ContainerType } from "../common/enumerations";
 
 
 export class DraggableContainer implements IDockContainer {
@@ -22,6 +25,9 @@ export class DraggableContainer implements IDockContainer {
         DOM.from(this.topElement)
             .css("left", domBounds.left.toFixed(3) + "px")
             .css("top", domBounds.top.toFixed(3) + "px");
+    }
+    onQueryContextMenu(config: IContextMenuAPI): void {
+        throw new Error("Method not implemented.");
     }
     getMinimumChildNodeCount(): number {
         throw new Error("Method not implemented.");

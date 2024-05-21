@@ -1,7 +1,8 @@
 import { Component } from "../framework/Component";
-import { IDockContainer, OrientationKind } from "../common/declarations";
+import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { SplitterBar } from "./SplitterBar";
+import { OrientationKind } from "../common/enumerations";
 
 
 export class SplitterPanel extends Component {
@@ -22,7 +23,7 @@ export class SplitterPanel extends Component {
     }
 
     getRatios(): number[] {
-        throw 0;
+        return [];
     }
 
     setRatios(ratios: number[]) {

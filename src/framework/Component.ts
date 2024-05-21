@@ -13,8 +13,10 @@ export abstract class Component {
     private isUpdateRequested: boolean = false;
 
     constructor() {
-        this.onInitialized();
-        this.element = this.onInitialRender();
+        Promise.resolve(() => {
+            this.onInitialized();
+            this.element = this.onInitialRender();   
+        })
     }
 
     public getDOM(): HTMLElement {

@@ -1,9 +1,12 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ContainerType, IDeltaRect, IDockContainer, IPoint, IRect } from "../common/declarations";
+import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ResizeHandle, ResizeHandleType } from "./ResizeHandle";
 import { IState } from "../common/serialization";
+import { IContextMenuAPI } from "../common/panel-api";
+import { IDeltaRect, IPoint, IRect } from "../common/dimensions";
+import { ContainerType } from "../common/enumerations";
 
 
 export class ResizableContainer implements IDockContainer {
@@ -13,6 +16,9 @@ export class ResizableContainer implements IDockContainer {
     constructor(private delegate: IDockContainer, private topElement: HTMLElement, private disableResize: boolean = false) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
+    }
+    onQueryContextMenu(config: IContextMenuAPI): void {
+        throw new Error("Method not implemented.");
     }
     getMinimumChildNodeCount(): number {
         throw new Error("Method not implemented.");

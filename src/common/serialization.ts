@@ -1,4 +1,5 @@
-import { ContainerType, IPoint, PanelType } from "./declarations";
+import { IPoint } from "./dimensions";
+import { ContainerType,PanelType } from "./enumerations";
 
 /**
  * Serialization Data Interfaces

@@ -1,5 +1,5 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
-import { ContainerType, IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect, PanelType } from "../common/declarations";
+import {  IDeltaPoint, IDeltaRect, IPoint, IRect } from "../common/dimensions";
 import { EventKind, EventPayload } from "../common/events-api";
 import { IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
@@ -16,6 +16,8 @@ import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
+import { ContainerType, PanelType } from "../common/enumerations";
+import { IDockContainer } from "../common/declarations";
 
 
 /**
@@ -59,7 +61,7 @@ export class DockManager {
 
         // Initialize other internals
         this.eventManager = new ComponentEventManager();
-        this.dockWheel = new DockWheel(this);
+        // this.dockWheel = new DockWheel(this);
         this.layoutEngine = new DockLayoutEngine(this);
         this.panelTypeRegistry = new DockPanelTypeRegistry();
 
@@ -104,6 +106,10 @@ export class DockManager {
         return this.config.zIndexes.zIndexWheel;
     }
 
+    getDocumentNode(): DockNode {
+        return this.context.model.documentManagerNode;
+    }
+
     /**
      * Panel Type Management
      */
@@ -143,7 +149,7 @@ export class DockManager {
         const panelTypeContract = metadata.factoryFn(this);        
         // Create the panel container
         const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract, 
-                metadata.viewKind === "panel" ? PanelType.Panel : PanelType.Document, true
+                metadata.viewKind === "panel" ? PanelType.Panel : PanelType.Document
         );        
         // Invoke the constructor function
         const initOptions = new PanelInitConfig(options);

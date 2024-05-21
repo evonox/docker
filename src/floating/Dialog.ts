@@ -1,11 +1,13 @@
 import { DockManager } from "../facade/DockManager";
-import { IEventEmitter, IPoint, MOUSE_BTN_RIGHT } from "../common/declarations";
+import { IEventEmitter } from "../common/declarations";
 import { PanelContainer } from "../containers/PanelContainer";
 import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";
 import { DOMEvent } from "../framework/dom-events";
 import { DOM } from "../utils/DOM";
 import { DraggableContainer } from "./DraggableContainer";
 import { ResizableContainer } from "./ResizableContainer";
+import { IPoint } from "../common/dimensions";
+import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 /**
  * TODO: CONTEXT MENU

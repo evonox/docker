@@ -1,7 +1,8 @@
 import { Component } from "../framework/Component";
-import { IDockContainer, OrientationKind } from "../common/declarations";
+import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
+import { OrientationKind } from "../common/enumerations";
 
 
 export class SplitterBar extends Component {

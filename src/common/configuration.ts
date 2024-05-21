@@ -4,6 +4,8 @@
  */
 
 export interface IDockConfig {
+    defaultMinWidth?: number,
+    defaultMinHeight?: number;
     zIndexes?: {
         zIndexCounter?: number;
         zIndexDialogCounter?: number;
@@ -14,6 +16,8 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    defaultMinWidth: 50,
+    defaultMinHeight: 50,
     zIndexes: {
         zIndexCounter: 1001,
         zIndexDialogCounter: 10001,
