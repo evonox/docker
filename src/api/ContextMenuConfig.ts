@@ -15,15 +15,28 @@ export class ContextMenuConfig implements IContextMenuAPI {
         return [...this.menuItems];
     }
 
-    // TODO: VALIDATION
     appendMenuItem(item: IMenuItem): void {
-        this.menuItems.push(item);
+        if(item.separator === true) {
+            this.menuItems.push(item);
+        } else {
+            if(typeof item.actionName !== "string" || typeof item.title !== "string")
+                throw new Error("ERROR: Menu item must have at least 'title' and 'actionName' fields defined");
+            if(this.existsActionName(item.actionName))
+                throw new Error(`ERROR: Action name ${item.actionName} is already registered.`);   
+
+            this.menuItems.push(item);
+        }
     }
 
     removeMenuItem(item: IMenuItem): void {
         const index = this.menuItems.indexOf(item);
         if(index >= 0) {
-            this.menuItems.splice(index);
+            this.menuItems.splice(index, 1);
         }
+    }
+
+    private existsActionName(actionName: string): boolean {
+        const menuItems = this.menuItems.filter(mi => mi.separator !== true);
+        return menuItems.find(mi => mi.actionName === actionName) !== undefined;
     }
 }
