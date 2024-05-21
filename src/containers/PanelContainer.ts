@@ -2,7 +2,7 @@ import { DockManager } from "../facade/DockManager";
 import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import { PanelState } from "../api/PanelState";
 import { ContainerType, IDockContainer, IPoint, ISize, PanelType } from "../common/declarations";
-import { IPanelAPI } from "../common/panel-api";
+import { IHeaderButton, IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
@@ -61,6 +61,12 @@ export class PanelContainer extends Component implements IDockContainer {
     public getHeaderElement(): HTMLElement {
         return this.domTitle.get();
     }
+
+    // Header Button Management
+    addHeaderButton(button: IHeaderButton): void {}
+    removeHeaderButton(actionName: string): void {}
+    showHeaderButton(actionName: string, flag: boolean): void {}
+
 
     protected onInitialized(): void {}
 

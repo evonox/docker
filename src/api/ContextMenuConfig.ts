@@ -1,6 +1,9 @@
 import { IContextMenuAPI, IMenuItem } from "../common/panel-api";
 
-
+/**
+ * Class managing the configuration of context menu items.
+ * As for now, nesting of menu items is not supported.
+ */
 export class ContextMenuConfig implements IContextMenuAPI {
 
     private menuItems: IMenuItem[] = [];
