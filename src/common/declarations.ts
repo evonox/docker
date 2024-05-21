@@ -1,55 +1,13 @@
-import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { IState } from "./serialization";
-
-export const MOUSE_BTN_LEFT = 0;
-export const MOUSE_BTN_MIDDLE = 1;
-export const MOUSE_BTN_RIGHT = 2;
-
-export enum DockKind { Left, Right, Up, Down, Fill };
-
-export enum OrientationKind { Row = "row", Column = "column", Fill = "fill" };
-
-export enum TabHostDirection { Top = "top", Bottom = "bottom", Left = "left", Right = "right" };
-
-export enum ContainerType { Panel = "panel", RowLayout = "row", ColumnLayout = "column", FillLayout = "fill" }
-
-export enum PanelType { Document = "document", Panel = "panel" }
-
-export enum WheelTypes {
-    Left = "left", Right = "right", Top = "top", Bottom = "bottom", Fill = "fill",
-    SideLeft = "side-left", SideRight = "side-right", SideTop = "side-top", SideBottom = "side-bottom"
-}
-
-export interface IPoint {
-    x: number;
-    y: number;
-}
-
-export interface ISize {
-    w: number;
-    h: number;
-}
-
-export interface IRect {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-}
-
-export interface IDeltaPoint {
-    dx: number;
-    dy: number;
-}
-
-export interface IDeltaRect {
-    dx: number;
-    dy: number;
-    dw: number;
-    dh: number;
-}
+import type { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
+import { ContainerType } from "./enumerations";
+import type { IContextMenuAPI } from "./panel-api";
+import type { IState } from "./serialization";
 
 
+
+/**
+ * Interface for components having event support
+ */
 export interface IEventEmitter {
     on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription;
     off(eventName: string): void;
@@ -57,31 +15,39 @@ export interface IEventEmitter {
 
 }
 
+/**
+ * Generic Dock Container Interface
+ */
 export interface IDockContainer extends IEventEmitter {
 
+    // Query Methods
+    getDOM(): HTMLElement;
+    getContainerType(): ContainerType;
+    hasChanges(): boolean;
+    getMinimumChildNodeCount(): number;
+
+    // Visibility and active child selection
+    setActiveChild(container: IDockContainer): void;    
+    setVisible(visible: boolean): void;
+
+    // Cleanup
     dispose(): void;
 
-    getDOM(): HTMLElement;
+    // On Query Panel Context Menu
+    onQueryContextMenu(config: IContextMenuAPI): void;
 
-    hasChanges(): boolean;
 
-    getMinimumChildNodeCount(): number;
-    setActiveChild(container: IDockContainer): void;
-
-    setVisible(visible: boolean): void;
+    // Dimensions / Resizing & Layouting
+    getWidth(): number;
+    getHeight(): number;
 
     getMinWidth(): number;
     getMinHeight(): number;
 
-    getWidth(): number;
-    getHeight(): number;
-
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
     resize(width: number, height: number): void;
 
-    getContainerType(): ContainerType;
-
+    // Persitence Management
     saveState(state: IState): void;
     loadState(state: IState): void;   
 }
-

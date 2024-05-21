@@ -1,11 +1,13 @@
 import { DockManager } from "../facade/DockManager";
 import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import { PanelState } from "../api/PanelState";
-import { ContainerType, IDockContainer, IPoint, ISize, PanelType } from "../common/declarations";
-import { IHeaderButton, IPanelAPI } from "../common/panel-api";
+import { IDockContainer } from "../common/declarations";
+import { IContextMenuAPI, IHeaderButton, IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
+import { ContainerType, PanelType } from "../common/enumerations";
+import { IPoint, ISize } from "../common/dimensions";
 
 
 /**
@@ -42,6 +44,9 @@ export class PanelContainer extends Component implements IDockContainer {
         private hideCloseButton: boolean = false
     ) {
         super();
+    }
+    onQueryContextMenu(config: IContextMenuAPI): void {
+        throw new Error("Method not implemented.");
     }
     getMinimumChildNodeCount(): number {
         throw new Error("Method not implemented.");
@@ -315,5 +320,4 @@ export class PanelContainer extends Component implements IDockContainer {
     private handleMouseFocusEvent(event: MouseEvent) {
         this.triggerEvent("onFocused");
     }
-
 }
