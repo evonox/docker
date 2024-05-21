@@ -7,7 +7,7 @@ export interface ComponentEventSubscription {
     unsubscribe(): void;
 }
 
-class EventHandlerSubscription implements ComponentEventSubscription {
+export class EventHandlerSubscription implements ComponentEventSubscription {
    
     private handler?: ComponentEventHandler;
 
@@ -25,7 +25,7 @@ class EventHandlerSubscription implements ComponentEventSubscription {
     }
 }
 
-class ComponentEvent {
+export class ComponentEvent {
 
     private subscriptions: EventHandlerSubscription[] = [];
 
@@ -36,7 +36,9 @@ class ComponentEvent {
     }
 
     disposeAll() {
-        for(let event of this.subscriptions) {
+        // Note: Need to create the local copy of array, it gets modified when removing subscriptions
+        const subscription = [...this.subscriptions];
+        for(let event of subscription) {
             event.unsubscribe();
         }
     }
