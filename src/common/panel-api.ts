@@ -73,6 +73,8 @@ export interface IContextMenuAPI {
 export interface IDockManagerAPI {
     getDockManager(): DockManager;
 
+    activate(): void;
+
     setPanelIcon(html: string): void;
     setPanelTitle(title: string): void;
     notifyHasChanges(hasChanges: boolean): void;
@@ -92,6 +94,7 @@ export interface IPanelAPI {
     initialize: (api: IDockManagerAPI, options: IInitOptions) => Promise<HTMLElement>;
 
     canClose?: () => boolean;
+    onClose?: () => void;
 
     getMinWidth?: () => number;
     getMinHeight?: () => number;
