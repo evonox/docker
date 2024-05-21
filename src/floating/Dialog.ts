@@ -105,7 +105,7 @@ export class Dialog implements IEventEmitter {
     }
 
     show() {
-        this.domDialog.css("zIndex", this.dockManager.nextDialogZIndex().toString());
+        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString());
         // TODO: ELEMENT CONTAINER Z-INDEX???
         if(this.isHidden) {
             this.isHidden = false;
@@ -161,7 +161,7 @@ export class Dialog implements IEventEmitter {
 
     bringToFront() {
         // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
-        this.domDialog.css("zIndex", this.dockManager.nextDialogZIndex().toString());
+        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString());
         this.dockManager.setActivePanel(this.panel);
     }
 

@@ -1,5 +1,5 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
-import { IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect, PanelType } from "../common/declarations";
+import { ContainerType, IDeltaPoint, IDeltaRect, IDockContainer, IPoint, IRect, PanelType } from "../common/declarations";
 import { EventKind, EventPayload } from "../common/events-api";
 import { IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
@@ -13,11 +13,13 @@ import { TabPage } from "../tabview/TabPage";
 import { DockPanelTypeRegistry } from "./DockPanelTypeRegistry";
 import { PanelInitConfig } from "../api/PanelInitConfig";
 import { PanelContainerAdapter } from "../api/PanelContainerAdapter";
+import * as _ from "lodash-es";
+import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
+import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 
 
 /**
- * DOCUMENT API
- * DOCUMENTED METHOD VS. UNDOCUMENTED METHODS
+ * The main DockManager Library facade class
  */
 export class DockManager {
 
@@ -39,8 +41,12 @@ export class DockManager {
     // DockManager Event Manager
     private eventManager: ComponentEventManager;
 
-    constructor(private container: HTMLElement, private _config: any = {}) {
-        // TODO: MANAGE INITIAL OPTIONS - POPULATE WITH DEFAULTS        
+    // Z-Index Counters
+    private lastZIndex: number;
+    private lastDialogZIndex: number;
+
+    constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
+        this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
     }
 
     initialize() {
@@ -57,36 +63,45 @@ export class DockManager {
         this.layoutEngine = new DockLayoutEngine(this);
         this.panelTypeRegistry = new DockPanelTypeRegistry();
 
+        // Init other MISC attributes
+        this.lastZIndex = this.config.zIndexes.zIndexCounter;
+        this.lastDialogZIndex = this.config.zIndexes.zIndexDialogCounter;
+
         // Resize to the container
         this.resize(this.container.clientWidth, this.container.clientHeight);
-
         this.rebuildLayout(this.context.model.rootNode);
-
-        // TODO: INITIALIZE Z-INDEX COUNTERS - BASED ON INTERNAL CONFIGURATION - SSOT
     }
 
     /**
      * Misc Basic Query Methods
      */
 
-    /**
-     * TODO: DEFINE DOCKER OPTIONS
-     */
-    get config(): any {
+    get config(): Readonly<IDockConfig> {
         return this._config;
     }
 
-    // TODO: FURTHER METHOD IMPLEMENTATIONS
     getContainerBoundingRect(): DOMRect {
-        throw 0;
+        return this.container.getBoundingClientRect();
     }
 
     getDialogRootElement(): HTMLElement {
-        throw 0;
+        return this.container;
     }
 
     getModelContext(): DockManagerContext {
-        throw 0;
+        return this.context;
+    }
+
+    genNextZIndex(): number {
+        return this.lastZIndex++;
+    }
+
+    genNextDialogZIndex(): number {
+        return this.lastDialogZIndex++;
+    }
+
+    getWheelZIndex(): number {
+        return this.config.zIndexes.zIndexWheel;
     }
 
     /**
@@ -204,22 +219,78 @@ export class DockManager {
         });
     }
 
-    // TODO: COMPLEX IMPLEMENTATION
+    // TODO: REFACTOR IT
     private requestDockContainer(
         referenceNode: DockNode, container: IDockContainer, 
         layoutFn: (referenceNode: DockNode, newNode: DockNode) => void,
         dockedToPrevious: boolean, ratio?: number
     ) {
+        const newNode = new DockNode(container);
+        if(container.getContainerType() === ContainerType.Panel) {
+            const panel = container as PanelContainer;
+            panel.prepareForDocking();
+            // TODO: FIND THE CORRECT PLACE FOR THIS OPERATION
+            panel.getDOM().remove();
+        }
 
+        // Get original ratios and splitter - for further computations
+        let ratios: number[] = null;
+        let oldSplitter: SplitterDockContainer;
+        if(referenceNode.parent && referenceNode.parent.container) {
+            oldSplitter = referenceNode.parent.container as SplitterDockContainer;
+            ratios = oldSplitter.getRatios();
+        }
+
+        // Perform Dock Layout
+        layoutFn(referenceNode, newNode);
+
+        // Update correct ratios
+        if(ratio && newNode.parent 
+            && (
+                newNode.parent.container.getContainerType() === ContainerType.ColumnLayout ||
+                newNode.parent.container.getContainerType() === ContainerType.RowLayout
+            )
+        ) {
+            const splitter = newNode.parent.container as SplitterDockContainer;
+            if(ratios && splitter === oldSplitter) {
+                if(dockedToPrevious) {
+                    for(let i = 0; i < ratios.length; i++) {
+                        ratios[i] = ratios[i] + ratios[i] * ratio;
+                    }
+                    ratios.push(ratio);
+                } else {
+                    ratios[0] = ratios[0] - ratio;
+                    ratios.unshift(ratio);
+                }
+                splitter.setRatios(ratios);
+            } else {
+                splitter.setContainerRatio(container, ratio);
+            }
+        }
+
+        // Refresh Layout
+        this.rebuildLayout(this.context.model.rootNode);
+        this.invalidate();
+
+        return newNode;
     }
 
-    // TODO: COMPLEX IMPLEMENTATION
     private requestDockDialog(
         referenceNode: DockNode, dialog: Dialog, 
         layoutFn: (referenceNode: DockNode, newNode: DockNode) => void
     ) {
-
+        const panel = dialog.getPanel();
+        const newNode = new DockNode(panel);
+        panel.prepareForDocking();
+        // TODO: RESET ELEMENT CONTENT CONTAINER Z-INDEX - MOVE SOMEWHERE
+        dialog.destroy();
+        layoutFn(referenceNode, newNode);
+        return newNode;
     }
+
+    /**
+     * Constraint checks the moved dialog is inside the DockerTS Viewport
+     */
 
     isMoveInsideContainer(element: HTMLElement, delta: IDeltaPoint): boolean {
         const boundsElement = element.getBoundingClientRect();
@@ -338,7 +409,6 @@ export class DockManager {
         return bestMatch;
     }
 
-    // TODO: MOVE TO HELPER
     private isPointInsideNode(point: IPoint, node: DockNode): boolean {
         const element = node.container.getDOM();
         const rect = element.getBoundingClientRect();
@@ -614,13 +684,4 @@ export class DockManager {
     _allPanels(node: DockNode, panels: PanelContainer[]) {
 
     }
-
-    nextDialogZIndex(): number {
-        throw 0;
-    }
-
-    getWheelZIndex(): number {
-        throw 0;
-    }
-    
 }

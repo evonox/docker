@@ -11,6 +11,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@types/lodash-es": "^4.17.12",
     "acorn": "^8.11.3",
     "acorn-import-assertions": "^1.9.0",
     "ajv": "^6.12.6",
@@ -45,6 +46,7 @@
     "json-parse-even-better-errors": "^2.3.1",
     "json-schema-traverse": "^0.4.1",
     "loader-runner": "^4.3.0",
+    "lodash-es": "^4.17.21",
     "merge-stream": "^2.0.0",
     "micromatch": "^4.0.5",
     "mime-db": "^1.52.0",

@@ -84,3 +84,4 @@ export interface IDockContainer extends IEventEmitter {
     saveState(state: IState): void;
     loadState(state: IState): void;   
 }
+
