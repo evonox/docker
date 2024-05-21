@@ -8,7 +8,7 @@ export class PanelState implements IPanelState {
     constructor(private state: any = {}) {}
 
     getValue(key: string, defaultValue?: any) {
-        return this.state[key] ?? defaultValue;
+        return this.state[key] === undefined ? defaultValue : this.state[key];
     }
 
     setValue(key: string, value: any): void {
