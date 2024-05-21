@@ -1,11 +1,7 @@
 
-// Note: Will this be needed to decorate a component?
-export function component() {
-    return function(target: any) {
-        return target;
-    }
-}
-
+/**
+ * Reactive Property Decorator
+ */
 export function property(opts?: {defaultValue?: any}) {
     return function(target: any, propertyName: string) {
 
@@ -27,6 +23,9 @@ export function property(opts?: {defaultValue?: any}) {
     }
 }
 
+/**
+ * Reactive Component State Decorator
+ */
 export function state(opts?: {defaultValue?: any}) {
     return function(target: any, stateName: string) {
 
