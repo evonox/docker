@@ -1,6 +1,6 @@
 import { DockManager } from "../facade/DockManager";
 import { Dialog } from "../floating/Dialog";
-import { DocumentManagerContainer } from "../tabview/DocumentManagerContainer";
+import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
 import { DockModel } from "./DockModel";
 
 
