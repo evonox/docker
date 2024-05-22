@@ -45,6 +45,7 @@ export class PanelContainer extends Component implements IDockContainer {
         private panelType: PanelType
     ) {
         super();
+        this.initializeComponent();
     }
 
     /**

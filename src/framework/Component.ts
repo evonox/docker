@@ -12,7 +12,7 @@ export abstract class Component {
 
     private isUpdateRequested: boolean = false;
 
-    constructor() {
+    protected initializeComponent() {
         this.onInitialized();
         this.element = this.onInitialRender();
     }

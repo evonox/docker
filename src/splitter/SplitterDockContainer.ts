@@ -22,7 +22,7 @@ export abstract class SplitterDockContainer implements IDockContainer {
         throw new Error("Method not implemented.");
     }
     setActiveChild(container: IDockContainer): void {
-        throw new Error("Method not implemented.");
+        //throw new Error("Method not implemented.");
     }
     saveState(state: IState): void {
         throw new Error("Method not implemented.");

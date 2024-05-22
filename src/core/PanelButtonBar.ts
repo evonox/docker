@@ -18,6 +18,7 @@ export class PanelButtonBar extends Component {
 
     constructor() {
         super();
+        this.initializeComponent();
         this.handleActionTriggered = this.handleActionTriggered.bind(this)
     }
 

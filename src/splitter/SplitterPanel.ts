@@ -12,6 +12,7 @@ export class SplitterPanel extends Component {
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         super();
+        this.initializeComponent();
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
