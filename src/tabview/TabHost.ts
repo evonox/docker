@@ -57,13 +57,13 @@ export class TabHost extends Component {
     }
 
     resize(width: number, height: number) {
-        this.domHost.css("width", `${width}px`).css("height", `${height}px`);
+        this.domHost.width(width).height(height);
 
         const tabStripHeight = this.domTabStrip.getHeight();
         const separatorHeight = this.domSeparator.getHeight();
-
         const contentHeight = height - tabStripHeight - separatorHeight;
-        this.domContent.css("height", `${contentHeight}px`);
+
+        this.domContent.height(contentHeight);
 
         if(this.activeTab) {
             this.activeTab.resize(width, contentHeight);
@@ -94,7 +94,8 @@ export class TabHost extends Component {
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
                 const tabPage = new TabPage(child);
-                tabPage.on("onTabMoved", this.handleMoveTab);
+                tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
+                tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
                 this.tabPages.push(tabPage);
                 this.domTabStrip.appendChild(tabPage.getTabHandleDOM());
                 this.domContent.appendChild(tabPage.getDOM());
@@ -183,7 +184,7 @@ export class TabHost extends Component {
         this.activeTab = page;
         for(const tabPage of this.tabPages) {
             const isSelected = tabPage === this.activeTab;
-            tabPage.setSelected(isSelected, isActive);
+            tabPage.setSelected(isSelected, isSelected ? isActive : false);
         }
     }   
 }

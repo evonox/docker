@@ -37,6 +37,7 @@ export class TabPage extends Component {
     setSelected(flag: boolean, isActive: boolean) {
         this.selected = flag;
         this.tabHandle.setSelected(flag);
+        this.tabHandle.setActive(isActive);
 
         if(this.selected) {
             this.container.setVisible(true);

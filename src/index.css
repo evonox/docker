@@ -3,6 +3,8 @@
     --docker-ts-primary-color: #008749;
     --docker-ts-primary-dark-color: darkgreen;
     --docker-ts-primary-on-color: whitesmoke;
+    --docker-ts-inactive-color: gray;
+    --docker-ts-primary-inactive-color: #444;
 }
 
 .DockerTS--DisableSelection {

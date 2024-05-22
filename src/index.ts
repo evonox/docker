@@ -38,13 +38,28 @@ dockManager.registerPanelType("panel2", "panel", "singleton", (dockManager) => {
     }
 });
 
+dockManager.registerPanelType("panel3", "panel", "singleton", (dockManager) => {
+    return {
+        initialize: async (api, options) => {
+            const domElement = document.createElement("h1");
+            domElement.innerText = "DockerTS Panel Three";
+            api.setPanelFAIcon("fa fa-hamburger");
+            api.setPanelTitle("Panel Number 3");
+            return domElement;
+        }
+    }
+});
+
+
 async function performDocking() {
 
     try {
         const containerOne = await dockManager.createPanel("panel1");
         const containerTwo = await dockManager.createPanel("panel2");
+        const containerThree = await dockManager.createPanel("panel3");
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
+        dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
     }
     catch(err) {
         console.dir(err);

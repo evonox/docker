@@ -1,5 +1,5 @@
 import { Component } from "../framework/Component";
-import { property } from "../framework/decorators";
+import { property, state } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { CloseButton } from "./CloseButton";
@@ -13,6 +13,10 @@ export class TabHandle extends Component {
 
     @property({defaultValue: false})
     displayCloseButton: boolean;
+
+    @state({defaultValue: false})
+    isActive: boolean;
+
 
     @property({defaultValue: false})
     hasPanelChanges: boolean;
@@ -32,10 +36,13 @@ export class TabHandle extends Component {
         if(isSelected) {
             this.domRoot.addClass("dockspan-tab-handle-active");
         }
+        if(isSelected === false) {
+            this.isActive = false;
+        }
     }
 
-    setActive(isActive: boolean) {
-        this.domRoot.toggleClass("dockspan-tab-handle-active", isActive);        
+    setActive(isActive: boolean) {        
+        this.isActive = isActive;
     }
 
     protected onInitialized(): void {
@@ -74,6 +81,7 @@ export class TabHandle extends Component {
         this.closeButton.visible = this.displayCloseButton;
         this.domTitle.html(this.title).attr("title", this.domTitle.getText());
 
+        this.domRoot.toggleClass("DockerTS-TabHandle--Active", this.isActive);
         this.domTitle.toggleClass("DockerTS-TabHandle--HasChanges", this.hasPanelChanges);
     }
 
