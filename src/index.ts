@@ -17,7 +17,7 @@ dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
 });
 
 dockManager.createPanel("panel1").then(container => {
-    dockManager.dockLeft(dockManager.getDocumentNode(), container, 0.4);
+    dockManager.dockFill(dockManager.getDocumentNode(), container);
 }).catch(err => {
     console.dir(err);
 });

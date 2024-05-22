@@ -18,6 +18,7 @@ export class SplitterBar extends Component {
         private orientation: OrientationKind
     ) {
         super();
+        this.initializeComponent();
     }
 
     getBarSize() {

@@ -10,6 +10,11 @@ export class CloseButton extends Component {
     @property({defaultValue: true})
     visible: boolean;
 
+    constructor() {
+        super();
+        this.initializeComponent();
+    }
+
     protected onInitialized(): void {}
 
     protected onDisposed(): void {

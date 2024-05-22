@@ -18,6 +18,7 @@ import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 import { ContainerType, PanelType } from "../common/enumerations";
 import { IDockContainer } from "../common/declarations";
+import { DOM } from "../utils/DOM";
 
 
 /**
@@ -49,6 +50,7 @@ export class DockManager {
 
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
         this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
+        DOM.from(this.container).css("position", "relative");
     }
 
     initialize() {

@@ -180,9 +180,15 @@ export class PanelContainer extends Component implements IDockContainer {
         const contentHeight = height - titleBarHeight;
         this.domContentHost.height(contentHeight);
         this.domContentContainer.height(contentHeight);
+        this.domContentWrapper.height(contentHeight);
         this.domPanel.height(height);
 
-        // TODO: WHAT IS domElementContentWrapper
+        const boundsDockingContainer = this.dockManager.getContainerBoundingRect();
+        const boundsContentWrapper = this.domContentWrapper.getBounds();
+        console.dir(boundsContentWrapper);
+        this.domContentContainer.left(boundsContentWrapper.left - boundsDockingContainer.left)
+            .top(boundsContentWrapper.top - boundsDockingContainer.top)
+            .width(boundsContentWrapper.width).height(boundsContentWrapper.height);
     }
 
     // PanelContainer is leaf node => no layouting logic

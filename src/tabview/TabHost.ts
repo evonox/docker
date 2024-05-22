@@ -27,6 +27,7 @@ export class TabHost extends Component {
 
     constructor(private tabStripDirection: TabHostDirection) {
         super();
+        this.initializeComponent();
     }
 
     setActive(isActive: boolean) {
@@ -63,7 +64,7 @@ export class TabHost extends Component {
         this.domContent.css("height", `${contentHeight}px`);
 
         if(this.activeTab) {
-            this.resize(width, height);
+            this.activeTab.resize(width, height);
         }
 
         requestAnimationFrame(() => this.resizeTabStripElement(width, height));
@@ -93,6 +94,7 @@ export class TabHost extends Component {
                 const tabPage = new TabPage(child);
                 tabPage.on("onTabMoved", this.handleMoveTab);
                 this.tabPages.push(tabPage);
+                this.domContent.appendChild(tabPage.getDOM());
             }
         }
 
@@ -119,18 +121,18 @@ export class TabHost extends Component {
         this.domHost = DOM.create("div").addClass("dockspan-tab-host");
         this.domTabStrip = DOM.create("div").addClass("dockspan-tab-handle-list-container");
         this.domSeparator = DOM.create("div").addClass("dockspan-tab-handle-content-seperator");
-        const domContent = DOM.create("div").attr("tabIndex", "0").addClass("dockspan-tab-content");
+        this.domContent = DOM.create("div").attr("tabIndex", "0").addClass("dockspan-tab-content");
 
         if(this.tabStripDirection === TabHostDirection.Top) {
-            this.domHost.appendChildren([this.domTabStrip, this.domSeparator, domContent]);
+            this.domHost.appendChildren([this.domTabStrip, this.domSeparator, this.domContent]);
         } else if(this.tabStripDirection === TabHostDirection.Bottom) {
-            this.domHost.appendChildren([domContent, this.domSeparator, this.domTabStrip]);
+            this.domHost.appendChildren([this.domContent, this.domSeparator, this.domTabStrip]);
         } else {
             throw new Error("Unsupported TabStripDirection");
         }
 
-        this.bind(domContent.get(), "focus", this.handleFocus);
-        this.bind(domContent.get(), "mousedown", this.handleMouseDown);
+        this.bind(this.domContent.get(), "focus", this.handleFocus);
+        this.bind(this.domContent.get(), "mousedown", this.handleMouseDown);
 
         return this.domHost.get();
     }

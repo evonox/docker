@@ -3,6 +3,7 @@ import { ComponentEventSubscription } from "../framework/component-events";
 import { state } from "../framework/decorators";
 import { IDockContainer } from "../common/declarations";
 import { TabHandle } from "./TabHandle";
+import { DOM } from "../utils/DOM";
 
 
 export class TabPage extends Component {
@@ -10,11 +11,14 @@ export class TabPage extends Component {
     @state({defaultValue: false})
     selected: boolean;
 
+    private domContentWrapper: DOM<HTMLElement>;
+
     private tabHandle: TabHandle;
     private titleSubscription: ComponentEventSubscription;
 
     constructor(private container: IDockContainer) {
         super();
+        this.initializeComponent();
     }
 
     getContainer(): IDockContainer {
@@ -56,9 +60,9 @@ export class TabPage extends Component {
         this.titleSubscription.unsubscribe();
     }
 
-    // NOTE: PASS NullObject Pattern
     protected onInitialRender(): HTMLElement {
-        return null;
+        this.domContentWrapper = DOM.create("div").appendChild(this.container.getDOM());
+        return this.domContentWrapper.get();
     }
 
     protected onUpdate(element: HTMLElement): void {}

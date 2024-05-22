@@ -20,6 +20,10 @@ export class TabHandle extends Component {
 
     private closeButton: CloseButton;
 
+    constructor() {
+        super();
+        this.initializeComponent();
+    }
 
     setSelected(isSelected: boolean) {
         this.domRoot.toggleClass("dockspan-tab-handle-selected", isSelected);
