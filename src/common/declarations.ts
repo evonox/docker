@@ -1,4 +1,5 @@
 import type { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
+import { ISize } from "./dimensions";
 import { ContainerType } from "./enumerations";
 import type { IContextMenuAPI } from "./panel-api";
 import type { IState } from "./serialization";
@@ -43,6 +44,8 @@ export interface IDockContainer extends IEventEmitter {
 
     getMinWidth(): number;
     getMinHeight(): number;
+
+    queryLoadedSize(): ISize;
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
     resize(width: number, height: number): void;

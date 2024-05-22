@@ -47,6 +47,9 @@ export class PanelContainer extends Component implements IDockContainer {
         super();
         this.initializeComponent();
     }
+    queryLoadedSize(): ISize {
+        throw new Error("Method not implemented.");
+    }
 
     /**
      * Panel Icon & Title Management

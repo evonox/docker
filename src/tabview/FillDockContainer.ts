@@ -5,6 +5,7 @@ import { ComponentEventHandler, ComponentEventSubscription } from "../framework/
 import { ContainerType } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
 import { DOM } from "../utils/DOM";
+import { ISize } from "../common/dimensions";
 
 
 /**
@@ -16,6 +17,9 @@ export class FillDockContainer implements IDockContainer {
 
     constructor(private dockManager: DockManager) {
         this.domContainer = DOM.create("div");
+    }
+    queryLoadedSize(): ISize {
+        throw new Error("Method not implemented.");
     }
 
     onQueryContextMenu(config: IContextMenuAPI): void {

@@ -5,7 +5,7 @@ import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { IState } from "../common/serialization";
 import { IContextMenuAPI } from "../common/panel-api";
-import { IPoint } from "../common/dimensions";
+import { IPoint, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 
 
@@ -25,6 +25,9 @@ export class DraggableContainer implements IDockContainer {
         DOM.from(this.topElement)
             .css("left", domBounds.left.toFixed(3) + "px")
             .css("top", domBounds.top.toFixed(3) + "px");
+    }
+    queryLoadedSize(): ISize {
+        throw new Error("Method not implemented.");
     }
     onQueryContextMenu(config: IContextMenuAPI): void {
         throw new Error("Method not implemented.");

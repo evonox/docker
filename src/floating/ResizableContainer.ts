@@ -5,7 +5,7 @@ import { DragAndDrop } from "../utils/DragAndDrop";
 import { ResizeHandle, ResizeHandleType } from "./ResizeHandle";
 import { IState } from "../common/serialization";
 import { IContextMenuAPI } from "../common/panel-api";
-import { IDeltaRect, IPoint, IRect } from "../common/dimensions";
+import { IDeltaRect, IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 
 
@@ -16,6 +16,9 @@ export class ResizableContainer implements IDockContainer {
     constructor(private delegate: IDockContainer, private topElement: HTMLElement, private disableResize: boolean = false) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
+    }
+    queryLoadedSize(): ISize {
+        throw new Error("Method not implemented.");
     }
     onQueryContextMenu(config: IContextMenuAPI): void {
         throw new Error("Method not implemented.");

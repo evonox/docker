@@ -4,6 +4,7 @@ import { SplitterPanel } from "./SplitterPanel";
 import { IState } from "../common/serialization";
 import { ContainerType, OrientationKind } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
+import { ISize } from "../common/dimensions";
 
 /**
  * This class is a pure adapter for the SplitterPanel to apply it easily to the docking facilities
@@ -12,23 +13,31 @@ export abstract class SplitterDockContainer implements IDockContainer {
 
     private splitterPanel: SplitterPanel;
 
+    private loadedSize: ISize;
+
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         this.splitterPanel = new SplitterPanel(this.childContainers, this.orientation);
     }
-    onQueryContextMenu(config: IContextMenuAPI): void {
-        throw new Error("Method not implemented.");
+
+    queryLoadedSize(): ISize {
+        return {...this.loadedSize};
     }
+    
+    onQueryContextMenu(config: IContextMenuAPI): void {}
+
     getMinimumChildNodeCount(): number {
-        throw new Error("Method not implemented.");
+        return 2;
     }
-    setActiveChild(container: IDockContainer): void {
-        //throw new Error("Method not implemented.");
-    }
+
+    setActiveChild(container: IDockContainer): void {}
+
     saveState(state: IState): void {
-        throw new Error("Method not implemented.");
+        state.width = this.getWidth();
+        state.height = this.getHeight();
     }
+
     loadState(state: IState): void {
-        throw new Error("Method not implemented.");
+        this.loadedSize = { w: state.width, h: state.height };
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean = false)  {
@@ -80,19 +89,27 @@ export abstract class SplitterDockContainer implements IDockContainer {
     setVisible(visible: boolean): void {}
 
     getMinWidth(): number {
-        let minWidth = 0;
-        for(const container of this.childContainers) {
-            minWidth += container.getMinWidth();            
+        if(this.orientation === OrientationKind.Row) {
+            return this.childContainers.reduce((prev, value) => {
+                return prev + value.getMinWidth();
+            }, 0);
+        } else {
+            return this.childContainers.reduce((prev, value) => {
+                return Math.max(prev, value.getMinWidth());
+            }, 0);
         }
-        return minWidth;
     }
 
     getMinHeight(): number {
-        let minHeight = 0;
-        for(const container of this.childContainers) {
-            minHeight += container.getMinHeight();            
+        if(this.orientation === OrientationKind.Row) {
+            return this.childContainers.reduce((prev, value) => {
+                return Math.max(prev, value.getMinHeight());
+            }, 0);
+        } else {
+            return this.childContainers.reduce((prev, value) => {
+                return prev + value.getMinHeight();
+            }, 0);
         }
-        return minHeight;
     }
 
     getWidth(): number {
