@@ -1,0 +1,11 @@
+
+:root {
+    --docker-ts-primary-color: #008749;
+    --docker-ts-primary-dark-color: darkgreen;
+    --docker-ts-primary-on-color: whitesmoke;
+}
+
+.DockerTS--DisableSelection {
+    user-select: none;
+}
+

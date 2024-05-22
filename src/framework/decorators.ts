@@ -10,11 +10,11 @@ export function property(opts?: {defaultValue?: any}) {
 
         Object.defineProperty(target, propertyName, {
             enumerable: true,
-            get: () => target[attributeSymbol],
-            set: (value) => {
-                if(value !== target[attributeSymbol]) {
-                    target[attributeSymbol] = value;
-                    target.requestUpdate();  
+            get: function () { return this[attributeSymbol] },
+            set: function(value) {
+                if(value !== this[attributeSymbol]) {
+                    this[attributeSymbol] = value;
+                    this.requestUpdate.apply(this, []);
                 }
             }
         })
@@ -34,11 +34,11 @@ export function state(opts?: {defaultValue?: any}) {
 
         Object.defineProperty(target, stateName, {
             enumerable: false,
-            get: () => target[attributeSymbol],
-            set: (value) => {
-                if(value !== target[attributeSymbol]) {
-                    target[attributeSymbol] = value;
-                    target.requestUpdate();   
+            get: function () { return this[attributeSymbol] },
+            set: function(value) {
+                if(value !== this[attributeSymbol]) {
+                    this[attributeSymbol] = value;
+                    this.requestUpdate.apply(this, []);
                 }
             }
         })

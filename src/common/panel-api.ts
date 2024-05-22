@@ -76,6 +76,7 @@ export interface IPanelStateAPI {
     activate(): void;
 
     setPanelIcon(html: string): void;
+    setPanelFAIcon(faIcon: string): void;
     setPanelTitle(title: string): void;
     notifyHasChanges(hasChanges: boolean): void;
 

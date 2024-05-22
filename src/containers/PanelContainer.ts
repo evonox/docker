@@ -82,7 +82,8 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domTitle.html(this._iconHtml);
         this.domTitleText.text(this._title).appendTo(this.domTitle);
         this.domTitle.toggleClass("has-changes", this._hasChanges);
-        this.triggerEvent("onTitleChanged");
+
+        this.triggerEvent("onTitleChanged", this.getTitleHtml());
     }
 
     /**
@@ -99,7 +100,8 @@ export class PanelContainer extends Component implements IDockContainer {
 
     setVisible(visible: boolean): void {
         this._isVisible = visible;
-        this.domContentHost.css("display", visible ? "block" : "none");
+        this.domPanel.css("display", visible ? "block" : "none");
+        this.domContentContainer.css("display", visible ? "block" : "none")
     }
 
     getContainerType(): ContainerType {
@@ -185,7 +187,6 @@ export class PanelContainer extends Component implements IDockContainer {
 
         const boundsDockingContainer = this.dockManager.getContainerBoundingRect();
         const boundsContentWrapper = this.domContentWrapper.getBounds();
-        console.dir(boundsContentWrapper);
         this.domContentContainer.left(boundsContentWrapper.left - boundsDockingContainer.left)
             .top(boundsContentWrapper.top - boundsDockingContainer.top)
             .width(boundsContentWrapper.width).height(boundsContentWrapper.height);
@@ -235,7 +236,11 @@ export class PanelContainer extends Component implements IDockContainer {
      * Framework Component Callbacks
      */
 
-    protected onInitialized(): void {}
+    protected onInitialized(): void {
+        this._iconHtml = "";
+        this._hasChanges = false;
+        this._title = this.dockManager.config.defaultPanelLabel;
+    }
 
     protected onDisposed(): void {
         this.buttonBar.dispose();
@@ -248,7 +253,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
 
         this.domPanel = DOM.create("div").attr("tabIndex", "0").addClass("panel-base");
-        this.domPanelHeader = DOM.create("div").addClass("panel-header").appendTo(this.domPanel);
+        this.domPanelHeader = DOM.create("div").addClass("panel-header").css("display", "none").appendTo(this.domPanel);
         this.domTitle = DOM.create("div").addClasses(["panel-titlebar", "disable-selection"]);
         this.domTitleText = DOM.create("div").addClass("panel-titlebar-text");
         this.domContentHost = DOM.create("div").addClass("panel-content").appendTo(this.domPanel);
@@ -262,6 +267,9 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domPanelHeader.appendChild(this.buttonBar.getDOM());
 
         this.bind(this.domPanel.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
+
+        this.updateTitle();
+
         return this.domPanel.get();
     }
     

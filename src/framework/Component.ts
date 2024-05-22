@@ -10,7 +10,15 @@ export abstract class Component {
     private domEventManager: DOMEventManager = new DOMEventManager();
     private componentEventManager: ComponentEventManager = new ComponentEventManager();
 
-    private isUpdateRequested: boolean = false;
+    private _isUpdateRequested: boolean = false;
+
+    constructor() {
+        this.requestUpdate = this.requestUpdate.bind(this);
+    }
+
+    isUpdateRequested() {
+        return this._isUpdateRequested;
+    }
 
     protected initializeComponent() {
         this.onInitialized();
@@ -63,17 +71,17 @@ export abstract class Component {
 
     protected abstract onUpdate(element: HTMLElement): void;
 
-    protected requestUpdate() {
-        if(this.isUpdateRequested == false) {
-            this.isUpdateRequested = true;
-            requestAnimationFrame(() => {
+    public requestUpdate() {
+        if(this.isUpdateRequested() !== true) {
+            this._isUpdateRequested = true;
+            setTimeout(() => {
                 this.handleUpdateRequest();
-            })
+            });
         }
     }
 
     private handleUpdateRequest() {
-        this.isUpdateRequested = false;
+        this._isUpdateRequested = false;
         this.onUpdate(this.element);
     }
 }

@@ -5,6 +5,7 @@ import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
 import { ContainerType, TabHostDirection } from "../common/enumerations";
 
+import "./TabHost.css";
 
 export class TabHost extends Component {
 
@@ -60,11 +61,12 @@ export class TabHost extends Component {
 
         const tabStripHeight = this.domTabStrip.getHeight();
         const separatorHeight = this.domSeparator.getHeight();
+
         const contentHeight = height - tabStripHeight - separatorHeight;
         this.domContent.css("height", `${contentHeight}px`);
 
         if(this.activeTab) {
-            this.activeTab.resize(width, height);
+            this.activeTab.resize(width, contentHeight);
         }
 
         requestAnimationFrame(() => this.resizeTabStripElement(width, height));
@@ -94,6 +96,7 @@ export class TabHost extends Component {
                 const tabPage = new TabPage(child);
                 tabPage.on("onTabMoved", this.handleMoveTab);
                 this.tabPages.push(tabPage);
+                this.domTabStrip.appendChild(tabPage.getTabHandleDOM());
                 this.domContent.appendChild(tabPage.getDOM());
             }
         }
@@ -119,8 +122,8 @@ export class TabHost extends Component {
 
     protected onInitialRender(): HTMLElement {
         this.domHost = DOM.create("div").addClass("dockspan-tab-host");
-        this.domTabStrip = DOM.create("div").addClass("dockspan-tab-handle-list-container");
-        this.domSeparator = DOM.create("div").addClass("dockspan-tab-handle-content-seperator");
+        this.domTabStrip = DOM.create("div").addClass("DockerTS-TabStrip");
+        this.domSeparator = DOM.create("div").addClass("DockerTS-TabStrip__Separator");
         this.domContent = DOM.create("div").attr("tabIndex", "0").addClass("dockspan-tab-content");
 
         if(this.tabStripDirection === TabHostDirection.Top) {

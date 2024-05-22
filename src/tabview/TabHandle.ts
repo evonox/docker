@@ -4,6 +4,8 @@ import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { CloseButton } from "./CloseButton";
 
+import "./TabHandle.css";
+
 export class TabHandle extends Component {
 
     @property()
@@ -50,13 +52,14 @@ export class TabHandle extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domRoot = DOM.create("div").addClasses(["dockspan-tab-handle", "disable-selection"]);
+        this.domRoot = DOM.create("div").addClasses(["DockerTS-TabHandle", "DockerTS--DisableSelection"]);
         this.domTitle = DOM.create("div")
-            .addClass("dockspan-tab-handle-text")
+            .addClass("DockerTS-TabHandle__TitleText")
             .appendTo(this.domRoot);
         this.domRoot.appendChild(this.closeButton.getDOM());
 
         this.bind(this.domRoot.get(), "mousedown", this.handleMouseDown);
+
 
         // HIDE CLOSE BUTTON IF GRAYED OR DISALLOWED BY PANEL CONTAINER
         // APPEND ROOT TO TABLIST ELEMENT
@@ -71,7 +74,7 @@ export class TabHandle extends Component {
         this.closeButton.visible = this.displayCloseButton;
         this.domTitle.html(this.title).attr("title", this.domTitle.getText());
 
-        this.domTitle.toggleClass("panel-has-changes", this.hasPanelChanges);
+        this.domTitle.toggleClass("DockerTS-TabHandle--HasChanges", this.hasPanelChanges);
     }
 
     private handleCloseButtonClick() {

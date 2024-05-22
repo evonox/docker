@@ -22,6 +22,10 @@ export class PanelStateAdapter implements IPanelStateAPI {
         this.panelContainer.setTitleIcon(html);
     }
 
+    setPanelFAIcon(faIcon: string): void {
+        this.setPanelIcon(`<i class="${faIcon}"></i>`);
+    }
+
     setPanelTitle(title: string): void {
         this.panelContainer.setTitle(title);
     }

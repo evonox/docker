@@ -4,6 +4,7 @@
  */
 
 export interface IDockConfig {
+    defaultPanelLabel?: string;
     defaultMinWidth?: number,
     defaultMinHeight?: number;
     zIndexes?: {
@@ -16,6 +17,7 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    defaultPanelLabel: "Untitled",
     defaultMinWidth: 50,
     defaultMinHeight: 50,
     zIndexes: {

@@ -1,0 +1,115 @@
+
+.DockerTS-TabHandle {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;    
+    align-items: center;
+
+    padding: 2px 6px;
+    padding-right: 16px;
+    cursor: pointer;
+
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    background: linear-gradient(to bottom, var(--docker-ts-primary-color), var(--docker-ts-primary-dark-color));
+    border-right: 1px solid #444;
+}
+
+.DockerTS-TabHandle__TitleText {
+    color: var(--docker-ts-primary-on-color);
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;    
+    align-items: center;
+
+    column-gap: 8px;
+}
+
+.DockerTS-TabHandle--HasChanges {
+    position: relative;
+    font-style: italic;
+    padding-right: 4px;
+}
+
+.DockerTS-TabHandle--HasChanges::after {
+    position: absolute;
+    content: '*';
+    right: 0;
+    top: 0;
+    transform: translate(100%, 0);
+}
+
+
+
+
+.dockspan-tab-host {
+	background-color: #fff;
+}
+
+.dockspan-tab-content {
+	background-color: #fff;
+}
+
+.dockspan-tab-content > * {
+	background-color: #fff;
+}
+
+/*.tab-content * {
+    margin: 0px;
+}*/
+
+.dockspan-tab-handle {
+	background-color: #808080;
+	color:#D5D5D5;
+	box-shadow: 0px 5px 20px #000;
+}
+
+.dockspan-tab-handle:hover {
+    background-color: #006729;
+	color:#fff;
+}
+
+.dockspan-tab-handle-selected {
+    background-color: #333;
+	color:#fff;
+}
+
+.dockspan-tab-handle-selected:hover {
+    background-color: #008749;
+	color:#fff;
+}
+
+.dockspan-tab-handle-text {
+}
+
+.dockspan-tab-handle-close-button {
+}
+
+.dockspan-tab-handle-close-button:hover {
+	color: red;
+}
+
+.dockspan-tab-handle-list-container {
+	background-color: #ffffff;
+}
+
+.dockspan-tab-handle-content-seperator {
+	background-color:  #333;
+}
+
+.dockspan-tab-handle-content-seperator-active {
+	background-color: #008749;
+}
+
+.dockspan-tab-handle-active {
+	background-color: #008749;
+}
+
+.dockspan-panel-active {
+	background-color: #008749;
+}
+.dockspan-panel-titlebar-text-active {
+	color: white;
+}
