@@ -20,6 +20,18 @@ export class SplitterBar extends Component {
         super();
     }
 
+    getBarSize() {
+        return this.orientation === OrientationKind.Row ? this.domBar.getHeight() : this.domBar.getWidth();
+    }
+
+    adjustFixedDimension(size: number) {
+        if(this.orientation === OrientationKind.Row) {
+            this.domBar.height(size);
+        } else {
+            this.domBar.width(size);
+        }
+    }
+
     protected onInitialized(): void {}
 
     protected onDisposed(): void {}

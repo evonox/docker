@@ -3,11 +3,12 @@ import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { SplitterBar } from "./SplitterBar";
 import { OrientationKind } from "../common/enumerations";
+import { ArrayUtils } from "../utils/ArrayUtils";
 
 
 export class SplitterPanel extends Component {
 
-    private domRoot: DOM<HTMLElement>;
+    private domSplitterPanel: DOM<HTMLElement>;
     private splitterBars: SplitterBar[] = [];
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
@@ -16,40 +17,133 @@ export class SplitterPanel extends Component {
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
-
+        const isContainerEqual = ArrayUtils.isArrayEqual(children, this.childContainers);
+        if(isContainerEqual && ! relayoutEvenIfEqual)
+            return;
+        
+        this.removeFromDOM();
+        this.childContainers = children;
+        this.constructSplitterDOMInternals();
     }
 
     setContainerRatio(container: IDockContainer, ratio: number) {
+        const index = this.childContainers.indexOf(container);
+        if(index < 0)
+            throw new Error("ERROR: Container is not member of splitter panel");
 
+        const oldRatios = this.getRatios();
+        const remainingSpaceFactor = (1 - ratio);
+
+        const newRatios: number[] = []
+        for(let i = 0; i < oldRatios.length; i++) {
+            if(i === index) {
+                newRatios.push(ratio);
+            } else {
+                newRatios.push(oldRatios[i] * remainingSpaceFactor);
+            }
+        }
+
+        this.setRatios(newRatios);
     }
 
     getRatios(): number[] {
-        return [];
+        const panelSize = this.getSplitPanelSize();
+        const results = [];
+        for(const container of this.childContainers) {
+            const childSize = this.getVaryingSize(container.getDOM());
+            results.push(childSize / panelSize);
+        }
+        return results;
     }
 
     setRatios(ratios: number[]) {
-
+        const panelSize = this.getSplitPanelSize();
+        for(let i = 0; i < ratios.length; i++) {
+            const container = this.childContainers[i];
+            const size = ratios[i] * panelSize;
+            this.changeContainerVaryingSize(container, size);
+        }
     }
 
     resize(width: number, height: number) {
+        if(this.childContainers.length <= 1)
+            return;
 
+        // Set the container dimension
+        this.domSplitterPanel.width(width).height(height);
+
+        // Adjust the fixed non-varying dimension
+        for(let i = 0; i < this.childContainers.length; i++) {
+            const childContainer = this.childContainers[i];
+
+            if(this.orientation === OrientationKind.Row) {
+                childContainer.resize(childContainer.getWidth(), height);
+            } else {
+                childContainer.resize(width, childContainer.getHeight());
+            }
+
+            if(i < this.splitterBars.length) {
+                const fixedDimension = this.orientation === OrientationKind.Row ? height : width;
+                this.splitterBars[i].adjustFixedDimension(fixedDimension);
+            }            
+        }
+
+        // Adjust the varying dimension
+        let totalChildPanelSize = 0;
+        this.childContainers.forEach(container => {
+            const varyingSize = this.orientation === OrientationKind.Row ? 
+                container.getWidth() : container.getHeight();
+            totalChildPanelSize += varyingSize;
+        });
+
+        // Compute the scale multiplier as ratio between requried and available space
+        const barSize = this.splitterBars[0].getBarSize();
+        const targetTotalPanelSize = this.getVaryingSize(this.domSplitterPanel)
+            - barSize * (this.childContainers.length - 1);
+        totalChildPanelSize = Math.max(totalChildPanelSize, 1);
+        const scaleMultiplier = totalChildPanelSize / targetTotalPanelSize;
+
+        // Adjust the varying size accordingly
+        for(let i = 0; i < this.childContainers.length; i++) {
+            const childContainer = this.childContainers[i];
+            const originalSize = this.getVaryingSize(childContainer.getDOM());
+            const newSize = originalSize * scaleMultiplier;
+
+            this.changeContainerVaryingSize(childContainer, newSize);
+        }
+    }
+
+    private changeContainerVaryingSize(container: IDockContainer, size: number) {
+        if(this.orientation === OrientationKind.Row) {
+            container.resize(size, container.getHeight());
+        } else {
+            container.resize(container.getWidth(), size);
+        }
+    }
+
+    private getSplitPanelSize() {
+        const barSize = this.splitterBars[0].getBarSize();
+        const size = this.getVaryingSize(this.domSplitterPanel);
+        return size - (this.childContainers.length - 1) * barSize;
+    }
+
+    private getVaryingSize(element: DOM<HTMLElement> | HTMLElement) {
+        if(element instanceof HTMLElement) {
+            element = DOM.from(element);
+        }
+        return this.orientation === OrientationKind.Row ? element.getWidth() : element.getHeight();
     }
 
     protected onInitialized(): void {}
 
     protected onDisposed(): void {
         this.removeFromDOM();
-
-        for(let splitterBar of this.splitterBars) {
-            splitterBar.dispose();
-        }
-        this.splitterBars = [];
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domRoot = DOM.create("div");
+        this.domSplitterPanel = DOM.create("div");
         this.constructSplitterDOMInternals();
-        return this.domRoot.get();
+        return this.domSplitterPanel.get();
     }
 
     protected onUpdate(element: HTMLElement): void {}
@@ -59,7 +153,7 @@ export class SplitterPanel extends Component {
         if(this.childContainers.length < 2)
             throw new Error("Splitter panel must contain at least 2 containers");
 
-        let lastInsertedElement: HTMLElement = null;
+        // TODO: DIFF LOGIC TO MAKE IT FASTER???
         for(let i = 0; i < this.childContainers.length - 1; i++) {
             // Construct the new splitter bar
             const prevContainer = this.childContainers[i];
@@ -67,13 +161,24 @@ export class SplitterPanel extends Component {
             const splitterBar = new SplitterBar(prevContainer, nextContainer, this.orientation);
             this.splitterBars.push(splitterBar);
 
-
-
+            this.domSplitterPanel.appendChild(prevContainer.getDOM());
+            this.domSplitterPanel.appendChild(splitterBar.getDOM());
         }
+
+        this.domSplitterPanel.appendChild(ArrayUtils.lastElement(this.childContainers).getDOM());
     }
 
     private removeFromDOM() {
+        this.childContainers.forEach(container => {
+            const domContainerElement = container.getDOM();
+            DOM.from(domContainerElement)
+                .removeClass("splitter-container-vertical")
+                .removeClass("splitter-container-horizontal")
+                .removeFromDOM();
+        });
 
+        this.splitterBars.forEach(bar => bar.dispose());
+        this.splitterBars = [];
     }
 
     private insertContainerIntoSplitterPanel(container: IDockContainer, insertBeforeElement?: HTMLElement) {
@@ -99,6 +204,6 @@ export class SplitterPanel extends Component {
     }
 
     private isContainerAlreadyInserted(container: IDockContainer) {
-        return container.getDOM().parentElement.isSameNode(this.domRoot.get());
+        return container.getDOM().parentElement.isSameNode(this.domSplitterPanel.get());
     }
 }

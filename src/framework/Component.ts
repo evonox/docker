@@ -21,6 +21,10 @@ export abstract class Component {
         return this.element;
     }
 
+    detachFromDOM() {
+        this.element.remove();
+    }
+
     public dispose() {
         this.onDisposed();
 
