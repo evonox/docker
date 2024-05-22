@@ -93,8 +93,8 @@ export interface IPanelStateAPI {
 export interface IPanelAPI {
     initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<HTMLElement>;
 
-    canClose?: () => boolean;
-    onClose?: () => void;
+    canClose?: () => Promise<boolean>;
+    onClose?: () => Promise<void>;
 
     getMinWidth?: () => number;
     getMinHeight?: () => number;

@@ -8,12 +8,14 @@ import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
 import { ContainerType, PanelType } from "../common/enumerations";
 import { IPoint, ISize } from "../common/dimensions";
+import { PanelButtonBar } from "../core/PanelButtonBar";
 
 
 export class PanelContainer extends Component implements IDockContainer {
 
     // DOM State Variables
     private domPanel: DOM<HTMLElement>;
+    private domPanelHeader: DOM<HTMLElement>;
     private domTitle: DOM<HTMLElement>;
     private domTitleText: DOM<HTMLElement>;
     private domContentHost: DOM<HTMLElement>;
@@ -24,6 +26,8 @@ export class PanelContainer extends Component implements IDockContainer {
     private domContentContainer: DOM<HTMLElement>;
     private domGrayingPlaceholder: HTMLElement;
 
+    private buttonBar: PanelButtonBar;
+
     // Icon & Title State
     private _iconHtml: string = "";
     private _title: string = "";
@@ -31,6 +35,8 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // Dimensions & Resizing State
     private _lastDialogSize: ISize;
+
+    private _isVisible: boolean = false;
 
     constructor(
         private dockManager: DockManager, 
@@ -79,41 +85,38 @@ export class PanelContainer extends Component implements IDockContainer {
      * Misc Query and Helper Methods
      */
 
-    canUndock(flag?: boolean): boolean {
-        return true;
+    getDockManager(): DockManager {
+        return this.dockManager;
     }
     
+    isHidden(): boolean {
+        return ! this._isVisible;
+    }
+
     setVisible(visible: boolean): void {
-        throw new Error("Method not implemented.");
+        this._isVisible = visible;
+        this.domContentHost.css("display", visible ? "block" : "none");
     }
 
     getContainerType(): ContainerType {
         return ContainerType.Panel;
     }
 
-
-    isHidden(): boolean {
-        return false;
-    }
-
     onQueryContextMenu(config: IContextMenuAPI): void {
-        throw new Error("Method not implemented.");
+        return this.api.onQueryContextMenu?.(config);
     }
+
+    // Leaf Node - minimum child count is zero
     getMinimumChildNodeCount(): number {
-        throw new Error("Method not implemented.");
+        return 0;
     }
-    setActiveChild(container: IDockContainer): void {
-        throw new Error("Method not implemented.");        
-    }
+
+    // Note: PanelContainer is leaf node, no child active selection
+    setActiveChild(container: IDockContainer): void {}
 
     activatePanel() {
-
+        this.dockManager.setActivePanel(this);
     }
-
-    getDockManager(): DockManager {
-        return this.dockManager;
-    }
-
 
     /**
      * Dimensions Query & Resizing / Layouting
@@ -202,9 +205,21 @@ export class PanelContainer extends Component implements IDockContainer {
      *  Header Button Management
      */
 
-    addHeaderButton(button: IHeaderButton): void {}
-    removeHeaderButton(actionName: string): void {}
-    showHeaderButton(actionName: string, flag: boolean): void {}
+    addHeaderButton(button: IHeaderButton): void {
+        this.buttonBar.appendUserButton(button);
+    }
+
+    removeHeaderButton(actionName: string): void {
+        this.buttonBar.removeUserButton(actionName);
+    }
+
+    showHeaderButton(actionName: string, flag: boolean): void {
+        if(flag) {
+            this.buttonBar.allowAction(actionName);
+        } else {
+            this.buttonBar.denyAction(actionName);
+        }
+    }
 
     /**
      * Framework Component Callbacks
@@ -213,7 +228,7 @@ export class PanelContainer extends Component implements IDockContainer {
     protected onInitialized(): void {}
 
     protected onDisposed(): void {
-        throw new Error("Method not implemented.");
+        this.buttonBar.dispose();
     }
 
     protected onInitialRender(): HTMLElement {
@@ -223,6 +238,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
 
         this.domPanel = DOM.create("div").attr("tabIndex", "0").addClass("panel-base");
+        this.domPanelHeader = DOM.create("div").addClass("panel-header").appendTo(this.domPanel);
         this.domTitle = DOM.create("div").addClasses(["panel-titlebar", "disable-selection"]);
         this.domTitleText = DOM.create("div").addClass("panel-titlebar-text");
         this.domContentHost = DOM.create("div").addClass("panel-content").appendTo(this.domPanel);
@@ -230,16 +246,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domContentWrapper = DOM.create("div")
                 .addClass("panel-content-wrapper")
                 .appendTo(this.domContentHost);
-        if(this.domContent) {
-            this.domContentContainer.appendChild(this.domContent);
-        }
 
-        // TODO: UPDATE PANEL DIMENSIONS
-
-        // TODO: CLOSE BUTTON????
-        // TODO: ATTACH OR DETACH CLOSE BUTTON BASED ON THE FLAG
-        // TODO: FUTURE THERE WILL BE MORE BUTTONS - EXTRACT A BUTTON COMPONENT
-        // TODO: CREATE ATTACH / DETACH BUTTON AND CLOSE BUTTON
+        this.buttonBar = new PanelButtonBar();
+        this.domPanelHeader.appendChild(this.domTitle);
+        this.domPanelHeader.appendChild(this.buttonBar.getDOM());
 
         this.bind(this.domPanel.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
         return this.domPanel.get();
@@ -279,6 +289,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // LOAD PANEL API STATE
     loadState(state: IState) {
+        // TODO: QUERIED BY THE LOAD RESIZE IN THE DOCK MANAGER
         const width = state.width;
         const height = state.height;
         // TODO: IF NOT SAVED, FORCE RESIZE SOMEHOW
@@ -292,6 +303,9 @@ export class PanelContainer extends Component implements IDockContainer {
         this.api.loadState?.(panelClientState);
     }
 
+    /**
+     * TODO: WHAT IS THIS GOOD FOR?
+     */
     grayOut(show: boolean) {
         if(show && !this.domGrayingPlaceholder) {
             this.domGrayingPlaceholder.remove();
@@ -314,38 +328,58 @@ export class PanelContainer extends Component implements IDockContainer {
      * Dock & Undock Facilities
      */
 
-    performUndockToDialog(event: MouseEvent, dragOffset: IPoint) {
+    canUndock(flag?: boolean): boolean {
+        return true;
+    }
 
+    performUndockToDialog(event: MouseEvent, dragOffset: IPoint) {
+        this.domContentWrapper.css("display", "block");
+        this.domPanel.css("position", "");
+        this.dockManager.requestUndockToDialog(this, event, dragOffset);
     }
 
     performUndock() {
-
+        this.dockManager.requestUndock(this);
     }
 
     prepareForDocking() {
-
+        this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
     }
 
     /**
      * Closing Facilities
      */
 
-    async close() {
+    async close(): Promise<boolean> {
+        const canClose = (await this.api.canClose?.()) ?? true
+        if(! canClose) {
+            return false;
+        }
+        
+        await this.api.onClose?.();
+        this.closeInternal();
 
+        return true;
     }
 
-    private async closeInternal(runCallback: boolean) {
-
+    private async closeInternal() {
+        this.domContentContainer.removeFromDOM();
+        // TODO: FLOATING DIALOG SHOULD CLOSE
+        this.triggerEvent("onClose");
+        // TODO: TRY AND CATCH IN THE TRIGGER EVENT AND API CALLS?
+        this.dockManager.notifyOnClosePanel(this);
+        this.performClose();
     }
     
     private performClose() {
-
-
+        this.domContentWrapper.css("display", "block");
+        this.domContentContainer.css("display", "none");
+        this.domPanel.css("position", "");
+        this.dockManager.requestClose(this);
     }
 
-    // TODO: ON DISPOSE
     destroy() {
-
+        this.dispose();
     }
 
     /**
@@ -353,6 +387,7 @@ export class PanelContainer extends Component implements IDockContainer {
      */
 
     private handleMouseDownOnPanel(event: MouseEvent) {
+        this.activatePanel();
     }
 
     /**
