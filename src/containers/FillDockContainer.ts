@@ -2,10 +2,11 @@ import { DockManager } from "../facade/DockManager";
 import {  IDockContainer } from "../common/declarations";
 import { IState } from "../common/serialization";
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ContainerType } from "../common/enumerations";
+import { ContainerType, TabHostDirection } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
 import { DOM } from "../utils/DOM";
 import { ISize } from "../common/dimensions";
+import { TabHost } from "../tabview/TabHost";
 
 
 /**
@@ -14,19 +15,24 @@ import { ISize } from "../common/dimensions";
 export class FillDockContainer implements IDockContainer {
 
     private domContainer: DOM<HTMLElement>;
+    private tabHost: TabHost;
+    private _loadedSize: ISize;
 
-    constructor(private dockManager: DockManager) {
+    constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
         this.domContainer = DOM.create("div");
-    }
-    queryLoadedSize(): ISize {
-        throw new Error("Method not implemented.");
+        this.tabHost = new TabHost(this.tabStripDirection);
+        this.domContainer.appendChild(this.tabHost.getDOM());
     }
 
-    onQueryContextMenu(config: IContextMenuAPI): void {
-        throw new Error("Method not implemented.");
+    queryLoadedSize(): ISize {
+        return {...this._loadedSize};
     }
+
+    onQueryContextMenu(config: IContextMenuAPI): void {}
+
     dispose(): void {
-        throw new Error("Method not implemented.");
+        this.tabHost.dispose();
+        this.domContainer.removeFromDOM();
     }
 
     getDOM(): HTMLElement {
@@ -34,50 +40,66 @@ export class FillDockContainer implements IDockContainer {
     }
 
     hasChanges(): boolean {
-        throw new Error("Method not implemented.");
+        return false;
     }
+
     getMinimumChildNodeCount(): number {
-        throw new Error("Method not implemented.");
-    }
+        return 2;
+    }    
+
     setActiveChild(container: IDockContainer): void {
-        throw new Error("Method not implemented.");
+        this.tabHost.setActiveTab(container);
     }
-    setVisible(visible: boolean): void {
-        throw new Error("Method not implemented.");
-    }
+
+    setVisible(visible: boolean): void {}
+
     getMinWidth(): number {
-        throw new Error("Method not implemented.");
+        return this.tabHost.getMinWidth();
     }
+
     getMinHeight(): number {
-        throw new Error("Method not implemented.");
+        return this.tabHost.getMinHeight();
     }
+
     getWidth(): number {
-        throw new Error("Method not implemented.");
+        return this.domContainer.getWidth();
     }
+
     getHeight(): number {
-        throw new Error("Method not implemented.");
+        return this.domContainer.getHeight();
     }
+
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {
+        this.tabHost.performLayout(children, relayoutEvenIfEqual);
     }
+
     resize(width: number, height: number): void {
+        this.domContainer.width(width).height(height);
+        this.tabHost.resize(width, height);
     }
+
     getContainerType(): ContainerType {
         return ContainerType.FillLayout;
     }
+
     saveState(state: IState): void {
-        throw new Error("Method not implemented.");
-    }
-    loadState(state: IState): void {
-        throw new Error("Method not implemented.");
-    }
-    on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        throw new Error("Method not implemented.");
-    }
-    off(eventName: string): void {
-        throw new Error("Method not implemented.");
-    }
-    once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        throw new Error("Method not implemented.");
+        state.width = this.getWidth();
+        state.height = this.getHeight();
     }
 
+    loadState(state: IState): void {
+        this._loadedSize = {w: state.width, h: state.height};
+    }
+
+    on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
+        return this.tabHost.on(eventName, handler);
+    }
+
+    off(eventName: string): void {
+        this.tabHost.off(eventName);
+    }
+
+    once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
+        return this.tabHost.once(eventName, handler);
+    }
 }

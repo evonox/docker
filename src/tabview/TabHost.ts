@@ -46,6 +46,13 @@ export class TabHost extends Component {
         }
     }
 
+    getMinWidth(): number {
+        throw 0;
+    }
+
+    getMinHeight(): number {
+        throw 0;
+    }
 
     resize(width: number, height: number) {
         this.domHost.css("width", `${width}px`).css("height", `${height}px`);
@@ -68,7 +75,7 @@ export class TabHost extends Component {
 
     }
 
-    performLayout(children: IDockContainer[]) {
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
         const tabPages = [...this.tabPages];
         for(const tabPage of tabPages) {
             if(children.includes(tabPage.getContainer()) === false) {
