@@ -12,12 +12,7 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
-  },
-  "name": "docker",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
+    "webpack-dev-server": "^5.0.4",
     "@types/lodash-es": "^4.17.12",
     "acorn": "^8.11.3",
     "acorn-import-assertions": "^1.9.0",
@@ -53,7 +48,6 @@
     "json-parse-even-better-errors": "^2.3.1",
     "json-schema-traverse": "^0.4.1",
     "loader-runner": "^4.3.0",
-    "lodash-es": "^4.17.21",
     "merge-stream": "^2.0.0",
     "micromatch": "^4.0.5",
     "mime-db": "^1.52.0",
@@ -64,7 +58,6 @@
     "picomatch": "^2.3.1",
     "punycode": "^2.3.1",
     "randombytes": "^2.1.0",
-    "reflect-metadata": "^0.2.2",
     "safe-buffer": "^5.2.1",
     "schema-utils": "^3.3.0",
     "semver": "^7.6.2",
@@ -82,6 +75,13 @@
     "watchpack": "^2.4.1",
     "webpack": "^5.91.0",
     "webpack-sources": "^3.2.3"
+  },
+  "name": "docker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "lodash-es": "^4.17.21"
   },
   "scripts": {
     "start": "webpack serve --open --mode development",
