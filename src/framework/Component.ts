@@ -59,8 +59,9 @@ export abstract class Component {
         this.componentEventManager.triggerEvent(eventName, payload);
     }
 
-    protected bind(dom: HTMLElement, eventName: string, handler: DOMEventHandler<Event>): DOMEventSubscription {
-        return this.domEventManager.bind(dom, eventName, handler.bind(this), {capture: false});
+    protected bind(dom: HTMLElement | Window, eventName: string, handler: DOMEventHandler<Event>, options?: {capture?: boolean}): DOMEventSubscription {
+        const isCapture = options?.capture ?? false;
+        return this.domEventManager.bind(dom, eventName, handler.bind(this), {capture: isCapture});
     }
 
     protected abstract onInitialized(): void;

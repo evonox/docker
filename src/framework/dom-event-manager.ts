@@ -18,7 +18,7 @@ export class DOMEventManager {
 
     private subscriptions: DOMEventSubscription[] = [];
 
-    bind(element: HTMLElement, eventName: string, handler: DOMEventHandler<Event>, opts: {capture: boolean}): DOMEventSubscription {
+    bind(element: HTMLElement | Window, eventName: string, handler: DOMEventHandler<Event>, opts: {capture: boolean}): DOMEventSubscription {
         let domEvent = new DOMEvent(element);
         domEvent.bind(eventName, handler, {capture: opts.capture});
         const subscription = new DOMHandlerSubscription(domEvent, this);

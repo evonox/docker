@@ -1,0 +1,56 @@
+
+
+.DockerTS-ContextMenu {
+    position: absolute;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+
+    visibility: hidden;
+
+    border: 1px solid var(--docker-ts-context-menu-border-color);
+
+    /* Note - CSS style of shadow taken from the CSS Tailwind Framework */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    color: var(--docker-ts-context-menu-color);
+    background-color: var(--docker-ts-context-menu-background);
+}
+
+.DockerTS-ContextMenu--Visible {
+    visibility: visible;
+}
+
+.DockerTS-MenuItem {
+    padding: 5px 10px;
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.DockerTS-MenuItem__Icon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    min-width: 1.25rem;
+}
+
+.DockerTS-MenuItem:hover {
+    color: var(--docker-ts-primary-on-color);
+    background: var(--docker-ts-primary-color);
+}
+
+.DockerTS-MenuItem--Disabled {
+    opacity: 0.5;
+}
+
+.DockerTS--Separator {
+    height: 1px;
+    background: var(--docker-ts-context-menu-border-color);
+    margin: 0px 0;
+}

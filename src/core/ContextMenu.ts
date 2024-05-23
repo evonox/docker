@@ -5,6 +5,7 @@ import { DOM } from "../utils/DOM";
 import { MenuItem } from "./MenuItem";
 import { MenuSeparator } from "./MenuSeparator";
 
+import "./ContextMenu.css"
 
 export class ContextMenu extends Component {
 
@@ -16,12 +17,20 @@ export class ContextMenu extends Component {
     constructor(private config: ContextMenuConfig) {
         super();
         this.handleInvokedAction = this.handleInvokedAction.bind(this);
+        this.initializeComponent();
     }
 
-    // TODO: POSITION CONTEXT MENU AND SHOW
     show(event: MouseEvent ) {
-
+        this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
+            .left(event.pageX).top(event.pageY).appendTo(document.body);
+        this.bind(window, "mousedown", this.handleMouseDown.bind(this), {capture: true});
     }
+
+    hide() {
+        this.domContextMenu.removeClass("DockerTS-ContextMenu--Visible");
+        this.dispose();
+    }
+
 
     protected onInitialized(): void {}
 
@@ -33,7 +42,7 @@ export class ContextMenu extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domContextMenu = DOM.create("div").addClasses(["dockspawn-context-menu", "context-menu-hidden"]);
+        this.domContextMenu = DOM.create("div").addClasses(["DockerTS-ContextMenu"]);
         for(const item of this.config.queryMenuItemsOrdered()) {
             if(item.separator === true) {
                 this.constructMenuSeparator();
@@ -65,5 +74,23 @@ export class ContextMenu extends Component {
 
     private handleInvokedAction(actionName: string) {
         this.triggerEvent("onAction", actionName);
+        this.hide();
     }
+
+    private handleMouseDown(event: MouseEvent) {
+        if(this.isClickInsideMenu(event) === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            this.hide();
+        }
+    }
+
+    private isClickInsideMenu(event: MouseEvent) {
+        const menuBounds = this.domContextMenu.getBounds();
+        return menuBounds.left < event.pageX && menuBounds.top < event.pageY &&
+            event.pageX < menuBounds.right && event.pageY < menuBounds.bottom;
+    }
+
 }

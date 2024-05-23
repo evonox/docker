@@ -60,7 +60,22 @@ dockManager.registerPanelType("panel4", "panel", "singleton", (dockManager) => {
             api.setPanelTitle("Left View");
             return domElement;
         },
-        getMinWidth: () => 200
+        getMinWidth: () => 200,
+        onQueryContextMenu: (config) => {
+            config.appendMenuItem({
+                displayOrder: 1,
+                icon: `<i class="fa fa-user"></i>`,
+                title: "Menu Item One",
+                actionName: "Action One"            
+            });
+    
+            config.appendMenuItem({displayOrder: 100, separator: true});
+            config.appendMenuItem({displayOrder: 101, title: "Menu Item 2", actionName: "Action2"});
+            config.appendMenuItem({displayOrder: 102, title: "Menu Item 3", actionName: "Action3"});
+        },
+        onActionInvoked: (actionName) => {
+            console.log(`ACTION INVOKED: ${actionName}`);
+        }
     }
 });
 
@@ -73,7 +88,21 @@ dockManager.registerPanelType("panel5", "panel", "singleton", (dockManager) => {
             api.setPanelTitle("Bottom View");
             return domElement;
         },
-        getMinHeight: () => 100
+        getMinHeight: () => 100,
+        onQueryContextMenu: (config) => {
+            config.appendMenuItem({
+                displayOrder: 1,
+                icon: `<i class="fa fa-hamburger"></i>`,
+                title: "Menu Item One",
+                actionName: "Action One"            
+            });   
+            config.appendMenuItem({displayOrder: 101, title: "Menu Item 2", actionName: "Action2"});
+            config.appendMenuItem({displayOrder: 102, title: "Menu Item 3", actionName: "Action3"});
+        },
+        onActionInvoked: (actionName) => {
+            console.log(`ACTION INVOKED: ${actionName}`);
+        }
+
     }
 });
 

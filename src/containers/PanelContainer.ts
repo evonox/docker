@@ -12,6 +12,8 @@ import { PanelButtonBar } from "../core/PanelButtonBar";
 
 import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
+import { ContextMenuConfig } from "../api/ContextMenuConfig";
+import { ContextMenu } from "../core/ContextMenu";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -287,6 +289,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.buttonBar = new PanelButtonBar();
         this.domPanelHeader.appendChild(this.domTitle);
         this.domPanelHeader.appendChild(this.buttonBar.getDOM());
+        this.bind(this.domPanelHeader.get(), "contextmenu", this.handleContextMenuClick.bind(this));
 
         this.bind(this.domPanel.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
 
@@ -427,8 +430,22 @@ export class PanelContainer extends Component implements IDockContainer {
      */
 
     private handleMouseDownOnPanel(event: MouseEvent) {
-        console.dir("PANEL ACTIVATED");
         this.activatePanel();
+    }
+
+    private handleContextMenuClick(event: MouseEvent) {
+        event.preventDefault();
+
+        const contextMenuConfig = new ContextMenuConfig();
+        this.api.onQueryContextMenu?.(contextMenuConfig);
+        if(contextMenuConfig.getMenuItems().length === 0)
+            return;
+
+        const domContextMenu = new ContextMenu(contextMenuConfig);
+        domContextMenu.on("onAction", (actionName) => {
+            this.api.onActionInvoked?.(actionName);
+        });
+        domContextMenu.show(event);
     }
 
     /**
