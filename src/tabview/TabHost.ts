@@ -56,6 +56,12 @@ export class TabHost extends Component {
         return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinHeight()), 0);
     }
 
+    updateContainerState(): void {
+        for(const tabPage of this.tabPages) {
+            tabPage.updateContainerState();
+        }
+    }
+
     resize(width: number, height: number) {
         this.domHost.width(width).height(height);
 
@@ -93,6 +99,7 @@ export class TabHost extends Component {
         const childPanels = children.filter(c => c.getContainerType() === ContainerType.Panel);
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
+                child.setHeaderVisibility(this.tabStripDirection !== TabHostDirection.Top);
                 const tabPage = new TabPage(child);
                 tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
                 tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
@@ -190,6 +197,6 @@ export class TabHost extends Component {
         // TODO: HOTFIX: Think of proper solution - WHEN PANEL SET VISIBLE - RESIZE IT
         setTimeout(() => {
             this.resize(this.domHost.getWidth(), this.domHost.getHeight());
-        });
+        });       
     }   
 }

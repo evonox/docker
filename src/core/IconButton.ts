@@ -2,6 +2,7 @@ import { Component } from "../framework/Component";
 import { property } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
 
+import "./IconButton.css";
 
 export class IconButton extends Component {
 
@@ -18,6 +19,7 @@ export class IconButton extends Component {
 
     constructor(private actionName: string, private displayOrder: number) {
         super();
+        this.initializeComponent();
     }
 
     getActionName() {
@@ -33,7 +35,7 @@ export class IconButton extends Component {
     protected onDisposed(): void {}
 
     protected onInitialRender(): HTMLElement {
-        this.domButton = DOM.create("div").addClass("dockspawn-icon-button");
+        this.domButton = DOM.create("div").addClass("IconButton");
         this.bind(this.domButton.get(), "click", this.handleButtonClick.bind(this));
         return this.domButton.get();
     }

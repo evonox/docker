@@ -1,0 +1,20 @@
+
+.IconButton {
+    width: 1em;
+    height: 1em;
+
+    fill: var(--docker-ts-primary-on-color);
+    stroke: var(--docker-ts-primary-on-color);
+
+    cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+
+    padding-right: 0.3rem;
+}
+
+.IconButton:hover {
+    fill: var(--docker-ts-hover-button-color);
+    stroke: var(--docker-ts-hover-button-color);
+}

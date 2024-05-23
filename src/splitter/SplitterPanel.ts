@@ -22,9 +22,15 @@ export class SplitterPanel extends Component {
         if(isContainerEqual && ! relayoutEvenIfEqual)
             return;
         
+        children.forEach(child => child.setHeaderVisibility(true));
+
         this.removeFromDOM();
         this.childContainers = children;
         this.constructSplitterDOMInternals();
+    }
+
+    updateContainerState(): void {
+        this.childContainers.forEach(child => child.updateContainerState());
     }
 
     setContainerRatio(container: IDockContainer, ratio: number) {

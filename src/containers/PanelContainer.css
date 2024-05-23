@@ -1,0 +1,45 @@
+
+.DockerTS-Panel {
+    display: grid;
+    grid-template-rows: auto 1fr;    
+}
+
+.DockerTS-PanelHeader {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    user-select: none;
+
+    color: var(--docker-ts-inactive-on-color);
+    background: var(--docker-ts-inactive-color);
+}
+
+.DockerTS-PanelHeader--Selected {
+    color: var(--docker-ts-primary-on-color);
+    background: var(--docker-ts-primary-color);
+}
+
+.DockerTS-HeaderTitleBar {
+    flex: 1;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    cursor: pointer;
+
+    column-gap: 7px;
+
+    box-sizing: border-box;
+    padding: 3px 4px;
+
+}
+
+.DockerTS-PanelContent {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-auto-columns: 100%;
+}

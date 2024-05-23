@@ -30,6 +30,8 @@ export interface IDockContainer extends IEventEmitter {
     // Visibility and active child selection
     setActiveChild(container: IDockContainer): void;    
     setVisible(visible: boolean): void;
+    setHeaderVisibility(visible: boolean): void;
+    updateContainerState(): void;
 
     // Cleanup
     dispose(): void;

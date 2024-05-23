@@ -24,6 +24,12 @@ export class FillDockContainer implements IDockContainer {
         this.domContainer.appendChild(this.tabHost.getDOM());
     }
 
+    updateContainerState(): void {
+        this.tabHost.updateContainerState();
+    }
+
+    setHeaderVisibility(visible: boolean): void {}
+
     queryLoadedSize(): ISize {
         return {...this._loadedSize};
     }

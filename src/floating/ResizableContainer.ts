@@ -17,6 +17,15 @@ export class ResizableContainer implements IDockContainer {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
     }
+
+    updateContainerState(): void {
+        this.delegate.updateContainerState();
+    }
+
+    setHeaderVisibility(visible: boolean): void {
+        this.delegate.setHeaderVisibility(visible);
+    }
+    
     queryLoadedSize(): ISize {
         throw new Error("Method not implemented.");
     }

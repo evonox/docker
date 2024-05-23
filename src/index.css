@@ -4,7 +4,9 @@
     --docker-ts-primary-dark-color: darkgreen;
     --docker-ts-primary-on-color: whitesmoke;
     --docker-ts-inactive-color: gray;
+    --docker-ts-inactive-on-color: lightgray;
     --docker-ts-primary-inactive-color: #444;
+    --docker-ts-hover-button-color: orangered;
 }
 
 .DockerTS--DisableSelection {

@@ -44,6 +44,9 @@ export class DockManager {
     // DockManager Event Manager
     private eventManager: ComponentEventManager;
 
+    // Resize Observer
+    private resizeObserver: ResizeObserver;
+
     // Z-Index Counters
     private lastZIndex: number;
     private lastDialogZIndex: number;
@@ -66,6 +69,13 @@ export class DockManager {
         // this.dockWheel = new DockWheel(this);
         this.layoutEngine = new DockLayoutEngine(this);
         this.panelTypeRegistry = new DockPanelTypeRegistry();
+
+        // Initialize ResizeObserver
+        // this.resizeObserver = new ResizeObserver(() => {
+        //     console.log("RESIZE OBSERVER");
+        //     setTimeout(() => this.invalidate());
+        // });
+        // this.resizeObserver.observe(this.container);
 
         // Init other MISC attributes
         this.lastZIndex = this.config.zIndexes.zIndexCounter;
@@ -337,6 +347,9 @@ export class DockManager {
         this.resize(this.container.clientWidth, this.container.clientHeight);
     }
 
+    private updateContainerState() {
+        this.context.model.rootNode.container.updateContainerState();
+    }
     
     private resize(width: number, height: number) {
         this.context.model.rootNode.container.resize(width, height);
@@ -550,6 +563,8 @@ export class DockManager {
      */
     setActivePanel(panel: PanelContainer) {
         if(this.activePanel !== panel) {
+            this.activePanel = panel;
+            this.updateContainerState();
             /**
              * 1. Zjistit posledni aktivni panel, ktery neni dialog
              * 2. Uchovat si posledni aktivni panel

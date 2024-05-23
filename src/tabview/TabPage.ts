@@ -34,6 +34,7 @@ export class TabPage extends Component {
         this.tabHandle.setActive(flag);
     }
 
+
     setSelected(flag: boolean, isActive: boolean) {
         this.selected = flag;
         this.tabHandle.setSelected(flag);
@@ -47,6 +48,8 @@ export class TabPage extends Component {
         else {
             this.container.setVisible(false);
         }
+
+
     }
 
     getMinWidth(): number {
@@ -60,6 +63,11 @@ export class TabPage extends Component {
     resize(width: number, height: number) {
         this.container.resize(width, height);
     }
+
+    updateContainerState(): void {
+        this.container.updateContainerState();
+    }
+    
 
     protected onInitialized(): void {
         this.tabHandle = new TabHandle();

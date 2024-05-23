@@ -26,6 +26,14 @@ export class DraggableContainer implements IDockContainer {
             .css("left", domBounds.left.toFixed(3) + "px")
             .css("top", domBounds.top.toFixed(3) + "px");
     }
+    
+    updateContainerState(): void {
+        return this.delegate.updateContainerState();
+    }
+
+    setHeaderVisibility(visible: boolean): void {
+        this.delegate.setHeaderVisibility(visible);
+    }
     queryLoadedSize(): ISize {
         throw new Error("Method not implemented.");
     }

@@ -5,6 +5,8 @@ import { DOM } from "../utils/DOM";
 import { IconButton } from "./IconButton";
 import { PANEL_DEFAULT_BUTTONS, isPanelDefaultAction } from "./panel-default-buttons";
 
+import "./PanelButtonBar.css";
+
 /**
  * Class managing the Button Bar in a panel's header
  */
@@ -65,7 +67,7 @@ export class PanelButtonBar extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domButtonBar = DOM.create("div");
+        this.domButtonBar = DOM.create("div").addClass("DockerTS-PanelButtonBar");
         for(const iconButton of this.iconButtons) {
             this.domButtonBar.appendChild(iconButton.getDOM());
         }
@@ -74,7 +76,7 @@ export class PanelButtonBar extends Component {
     }
 
     protected onUpdate(element: HTMLElement): void {
-        this.domButtonBar.css("display", this.visible ? "block" : "none");
+        this.domButtonBar.css("display", this.visible ? "flex" : "none");
     }
 
     private constructButtonFromConfig(config: IHeaderButton): IconButton {

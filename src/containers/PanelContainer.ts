@@ -10,6 +10,8 @@ import { ContainerType, PanelType } from "../common/enumerations";
 import { IPoint, ISize } from "../common/dimensions";
 import { PanelButtonBar } from "../core/PanelButtonBar";
 
+import "./PanelContainer.css";
+import { DOMEvent } from "../framework/dom-events";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -37,6 +39,8 @@ export class PanelContainer extends Component implements IDockContainer {
     private _lastDialogSize: ISize;
 
     private _isVisible: boolean = false;
+
+    private contentPanelMouseDown: DOMEvent<MouseEvent>;
 
     constructor(
         private dockManager: DockManager, 
@@ -101,8 +105,13 @@ export class PanelContainer extends Component implements IDockContainer {
     setVisible(visible: boolean): void {
         this._isVisible = visible;
         this.domPanel.css("display", visible ? "block" : "none");
-        this.domContentContainer.css("display", visible ? "block" : "none")
+        this.domContentContainer.css("display", visible ? "block" : "none");
     }
+
+    setHeaderVisibility(visible: boolean): void {
+        this.domPanelHeader.css("display", visible ? "flex" : "none");
+    }
+
 
     getContainerType(): ContainerType {
         return ContainerType.Panel;
@@ -172,9 +181,10 @@ export class PanelContainer extends Component implements IDockContainer {
      * REMOVE JS DIMENSION CALCULATION AS MUCH AS POSSIBLE
      */
     resize(width: number, height: number): void {
+
         // TODO: COULD BE LAYOUT BY CSS GRID / FLEX???
         this.domPanel.width(width);
-        this.domTitle.width(width); // Note: Add Place for Buttons, or layout by CSS
+        this.domPanelHeader.width(width); // Note: Add Place for Buttons, or layout by CSS
         this.domContentHost.width(width);
         this.domContentContainer.width(width);
 
@@ -195,6 +205,14 @@ export class PanelContainer extends Component implements IDockContainer {
     // PanelContainer is leaf node => no layouting logic
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {}
 
+    updateContainerState() {
+        if(this.dockManager.getActivePanel() === this) {
+            this.domPanelHeader.addClass("DockerTS-PanelHeader--Selected");
+        } else {
+            this.domPanelHeader.removeClass("DockerTS-PanelHeader--Selected");
+        }
+    }
+
     /**
      * Misc Methods
      */
@@ -206,6 +224,10 @@ export class PanelContainer extends Component implements IDockContainer {
             .css("left", "0").css("top", "0")
             .css("width", "100%").css("height", "100%");
         this.domContentContainer?.appendChild(this.domContent);
+
+        this.contentPanelMouseDown?.unbind();
+        this.contentPanelMouseDown = new DOMEvent(content);
+        this.contentPanelMouseDown.bind("mousedown", this.handleMouseDownOnPanel.bind(this), {capture: true});
     }
 
     public getHeaderElement(): HTMLElement {
@@ -252,11 +274,11 @@ export class PanelContainer extends Component implements IDockContainer {
         this.bind(this.domContentContainer.get(), "mousedown", this.handleMouseFocusEvent.bind(this));
         this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
 
-        this.domPanel = DOM.create("div").attr("tabIndex", "0").addClass("panel-base");
-        this.domPanelHeader = DOM.create("div").addClass("panel-header").css("display", "none").appendTo(this.domPanel);
-        this.domTitle = DOM.create("div").addClasses(["panel-titlebar", "disable-selection"]);
-        this.domTitleText = DOM.create("div").addClass("panel-titlebar-text");
-        this.domContentHost = DOM.create("div").addClass("panel-content").appendTo(this.domPanel);
+        this.domPanel = DOM.create("div").attr("tabIndex", "0").addClass("DockerTS-Panel");
+        this.domPanelHeader = DOM.create("div").addClass("DockerTS-PanelHeader").css("display", "none").appendTo(this.domPanel);
+        this.domTitle = DOM.create("div").addClasses(["DockerTS-HeaderTitleBar"]);
+        this.domTitleText = DOM.create("div");
+        this.domContentHost = DOM.create("div").addClass("DockerTS-PanelContent").appendTo(this.domPanel);
 
         this.domContentWrapper = DOM.create("div")
                 .addClass("panel-content-wrapper")
@@ -405,6 +427,7 @@ export class PanelContainer extends Component implements IDockContainer {
      */
 
     private handleMouseDownOnPanel(event: MouseEvent) {
+        console.dir("PANEL ACTIVATED");
         this.activatePanel();
     }
 
