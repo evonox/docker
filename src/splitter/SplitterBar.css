@@ -1,0 +1,43 @@
+
+
+.DockerTS-SplitterBar {
+    background: var(--docker-ts-primary-inactive-color);
+}
+
+.DockerTS-SplitterBar:hover {
+    background: var(--docker-ts-primary-dark-color);
+}
+
+.DockerTS-SplitterBar--Row {
+    position: relative;
+    width: 5px;
+    cursor: col-resize;
+}
+
+.DockerTS-SplitterBar--Row::after {
+    content: " ";
+    position: absolute;
+    left: 50%;
+    width: 10px;
+    top: 0;
+    height: 100%;
+    transform: translate(-50%, 0);
+}
+
+.DockerTS-SplitterBar--Column {
+    display: inline-block;
+    position: relative;
+    min-height: 5px;
+    height: 5px;
+    cursor: row-resize;
+}
+
+.DockerTS-SplitterBar--Column::after {
+    content: " ";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 50%;
+    height: 10px;
+    transform: translate(0, -50%);
+}

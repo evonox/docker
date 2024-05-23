@@ -1,0 +1,14 @@
+
+
+.DockerTS-SplitterPanel {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.DockerTS-SplitterPanel--Row {
+    flex-direction: row;
+}
+
+.DockerTS-SplitterPanel--Column {
+    flex-direction: column;
+}

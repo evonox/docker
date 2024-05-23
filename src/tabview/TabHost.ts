@@ -49,11 +49,11 @@ export class TabHost extends Component {
     }
 
     getMinWidth(): number {
-        throw 0;
+        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinWidth()), 0);
     }
 
     getMinHeight(): number {
-        throw 0;
+        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinHeight()), 0);
     }
 
     resize(width: number, height: number) {
@@ -186,5 +186,10 @@ export class TabHost extends Component {
             const isSelected = tabPage === this.activeTab;
             tabPage.setSelected(isSelected, isSelected ? isActive : false);
         }
+
+        // TODO: HOTFIX: Think of proper solution - WHEN PANEL SET VISIBLE - RESIZE IT
+        setTimeout(() => {
+            this.resize(this.domHost.getWidth(), this.domHost.getHeight());
+        });
     }   
 }

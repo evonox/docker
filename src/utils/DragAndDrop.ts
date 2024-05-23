@@ -1,17 +1,27 @@
+import { DOM } from "./DOM";
 
 export interface MouseEventHandler {
     (event: MouseEvent): void;
 }
 
+/**
+ * TODO: CANCEL BY ESCAPE KEY
+ */
 export class DragAndDrop {
 
     static readonly THRESHOLD = 5;
+    static readonly BLOCKER_ZINDEX = 1e6;
 
 
-    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, threshold: number = this.THRESHOLD) {
+    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing", threshold: number = this.THRESHOLD) {
 
         let startingX = event.pageX;
         let startingY = event.pageX;
+
+        let domBlocker = DOM.create("div").addClass("DockerTS-Blocker")
+            .css("position", "absolute").left(0).top(0).width("100%").height("100%")
+            .css("cursor", cursor).css("z-index", String(this.BLOCKER_ZINDEX))
+            .appendTo(document.body);
 
         event.preventDefault();
 
@@ -23,9 +33,6 @@ export class DragAndDrop {
 
         const handleMouseMove = (e: MouseEvent) => {
             e.preventDefault();
-
-            if(isInsideThreshold(e))
-                return;
             
             mousemove(e);
 
@@ -34,10 +41,14 @@ export class DragAndDrop {
         }
 
         const handleMouseUp = (e: MouseEvent) => {
+            e.preventDefault();
             window.removeEventListener("mousemove", handleMouseMove, {capture: true});
             window.removeEventListener("mouseup", handleMouseUp, {capture: true});
-            e.preventDefault();
+
             mouseup(e)
+
+            domBlocker.removeFromDOM();
+            domBlocker = undefined;
         }
 
         window.addEventListener("mousemove", handleMouseMove, {capture: true});

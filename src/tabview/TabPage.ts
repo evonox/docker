@@ -49,6 +49,14 @@ export class TabPage extends Component {
         }
     }
 
+    getMinWidth(): number {
+        return this.container.getMinWidth();
+    }
+
+    getMinHeight(): number {
+        return this.container.getMinHeight();
+    }
+
     resize(width: number, height: number) {
         this.container.resize(width, height);
     }

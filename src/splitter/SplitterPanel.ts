@@ -5,6 +5,7 @@ import { SplitterBar } from "./SplitterBar";
 import { OrientationKind } from "../common/enumerations";
 import { ArrayUtils } from "../utils/ArrayUtils";
 
+import "./SplitterPanel.css";
 
 export class SplitterPanel extends Component {
 
@@ -69,6 +70,7 @@ export class SplitterPanel extends Component {
         if(this.childContainers.length <= 1)
             return;
 
+
         // Set the container dimension
         this.domSplitterPanel.width(width).height(height);
 
@@ -96,21 +98,33 @@ export class SplitterPanel extends Component {
             totalChildPanelSize += varyingSize;
         });
 
+
         // Compute the scale multiplier as ratio between requried and available space
         const barSize = this.splitterBars[0].getBarSize();
         const targetTotalPanelSize = this.getVaryingSize(this.domSplitterPanel)
             - barSize * (this.childContainers.length - 1);
         totalChildPanelSize = Math.max(totalChildPanelSize, 1);
-        const scaleMultiplier = totalChildPanelSize / targetTotalPanelSize;
+        const scaleMultiplier = targetTotalPanelSize / totalChildPanelSize;
+
+        console.dir(totalChildPanelSize);
+        console.dir(targetTotalPanelSize);
+        console.dir(scaleMultiplier);
 
         // Adjust the varying size accordingly
+        let totalNewSize = 0;
         for(let i = 0; i < this.childContainers.length; i++) {
             const childContainer = this.childContainers[i];
             const originalSize = this.getVaryingSize(childContainer.getDOM());
-            const newSize = originalSize * scaleMultiplier;
+            const newSize = Math.floor(originalSize * scaleMultiplier);
+            
+            totalNewSize += newSize;
+
 
             this.changeContainerVaryingSize(childContainer, newSize);
         }
+
+        console.log("TOTAL NEW SIZE");
+        console.dir(totalNewSize);
     }
 
     private changeContainerVaryingSize(container: IDockContainer, size: number) {
@@ -141,7 +155,8 @@ export class SplitterPanel extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domSplitterPanel = DOM.create("div");
+        this.domSplitterPanel = DOM.create("div").addClass("DockerTS-SplitterPanel")
+            .addClass(this.orientation === OrientationKind.Row ? "DockerTS-SplitterPanel--Row" : "DockerTS-SplitterPanel--Column");
         this.constructSplitterDOMInternals();
         return this.domSplitterPanel.get();
     }
