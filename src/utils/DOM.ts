@@ -2,6 +2,10 @@ import { IRect } from "../common/dimensions";
 
 const COORDINATE_PRECISION = 3;
 
+export interface CSSClassObject {
+    [key: string]: boolean;
+}
+
 /**
  * TODO: INTRODUCE VALUE CACHING
  */
@@ -20,6 +24,24 @@ export class DOM<T extends HTMLElement> {
 
     removeClass(name: string): DOM<T> {
         this.element.classList.remove(name);
+        return this;
+    }
+
+    removeClasses(names: string[]): DOM<T> {
+        for(const cssClass of names) {
+            this.removeClass(cssClass);
+        }
+        return this;
+    }
+
+    applyClasses(classObject: CSSClassObject): DOM<T> {
+        for(const cssClass in classObject) {
+            if(classObject[cssClass] === true) {
+                this.addClass(cssClass);
+            } else {
+                this.removeClass(cssClass);
+            }
+        }
         return this;
     }
 

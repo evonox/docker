@@ -19,6 +19,7 @@ import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 import { ContainerType, PanelType } from "../common/enumerations";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
+import { DragAndDrop } from "../utils/DragAndDrop";
 
 
 /**
@@ -56,6 +57,11 @@ export class DockManager {
         DOM.from(this.container).css("position", "relative")
             .css("display", "grid")
             .css("overflow", "hidden");
+        
+        DragAndDrop.initialize(
+            this.config.zIndexes.zIndexDragAndDropBlocker,
+            this.config.dragAndDropFrameRate
+        );
     }
 
     initialize() {
@@ -181,31 +187,31 @@ export class DockManager {
      */
 
     dockLeft(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+        return this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
             this.layoutEngine.dockLeft(refNode, newNode);
         }, false, ratio);              
     }
 
     dockRight(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+        return this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
             this.layoutEngine.dockRight(refNode, newNode);
         }, true, ratio);              
     }
 
     dockUp(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+        return this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
             this.layoutEngine.dockUp(refNode, newNode);
         }, false, ratio);       
     }
 
     dockDown(referenceNode: DockNode, container: PanelContainer, ratio: number) {
-        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+        return this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
             this.layoutEngine.dockDown(refNode, newNode);
         }, true, ratio);
     }
 
     dockFill(referenceNode: DockNode, container: PanelContainer) {
-        this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
+        return this.requestDockContainer(referenceNode, container, (refNode, newNode) => {
             this.layoutEngine.dockFill(refNode, newNode);
         }, false);
     }

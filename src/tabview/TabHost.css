@@ -20,6 +20,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     min-height: 1.6rem;
+    background: lightgray;
 }
 
 .DockerTS-TabStrip__Separator {

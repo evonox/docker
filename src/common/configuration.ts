@@ -7,6 +7,7 @@ export interface IDockConfig {
     defaultPanelLabel?: string;
     defaultMinWidth?: number,
     defaultMinHeight?: number;
+    dragAndDropFrameRate?: number;
     zIndexes?: {
         zIndexCounter?: number;
         zIndexDialogCounter?: number;
@@ -15,6 +16,7 @@ export interface IDockConfig {
         zIndexWheel?: number;
         zIndexMaximizedPanel?: number;
         zIndexContextMenu?: number;
+        zIndexDragAndDropBlocker?: number;
     }
 }
 
@@ -22,6 +24,7 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     defaultPanelLabel: "Untitled",
     defaultMinWidth: 50,
     defaultMinHeight: 50,
+    dragAndDropFrameRate: 120, 
     zIndexes: {
         zIndexCounter: 1001,
         zIndexDialogCounter: 10001,
@@ -29,6 +32,7 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         zIndexTabHandle: 100,
         zIndexWheel: 1e6 - 1,
         zIndexMaximizedPanel: 1e6,
-        zIndexContextMenu: 1e6 + 1
+        zIndexContextMenu: 1e6 + 1,
+        zIndexDragAndDropBlocker: 1e6 + 2
     }
 }

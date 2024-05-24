@@ -2,7 +2,7 @@ import { DockManager } from "../facade/DockManager";
 import {  IDockContainer } from "../common/declarations";
 import { IState } from "../common/serialization";
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ContainerType, TabHostDirection } from "../common/enumerations";
+import { ContainerType, TabOrientation } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
 import { DOM } from "../utils/DOM";
 import { ISize } from "../common/dimensions";
@@ -19,7 +19,7 @@ export class FillDockContainer implements IDockContainer {
     private tabHost: TabHost;
     private _loadedSize: ISize;
 
-    constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
+    constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
         this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer");
         this.tabHost = new TabHost(this.dockManager, this.tabStripDirection);
         this.domContainer.appendChild(this.tabHost.getDOM());

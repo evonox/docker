@@ -325,6 +325,10 @@ export class PanelContainer extends Component implements IDockContainer {
         if(this.isHidden())
             return;
 
+        console.log("UPDATING LAYOUT STATE");
+        console.dir(this);
+        console.dir(this.containerState);
+
         let rect: DOMRect | IRect;
         if(this.containerState === PanelContainerState.Docked) {
             rect = this.domPanelPlaceholder.getBounds();
@@ -471,7 +475,7 @@ export class PanelContainer extends Component implements IDockContainer {
         //         .addClass("panel-content-wrapper")
         //         .appendTo(this.domContentHost);
 
-        this.bind(this.domContentContainer.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
+        this.bind(this.domContentFrame.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
 
         this.updateTitle();
         this.updateContainerState();

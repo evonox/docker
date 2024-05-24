@@ -8,6 +8,7 @@ import { PanelContainer } from "../containers/PanelContainer";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { DockManager } from "../facade/DockManager";
 import { ContextMenu } from "../core/ContextMenu";
+import { SelectionState, TabOrientation } from "../common/enumerations";
 
 
 export class TabPage extends Component {
@@ -24,7 +25,11 @@ export class TabPage extends Component {
     private titleSubscription: ComponentEventSubscription;
     private focusSubscription: ComponentEventSubscription;
 
-    constructor(private dockManager: DockManager, private container: IDockContainer) {
+    constructor(
+        private dockManager: DockManager, 
+        private container: IDockContainer,
+        private tabOrientation: TabOrientation
+    ) {
         super();
         this.initializeComponent();
     }
@@ -72,7 +77,8 @@ export class TabPage extends Component {
 
     protected onInitialized(): void {
         this.tabHandle = new TabHandle();
-        this.tabHandle.on("onSelected", this.handleTabSelected.bind(this));
+        this.tabHandle.orientation = this.tabOrientation;
+        this.tabHandle.on("onTabClicked", this.handleTabSelected.bind(this));
         this.tabHandle.on("onTabMoved", this.handleTabMoved.bind(this));
         this.tabHandle.on("onContextMenu", this.handleShowContextMenu.bind(this));
 
@@ -99,8 +105,10 @@ export class TabPage extends Component {
     }
 
     protected onUpdate(element: HTMLElement): void {
-        this.tabHandle.setSelected(this.isSelected);
-        this.tabHandle.setActive(this.isActive);
+        this.tabHandle.setSelectionState(this.isSelected ? SelectionState.Selected : SelectionState.Unselected);
+        if(this.isActive) {
+            this.tabHandle.setSelectionState(SelectionState.Focused);
+        }
 
         this.container.setVisible(this.isSelected);
 
@@ -112,14 +120,15 @@ export class TabPage extends Component {
     }
 
     private handleTabSelected() {
+        this.dockManager.setActivePanel(this.container as PanelContainer);
         this.triggerEvent("onTabPageSelected", {tabPage: this, isActive: true});
         // DOCK CONTAINER - NOTIFY ON TAB CHANGED
     }
 
     private updateTabTitle() {
         const title = (this.container as PanelContainer).getTitleHtml();
-        this.tabHandle.title = title;
-        this.tabHandle.hasPanelChanges = this.container.hasChanges();
+        this.tabHandle.titleTemplate = title;
+        this.tabHandle.isModifiedState = this.container.hasChanges();
     }
 
     private handleTitleChanged() {

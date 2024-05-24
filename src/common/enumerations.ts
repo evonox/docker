@@ -3,6 +3,12 @@
  * Enumeration Declarations
  */
 
+export enum SelectionState {
+    Unselected = "unselected",
+    Selected = "selected",
+    Focused = "focused"     // panel is selected and is accepting the user input
+}
+
 export enum PanelContainerState { 
     Docked = "docked", 
     Floating = "floating", 
@@ -15,7 +21,12 @@ export enum DockKind { Left = "left", Right = "right", Up = "up", Down = "down",
 
 export enum OrientationKind { Row = "row", Column = "column", Fill = "fill" };
 
-export enum TabHostDirection { Top = "top", Bottom = "bottom", Left = "left", Right = "right" };
+export enum TabOrientation { 
+    Top = "top", 
+    Bottom = "bottom", 
+    Left = "left", 
+    Right = "right" 
+};
 
 export enum ContainerType { Panel = "panel", RowLayout = "row", ColumnLayout = "column", FillLayout = "fill" }
 

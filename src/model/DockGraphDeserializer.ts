@@ -1,5 +1,5 @@
 import { IDockContainer } from "../common/declarations";
-import { ContainerType, TabHostDirection } from "../common/enumerations";
+import { ContainerType, TabOrientation } from "../common/enumerations";
 import { INodeInfo, IPanelInfo } from "../common/serialization";
 import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
 import { FillDockContainer } from "../containers/FillDockContainer";
@@ -70,7 +70,7 @@ export class DockGraphDeserializer {
             if(containerState.documentManager === true) {
                 container = new DocumentManagerContainer(this.dockManager);
             } else {
-                container = new FillDockContainer(this.dockManager, TabHostDirection.Bottom);
+                container = new FillDockContainer(this.dockManager, TabOrientation.Bottom);
             }
         }
 

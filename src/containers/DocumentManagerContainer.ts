@@ -1,4 +1,4 @@
-import { TabHostDirection } from "../common/enumerations";
+import { TabOrientation } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
 import { FillDockContainer } from "./FillDockContainer";
 
@@ -6,6 +6,6 @@ import { FillDockContainer } from "./FillDockContainer";
 export class DocumentManagerContainer extends FillDockContainer {
 
     constructor(dockManager: DockManager) {
-        super(dockManager, TabHostDirection.Top);
+        super(dockManager, TabOrientation.Top);
     }
 }

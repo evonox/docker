@@ -5,7 +5,7 @@ import { ColumnLayoutDockContainer } from "../splitter/ColumnLayoutDockContainer
 import { RowLayoutDockContainer } from "../splitter/RowLayoutDockContainer";
 import { FillDockContainer } from "../containers/FillDockContainer";
 import { TabHandle } from "../tabview/TabHandle";
-import { ContainerType, OrientationKind, TabHostDirection } from "../common/enumerations";
+import { ContainerType, OrientationKind, TabOrientation } from "../common/enumerations";
 import { IRect } from "../common/dimensions";
 
 /**
@@ -271,7 +271,7 @@ export class DockLayoutEngine {
 
     private createDockContainer(containerType: ContainerType, newNode: DockNode, referenceNode: DockNode) {
         if(containerType === ContainerType.FillLayout) {
-            return new FillDockContainer(this.dockManager, TabHostDirection.Bottom);
+            return new FillDockContainer(this.dockManager, TabOrientation.Bottom);
         } else if(containerType === ContainerType.RowLayout) {
             return new RowLayoutDockContainer(this.dockManager, [newNode.container, referenceNode.container]);
         } else if(containerType === ContainerType.ColumnLayout) {

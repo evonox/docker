@@ -1,4 +1,5 @@
 import { MOUSE_BTN_RIGHT } from "../common/constants";
+import { SelectionState, TabOrientation } from "../common/enumerations";
 import { Component } from "../framework/Component";
 import { property, state } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
@@ -7,20 +8,34 @@ import { CloseButton } from "./CloseButton";
 
 import "./TabHandle.css";
 
+/**
+ * TabHandle Component
+ * Events:
+ *      onTabClicked    - tab handle was clicked
+ *      onTabMoved      - tab reorder was requested by drag-and-drop
+ *      onCloseClicked  - close button was clicked
+ *      onContextMenu   - user requests to show context menu
+ * 
+ * TO-DOs:
+ *      - bind drag-and-drop to initiate the panel undock operation
+ */
+
 export class TabHandle extends Component {
 
-    @property()
-    title: string;
+    @property({defaultValue: TabOrientation.Bottom})
+    orientation: TabOrientation;
+
+    @property({defaultValue: ""})
+    titleTemplate: string;
 
     @property({defaultValue: false})
-    displayCloseButton: boolean;
-
-    @state({defaultValue: false})
-    isActive: boolean;
-
+    closeButtonVisible: boolean;
 
     @property({defaultValue: false})
-    hasPanelChanges: boolean;
+    isModifiedState: boolean;
+
+    @state({defaultValue: SelectionState.Unselected})
+    selectionState: SelectionState;
 
     private domRoot: DOM<HTMLElement>;
     private domTitle: DOM<HTMLElement>;
@@ -32,27 +47,18 @@ export class TabHandle extends Component {
         this.initializeComponent();
     }
 
-    setSelected(isSelected: boolean) {
-        this.domRoot.toggleClass("dockspan-tab-handle-selected", isSelected);
-        if(isSelected) {
-            this.domRoot.addClass("dockspan-tab-handle-active");
-        }
-        if(isSelected === false) {
-            this.isActive = false;
-        }
+    setSelectionState(state: SelectionState) {
+        this.selectionState = state;
     }
 
-    setActive(isActive: boolean) {        
-        this.isActive = isActive;
-    }
+    /**
+     * Component Life-Cycle Methods
+     */
 
     protected onInitialized(): void {
         this.closeButton = new CloseButton();
-        this.closeButton.visible = this.displayCloseButton;
-        this.closeButton.on("click", this.handleCloseButtonClick);
-
-        // TODO: ASSIGN UNDOCK HANDLER - HOW????
-
+        this.closeButton.visible = this.closeButtonVisible;
+        this.closeButton.on("click", this.handleCloseButtonClick.bind(this));
     }
 
     protected onDisposed(): void {
@@ -66,30 +72,56 @@ export class TabHandle extends Component {
             .appendTo(this.domRoot);
         this.domRoot.appendChild(this.closeButton.getDOM());
 
-        this.bind(this.domRoot.get(), "mousedown", this.handleMouseDown);
+        this.bind(this.domRoot.get(), "mousedown", this.handleMouseDown.bind(this));
         this.bind(this.domRoot.get(), "contextmenu", this.handleShowContextMenu.bind(this));
-
-
-        // HIDE CLOSE BUTTON IF GRAYED OR DISALLOWED BY PANEL CONTAINER
-        // APPEND ROOT TO TABLIST ELEMENT
-        // UPDATE TITLE FROM THE PANEL
-        // BIND UNDOCK LISTENER
-        // CONTEXT MENU HANDLING
 
         return this.domRoot.get();
     }
 
     protected onUpdate(element: HTMLElement): void {
-        this.closeButton.visible = this.displayCloseButton;
-        this.domTitle.html(this.title).attr("title", this.domTitle.getText());
+        this.applyTabOrientationCSS();
+        this.applySelectionCSS();
 
-        this.domRoot.toggleClass("DockerTS-TabHandle--Active", this.isActive);
-        this.domTitle.toggleClass("DockerTS-TabHandle--HasChanges", this.hasPanelChanges);
+        this.closeButton.visible = this.closeButtonVisible;
+        this.domTitle.html(this.titleTemplate).attr("title", this.domTitle.getText());
+
+        this.domTitle.toggleClass("DockerTS-TabHandle--HasChanges", this.isModifiedState);
     }
+
+    private applyTabOrientationCSS() {
+        this.domRoot.applyClasses({
+            "DockerTS-TabHandle--Left": this.orientation === TabOrientation.Left,
+            "DockerTS-TabHandle--Right": this.orientation === TabOrientation.Right,
+            "DockerTS-TabHandle--Top": this.orientation === TabOrientation.Top,
+            "DockerTS-TabHandle--Bottom": this.orientation === TabOrientation.Bottom
+        })       
+    }
+
+    private applySelectionCSS() {
+        this.domRoot.applyClasses({
+            "DockerTS-TabHandle--Unselected": this.selectionState === SelectionState.Unselected,
+            "DockerTS-TabHandle--Selected": this.selectionState === SelectionState.Selected,
+            "DockerTS-TabHandle--Focused": this.selectionState === SelectionState.Focused
+        })
+    }
+
+    /**
+     * Event Handlers
+     */
 
     private handleCloseButtonClick() {
-        // TODO: REQUEST PANEL CLOSE
+        this.triggerEvent("onCloseClicked");
     }
+
+    private handleShowContextMenu(event: MouseEvent) {
+        event.preventDefault();
+        this.triggerEvent("onContextMenu", event);
+    }
+
+    /**
+     * TODO: REWORK AFTER THE REST IS TESTED
+     * TODO: MOVING ANIMATION????
+     */
 
     private previousX: number;
     private currentX: number;
@@ -97,7 +129,7 @@ export class TabHandle extends Component {
     private handleMouseDown(event: MouseEvent) {
         event.preventDefault();
         this.currentX = event.pageX;        
-        this.triggerEvent("onSelected");
+        this.triggerEvent("onTabClicked");
         if(event.button === MOUSE_BTN_RIGHT)
             return;
 
@@ -120,10 +152,5 @@ export class TabHandle extends Component {
 
     private handleMouseUp(event: MouseEvent) {
         this.domRoot.removeClass("dockspan-tab-handle-dragged");        
-    }
-
-    private handleShowContextMenu(event: MouseEvent) {
-        event.preventDefault();
-        this.triggerEvent("onContextMenu", event);
     }
  }

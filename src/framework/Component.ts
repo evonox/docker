@@ -1,6 +1,7 @@
 import { DOMEventHandler } from "./dom-events";
 import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "./component-events";
 import { DOMEventManager, DOMEventSubscription } from "./dom-event-manager";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 
 export abstract class Component {
@@ -23,6 +24,7 @@ export abstract class Component {
     protected initializeComponent() {
         this.onInitialized();
         this.element = this.onInitialRender();
+        this.requestUpdate();
     }
 
     public getDOM(): HTMLElement {
@@ -75,10 +77,12 @@ export abstract class Component {
     public requestUpdate() {
         if(this.isUpdateRequested() !== true) {
             this._isUpdateRequested = true;
-            requestAnimationFrame(() => {
-                this.handleUpdateRequest();
-            });
+            DOMUpdateInitiator.requestComponentUpdate(this);
         }
+    }
+
+    public updateComponent() {
+        this.handleUpdateRequest();
     }
 
     private handleUpdateRequest() {

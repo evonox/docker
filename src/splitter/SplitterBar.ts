@@ -81,6 +81,7 @@ export class SplitterBar extends Component {
         const deltaY = event.pageY - this.lastPosY;
 
         if(this.orientation === OrientationKind.Row) {
+            console.dir(deltaX);
             this.processDraggingX(deltaX, event);
         } else {
             this.processDraggingY(deltaY, event);
@@ -106,6 +107,10 @@ export class SplitterBar extends Component {
         // Current Widths
         const prevWidth = this.prevContainer.getWidth();
         const nextWidth = this.nextContainer.getWidth();
+
+        console.dir(prevWidth);
+        console.dir(nextWidth);
+
         // Minimum Allowed Widths
         const prevMinWidth = this.prevContainer.getMinWidth();
         const nextMinWidth = this.nextContainer.getMinWidth();
@@ -130,6 +135,11 @@ export class SplitterBar extends Component {
             prev: this.prevContainer, next: this.nextContainer,
             prevSize: newPrevWidth, nextSize: newNextWidth
         };
+
+        console.log(newPrevWidth + newNextWidth)
+
+        console.dir(payload);
+
         this.triggerEvent("onResized", payload);
 
         // Resize the containers
@@ -164,8 +174,8 @@ export class SplitterBar extends Component {
             this.overflowGuard.startDragOverflow(guardCoordinate, OverflowDirection.Incrementing);
         }        
         // New Heights
-        const newPrevHeight = prevHeight + delta;
-        const newNextHeight = nextHeight - delta;
+        const newPrevHeight = prevHeight  + delta;
+        const newNextHeight = nextHeight  - delta;
         // Resize the containers
         this.prevContainer.resize(this.prevContainer.getWidth(), newPrevHeight);
         this.nextContainer.resize(this.nextContainer.getWidth(), newNextHeight);

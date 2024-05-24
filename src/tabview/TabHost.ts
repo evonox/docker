@@ -3,7 +3,7 @@ import { property, state } from "../framework/decorators";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
-import { ContainerType, TabHostDirection } from "../common/enumerations";
+import { ContainerType, TabOrientation } from "../common/enumerations";
 
 import "./TabHost.css";
 import { DockManager } from "../facade/DockManager";
@@ -27,7 +27,7 @@ export class TabHost extends Component {
     private domSeparator: DOM<HTMLElement>;
     private domContent: DOM<HTMLElement>;
 
-    constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
+    constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
         super();
         this.initializeComponent();
     }
@@ -115,8 +115,8 @@ export class TabHost extends Component {
         const childPanels = children.filter(c => c.getContainerType() === ContainerType.Panel);
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
-                child.setHeaderVisibility(this.tabStripDirection !== TabHostDirection.Top);
-                const tabPage = new TabPage(this.dockManager, child);
+                child.setHeaderVisibility(this.tabStripDirection !== TabOrientation.Top);
+                const tabPage = new TabPage(this.dockManager, child, this.tabStripDirection);
                 tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
                 tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
                 this.tabPages.push(tabPage);
@@ -151,10 +151,10 @@ export class TabHost extends Component {
         this.domSeparator = DOM.create("div").addClass("DockerTS-TabStrip__Separator");
         this.domContent = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-TabContent");
 
-        if(this.tabStripDirection === TabHostDirection.Top) {
+        if(this.tabStripDirection === TabOrientation.Top) {
             this.domHost.appendChildren([this.domTabStrip, this.domSeparator, this.domContent])
                 .addClass("DockerTS-TabHost--Top");
-        } else if(this.tabStripDirection === TabHostDirection.Bottom) {
+        } else if(this.tabStripDirection === TabOrientation.Bottom) {
             this.domHost.appendChildren([this.domContent, this.domSeparator, this.domTabStrip])
                 .addClass("DockerTS-TabHost--Bottom");
         } else {
