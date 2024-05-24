@@ -50,6 +50,8 @@ export interface IDockContainer extends IEventEmitter {
 
     queryLoadedSize(): ISize;
 
+    updateLayoutState(): void;
+
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
     resize(width: number, height: number): void;
 

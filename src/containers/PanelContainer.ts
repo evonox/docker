@@ -290,7 +290,7 @@ export class PanelContainer extends Component implements IDockContainer {
      */
     resize(width: number, height: number): void {
         // TEMP SOLUTION
-        this.domPanelPlaceholder.width(width).height(height);
+        // this.domPanelPlaceholder.width(width).height(height);
 
         // TODO: COULD BE LAYOUT BY CSS GRID / FLEX???
         // this.domPanelPlaceholder.width(width);
@@ -316,6 +316,10 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // PanelContainer is leaf node => no layouting logic
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {}
+
+    updateLayoutState(): void {
+        this.updateContentLayout();
+    }
 
     private updateContentLayout() {
         if(this.isHidden())

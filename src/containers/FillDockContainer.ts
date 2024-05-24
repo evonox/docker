@@ -8,6 +8,7 @@ import { DOM } from "../utils/DOM";
 import { ISize } from "../common/dimensions";
 import { TabHost } from "../tabview/TabHost";
 
+import "./FillDockContainer.css";
 
 /**
  * Decorator over TabHost
@@ -19,12 +20,16 @@ export class FillDockContainer implements IDockContainer {
     private _loadedSize: ISize;
 
     constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
-        this.domContainer = DOM.create("div");
+        this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer");
         this.tabHost = new TabHost(this.dockManager, this.tabStripDirection);
         this.domContainer.appendChild(this.tabHost.getDOM());
     }
 
     handleContextMenuAction(actionName: string): void {}
+
+    updateLayoutState(): void {
+        this.tabHost.updateLayoutState();
+    }
 
     updateContainerState(): void {
         this.tabHost.updateContainerState();

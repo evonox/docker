@@ -38,6 +38,11 @@ export class SplitterPanel extends Component {
         this.childContainers.forEach(child => child.updateContainerState());
     }
 
+    updateLayoutState(): void {
+        this.childContainers.forEach(child => child.updateLayoutState());       
+    }
+
+
     setContainerRatio(container: IDockContainer, ratio: number) {
         const index = this.childContainers.indexOf(container);
         if(index < 0)

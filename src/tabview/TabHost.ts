@@ -57,6 +57,13 @@ export class TabHost extends Component {
         return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinHeight()), 0);
     }
 
+    updateLayoutState() {
+        for(const tabPage of this.tabPages) {
+            tabPage.updateLayoutState();
+        }
+    }
+
+
     updateContainerState(): void {
         for(const tabPage of this.tabPages) {
             tabPage.updateContainerState();

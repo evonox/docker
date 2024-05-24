@@ -25,6 +25,10 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.splitterPanel.updateContainerState();
     }
 
+    updateLayoutState(): void {
+        this.splitterPanel.updateLayoutState();
+    }
+
     setHeaderVisibility(visible: boolean): void {}
 
     queryLoadedSize(): ISize {
@@ -49,6 +53,7 @@ export abstract class SplitterDockContainer implements IDockContainer {
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean = false)  {
+        this.childContainers = children;
         this.splitterPanel.performLayout(children, relayoutEvenIfEqual);
     }
 

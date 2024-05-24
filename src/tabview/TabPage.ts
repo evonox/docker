@@ -59,6 +59,10 @@ export class TabPage extends Component {
         this.container.resize(width, height);
     }
 
+    updateLayoutState() {
+        this.container.updateLayoutState();
+    }
+
     updateContainerState(): void {
         if(this.dockManager.getActivePanel() === this.container) {
             this.isSelected = true;
@@ -83,7 +87,10 @@ export class TabPage extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domContentWrapper = DOM.create("div").appendChild(this.container.getDOM());
+        this.domContentWrapper = DOM.create("div")
+            .addClass("DockerTS-TabPage--ContentWrapper")
+            .appendChild(this.container.getDOM());
+            
         this.updateTabTitle();
 
         this.container.setVisible(this.isSelected);

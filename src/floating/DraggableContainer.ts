@@ -26,6 +26,10 @@ export class DraggableContainer implements IDockContainer {
         //     .css("left", domBounds.left.toFixed(3) + "px")
         //     .css("top", domBounds.top.toFixed(3) + "px");
     }
+    updateLayoutState(): void {
+        this.delegate.updateLayoutState();
+    }
+
     handleContextMenuAction(actionName: string): void {
         this.delegate.handleContextMenuAction(actionName);
     }

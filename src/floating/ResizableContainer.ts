@@ -18,6 +18,10 @@ export class ResizableContainer implements IDockContainer {
         this.buildResizeHandles();
     }
 
+    updateLayoutState(): void {
+        this.updateLayoutState();
+    }
+
     handleContextMenuAction(actionName: string): void {
         this.delegate.handleContextMenuAction(actionName);
     }
