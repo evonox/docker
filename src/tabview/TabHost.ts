@@ -68,6 +68,14 @@ export class TabHost extends Component {
         for(const tabPage of this.tabPages) {
             tabPage.updateContainerState();
         }
+        const activePanel = this.dockManager.getActivePanel();
+        const selectedTabPage = this.tabPages.find(page => page.getContainer() === activePanel);
+        
+        if(selectedTabPage !== undefined && this.activeTab !== selectedTabPage) {
+            this.activeTab?.setSelected(false, false);
+            this.activeTab = selectedTabPage;
+            this.activeTab.setSelected(true, true);
+        }
     }
 
     resize(width: number, height: number) {

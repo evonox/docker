@@ -45,6 +45,9 @@ export class TabPage extends Component {
     setSelected(flag: boolean, isActive: boolean) {
         this.isSelected = flag;
         this.isActive = isActive;
+        if(this.isSelected === false) {
+            this.isActive = false;
+        }
     }
 
     getMinWidth(): number {
@@ -64,10 +67,7 @@ export class TabPage extends Component {
     }
 
     updateContainerState(): void {
-        if(this.dockManager.getActivePanel() === this.container) {
-            this.isSelected = true;
-            this.isActive = true;
-        }       
+        this.container.updateContainerState();
     }    
 
     protected onInitialized(): void {

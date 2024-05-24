@@ -101,7 +101,7 @@ export class TabHandle extends Component {
         if(event.button === MOUSE_BTN_RIGHT)
             return;
 
-        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
+        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), "pointer");
     }
 
     private handleMouseMove(event: MouseEvent) {

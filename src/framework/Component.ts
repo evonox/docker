@@ -75,7 +75,7 @@ export abstract class Component {
     public requestUpdate() {
         if(this.isUpdateRequested() !== true) {
             this._isUpdateRequested = true;
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 this.handleUpdateRequest();
             });
         }

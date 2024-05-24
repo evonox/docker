@@ -53,7 +53,9 @@ export class DockManager {
 
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
         this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
-        DOM.from(this.container).css("position", "relative").css("display", "grid").css("overflow", "hidden");
+        DOM.from(this.container).css("position", "relative")
+            .css("display", "grid")
+            .css("overflow", "hidden");
     }
 
     initialize() {
@@ -72,11 +74,9 @@ export class DockManager {
 
         // Initialize ResizeObserver
         this.resizeObserver = new ResizeObserver(() => {
-            console.log("RESIZE OBSERVER");
             requestAnimationFrame(() => {
                 this.updateContainerState();
             })
-            // setTimeout(() => this.invalidate());
         });
         this.resizeObserver.observe(this.container);
 
