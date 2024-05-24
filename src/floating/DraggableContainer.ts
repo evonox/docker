@@ -18,13 +18,13 @@ export class DraggableContainer implements IDockContainer {
         this.handleMouseDown = this.handleMouseDown.bind(this);
 
         this.domEventMouseDown = new DOMEvent<MouseEvent>(this.dragHandle);
-        this.domEventMouseDown.bind("mousedown", this.handleMouseDown, {capture: false});
+        this.domEventMouseDown.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
 
-        // Note: will this be needed?
-        const domBounds = DOM.from(this.topElement).getBounds();
-        DOM.from(this.topElement)
-            .css("left", domBounds.left.toFixed(3) + "px")
-            .css("top", domBounds.top.toFixed(3) + "px");
+        // // Note: will this be needed?
+        // const domBounds = DOM.from(this.topElement).getBounds();
+        // DOM.from(this.topElement)
+        //     .css("left", domBounds.left.toFixed(3) + "px")
+        //     .css("top", domBounds.top.toFixed(3) + "px");
     }
     
     updateContainerState(): void {
@@ -34,23 +34,29 @@ export class DraggableContainer implements IDockContainer {
     setHeaderVisibility(visible: boolean): void {
         this.delegate.setHeaderVisibility(visible);
     }
+
     queryLoadedSize(): ISize {
-        throw new Error("Method not implemented.");
+        return this.delegate.queryLoadedSize();
     }
+
     onQueryContextMenu(config: IContextMenuAPI): void {
-        throw new Error("Method not implemented.");
+        return this.delegate.onQueryContextMenu(config);
     }
+
     getMinimumChildNodeCount(): number {
-        throw new Error("Method not implemented.");
+        return this.delegate.getMinimumChildNodeCount();
     }
+
     setActiveChild(container: IDockContainer): void {
-        throw new Error("Method not implemented.");
+        return this.delegate.setActiveChild(container);
     }
+
     saveState(state: IState): void {
-        throw new Error("Method not implemented.");
+        return this.delegate.saveState(state);
     }
+
     loadState(state: IState): void {
-        throw new Error("Method not implemented.");
+        return this.delegate.loadState(state);
     }
 
     removeDecorator() {
@@ -58,6 +64,7 @@ export class DraggableContainer implements IDockContainer {
     }
 
     private handleMouseDown(event: MouseEvent) {
+        this.lastMousePosition = {x: event.pageX, y: event.pageY};
         this.startDragging(event);
         DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
     }
@@ -65,7 +72,6 @@ export class DraggableContainer implements IDockContainer {
     private lastMousePosition: IPoint;
 
     private handleMouseUp(event: MouseEvent) {
-        this.lastMousePosition = {x: event.pageX, y: event.pageY};
         this.stopDragging(event);
     }
 
@@ -88,7 +94,9 @@ export class DraggableContainer implements IDockContainer {
         // TODO: CHECK THE BOUNDS USING DOCKER MANAGER
 
         this.performDrag(dx, dy);
-        this.eventManager.triggerEvent("onDraggableDragMove", event);
+
+        const domBounds = DOM.from(this.topElement).getBounds();
+        this.eventManager.triggerEvent("onDraggableDragMove", {event, x: domBounds.left, y: domBounds.top});
 
         this.lastMousePosition = {x: event.pageX, y: event.pageY};
     }
@@ -97,7 +105,7 @@ export class DraggableContainer implements IDockContainer {
         const domBounds = DOM.from(this.topElement).getBounds();
         const x = domBounds.left + dx;
         const y = domBounds.top + dy;
-        DOM.from(this.topElement).css("left", x.toFixed(3) + "px").css("top", y.toFixed(3) + "px");
+        DOM.from(this.topElement).left(x).top(y);
     }
 
     dispose(): void {

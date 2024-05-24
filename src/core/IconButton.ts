@@ -40,7 +40,7 @@ export class IconButton extends Component {
         return this.domButton.get();
     }
     protected onUpdate(element: HTMLElement): void {
-        this.domButton.html(this.icon).toggleClass("downspawn-icon-button--hidden", ! this.visible)
+        this.domButton.html(this.icon).toggleClass("IconButton--Hidden", ! this.visible)
             .attr("title", this.title);
     }
 

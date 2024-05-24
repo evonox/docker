@@ -9,9 +9,8 @@ import { ResizableContainer } from "./ResizableContainer";
 import { IPoint } from "../common/dimensions";
 import { MOUSE_BTN_RIGHT } from "../common/constants";
 
-/**
- * TODO: CONTEXT MENU
- */
+import "./Dialog.css";
+
 export class Dialog implements IEventEmitter {
 
     private domDialog: DOM<HTMLElement>;
@@ -24,6 +23,7 @@ export class Dialog implements IEventEmitter {
 
     private position: IPoint;
     private isHidden: boolean = false;
+    private lastExpanedSize: number;
 
     private eventManager = new ComponentEventManager();
 
@@ -35,7 +35,8 @@ export class Dialog implements IEventEmitter {
     ) {
         this.initialize();
         this.dockManager.getModelContext().appendDialog(this);
-        // SET DEFAULT DIALOG POSITION
+        this.panel.setHeaderVisibility(true);
+
         this.dockManager.notifyOnCreateDialog(this);
     }
 
@@ -51,7 +52,7 @@ export class Dialog implements IEventEmitter {
 
     private initialize() {
         // Construct Dialog DOM & Decorators
-        this.domDialog = DOM.create("div").attr("tabIndex", "0").addClass("dialog-floating")
+        this.domDialog = DOM.create("div").attr("tabIndex", "0").addClass("DockerTS-Dialog")
             .appendChild(this.panel.getDOM())
         this.draggable = new DraggableContainer(this.panel, this.domDialog.get(), this.panel.getHeaderElement());
         this.resizable = new ResizableContainer(this.draggable, this.domDialog.get(), this.disableResize);        
@@ -70,9 +71,13 @@ export class Dialog implements IEventEmitter {
         this.draggable.on("onDraggableDragStop", (event) => {
             this.eventManager.triggerEvent("onDragStop", {sender: this, event});
         })
-        this.draggable.on("onDraggableDragMove", (event) => {
-            this.eventManager.triggerEvent("onDragMove", {sender: this, event});
+        this.draggable.on("onDraggableDragMove", (payload) => {
+            this.setPosition(payload.x, payload.y);
+            this.eventManager.triggerEvent("onDragMove", {sender: this, event: payload.event});
         });
+        
+        this.panel.on("onExpanded", this.handleOnExpand.bind(this));
+        this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
 
         // Resize the dialog
         this.resize(this.panel.getWidth(), this.panel.getHeight());
@@ -80,6 +85,8 @@ export class Dialog implements IEventEmitter {
         if(this.grayOutParent) {
             this.grayOutParent.grayOut(true);
         }
+
+        this.panel.prepareForFloating();
 
         // Bring the dialog to the front
         this.bringToFront();
@@ -163,7 +170,9 @@ export class Dialog implements IEventEmitter {
 
     bringToFront() {
         // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
-        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString());
+        const nextZIndex = this.dockManager.genNextDialogZIndex();
+        this.domDialog.css("zIndex", String(nextZIndex));
+        this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
     }
 
@@ -175,5 +184,15 @@ export class Dialog implements IEventEmitter {
         if(event.button !== MOUSE_BTN_RIGHT) {
             this.bringToFront();
         }
+    }
+
+    private handleOnCollapse() {
+        this.lastExpanedSize = this.domDialog.getHeight();
+        const bounds = this.panel.getHeaderElement().getBoundingClientRect();
+        this.domDialog.height(bounds.height);
+    }
+
+    private handleOnExpand() {
+        this.domDialog.height(this.lastExpanedSize);
     }
 }

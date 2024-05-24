@@ -18,3 +18,7 @@
     fill: var(--docker-ts-hover-button-color);
     stroke: var(--docker-ts-hover-button-color);
 }
+
+.IconButton.IconButton--Hidden {
+    display: none;
+}

@@ -20,6 +20,7 @@ export class ResizeHandle extends Component {
 
     constructor(private handleType: ResizeHandleType) {
         super();
+        this.initializeComponent();
     }
 
     north() { return this.handleType.north; }

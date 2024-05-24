@@ -106,6 +106,34 @@ dockManager.registerPanelType("panel5", "panel", "singleton", (dockManager) => {
     }
 });
 
+dockManager.registerPanelType("panel6", "panel", "transient", (dockManager) => {
+    return {
+        initialize: async (api, options) => {
+            const domElement = document.createElement("h1");
+            domElement.innerText = "FLOATING DIALOG";
+            api.setPanelFAIcon("fa fa-bars");
+            api.setPanelTitle("Floating Test Dialog");
+            return domElement;
+        },
+        getMinWidth: () => 400,
+        getMinHeight: () => 100,
+        onQueryContextMenu: (config) => {
+            config.appendMenuItem({
+                displayOrder: 1,
+                icon: `<i class="fa fa-bars"></i>`,
+                title: "Menu Item One",
+                actionName: "Action One"            
+            });   
+            config.appendMenuItem({displayOrder: 50, separator: true});
+            config.appendMenuItem({displayOrder: 101, title: "Menu Item Two", actionName: "Action2"});
+            config.appendMenuItem({displayOrder: 102, title: "Menu Item Three", actionName: "Action3"});
+        },
+        onActionInvoked: (actionName) => {
+            console.log(`ACTION INVOKED: ${actionName}`);
+        }
+
+    }
+});
 
 async function performDocking() {
 
@@ -115,12 +143,15 @@ async function performDocking() {
         const containerThree = await dockManager.createPanel("panel3");
         const containerLeft = await dockManager.createPanel("panel4");
         const containerBottom = await dockManager.createPanel("panel5");
+        const containerFloat = await dockManager.createPanel("panel6");
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
         dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
         dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
         dockManager.dockDown(dockManager.getDocumentNode(), containerBottom, 0.25);
+
+        dockManager.floatDialog(containerFloat, {x: 50, y: 50, w: 500, h: 200});
     }
     catch(err) {
         console.dir(err);

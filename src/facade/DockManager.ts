@@ -237,6 +237,16 @@ export class DockManager {
         });
     }
 
+    floatDialog(container: PanelContainer, rect: IRect) {
+        // TODO: CHECK DIALOG DOES NOT EXIST, THEN SHOW
+        // TODO: UNDOCK IF THE CONTAINER IS DOCKED
+
+        const dialog = new Dialog(this, container);
+        dialog.setPosition(rect.x, rect.y);
+        dialog.resize(rect.w, rect.h);
+        return dialog;
+    }
+
     // TODO: REFACTOR IT
     private requestDockContainer(
         referenceNode: DockNode, container: IDockContainer, 
@@ -442,11 +452,6 @@ export class DockManager {
      * TODO - OTHER MISSING IMPLEMENTATION
      */
 
-
-    // TODO: COMPLEX IMPLEMENTATION
-    floatDialog() {
-
-    }
 
     requestTabReorder(container: IDockContainer, e: any) {
         // TODO: COMPLETE THIS

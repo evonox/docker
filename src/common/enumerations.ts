@@ -3,6 +3,14 @@
  * Enumeration Declarations
  */
 
+export enum PanelContainerState { 
+    Docked = "docked", 
+    Floating = "floating", 
+    Minimized = "minimized", 
+    Maximized = "maximized",
+    InCollapser = "in-collapser" 
+ }
+
 export enum DockKind { Left = "left", Right = "right", Up = "up", Down = "down", Fill = "fill" };
 
 export enum OrientationKind { Row = "row", Column = "column", Fill = "fill" };

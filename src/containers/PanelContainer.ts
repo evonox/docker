@@ -6,7 +6,7 @@ import { IContextMenuAPI, IHeaderButton, IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
-import { ContainerType, PanelType } from "../common/enumerations";
+import { ContainerType, PanelContainerState, PanelType } from "../common/enumerations";
 import { IPoint, ISize } from "../common/dimensions";
 import { PanelButtonBar } from "../core/PanelButtonBar";
 
@@ -14,6 +14,7 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND } from "../core/panel-default-buttons";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -32,6 +33,10 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private buttonBar: PanelButtonBar;
 
+    // Panel Container State
+    private containerState: PanelContainerState;
+    private isCollapsed: boolean = false;
+
     // Icon & Title State
     private _iconHtml: string = "";
     private _title: string = "";
@@ -39,6 +44,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // Dimensions & Resizing State
     private _lastDialogSize: ISize;
+    private _lastExpandedHeight: number;
 
     private _isVisible: boolean = false;
 
@@ -163,11 +169,16 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     setDialogPosition(x: number, y: number) {
-        this.domPanel.left(x).top(y);
+        //this.domPanel.left(x).top(y);
+        this.domContentContainer.left(x).top(y + this.domPanelHeader.getHeight());
     }
 
     setPanelDimensions(width: number, heigth: number) {
         this.domPanel.width(width).height(heigth);
+    }
+
+    setPanelZIndex(zIndex: number) {
+        this.domContentContainer.css("z-index", String(zIndex));
     }
 
     getLastDialogSize(): ISize {
@@ -176,6 +187,29 @@ export class PanelContainer extends Component implements IDockContainer {
 
     saveLastDialogSize(size: ISize) {
         this._lastDialogSize = {...size};
+    }
+
+    expandPanel() {
+        if(this.containerState !== PanelContainerState.Floating)
+            return;
+        if(! this.isCollapsed)
+            return;
+        this.isCollapsed = false;
+        this.domContentContainer.height(this._lastExpandedHeight);
+
+        this.triggerEvent("onExpanded");
+    }
+
+    collapsePanel() {
+        if(this.containerState !== PanelContainerState.Floating)
+            return;
+        if(this.isCollapsed)
+            return;
+        this._lastExpandedHeight = this.domContentContainer.getHeight();
+        this.isCollapsed = true;
+
+        this.domContentContainer.height(0);
+        this.triggerEvent("onCollapsed");
     }
 
     /**
@@ -213,6 +247,20 @@ export class PanelContainer extends Component implements IDockContainer {
         } else {
             this.domPanelHeader.removeClass("DockerTS-PanelHeader--Selected");
         }
+
+        this.updateHeaderButtonVisibility();
+    }
+
+    private updateHeaderButtonVisibility() {
+        if(this.containerState === PanelContainerState.Floating) {
+            this.showHeaderButton(PANEL_ACTION_EXPAND, this.isCollapsed);
+            this.showHeaderButton(PANEL_ACTION_COLLAPSE, ! this.isCollapsed);
+            
+        } else {
+            this.showHeaderButton(PANEL_ACTION_EXPAND, false);
+            this.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+        }
+
     }
 
     /**
@@ -256,6 +304,16 @@ export class PanelContainer extends Component implements IDockContainer {
         }
     }
 
+    private handleButtonAction(actionName: string) {
+        if(actionName === PANEL_ACTION_COLLAPSE) {
+            this.collapsePanel();
+        } else if(actionName === PANEL_ACTION_EXPAND) {
+            this.expandPanel();
+        }
+
+        this.updateHeaderButtonVisibility();
+    }
+
     /**
      * Framework Component Callbacks
      */
@@ -271,7 +329,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domContentContainer = DOM.create("div").addClass("anel-element-content-container")
+        this.domContentContainer = DOM.create("div").addClass("DockerTS-ContentContainer")
                 .css("position", "absolute");
         this.bind(this.domContentContainer.get(), "mousedown", this.handleMouseFocusEvent.bind(this));
         this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
@@ -287,6 +345,8 @@ export class PanelContainer extends Component implements IDockContainer {
                 .appendTo(this.domContentHost);
 
         this.buttonBar = new PanelButtonBar();
+        this.buttonBar.on("onAction", this.handleButtonAction.bind(this));
+
         this.domPanelHeader.appendChild(this.domTitle);
         this.domPanelHeader.appendChild(this.buttonBar.getDOM());
         this.bind(this.domPanelHeader.get(), "contextmenu", this.handleContextMenuClick.bind(this));
@@ -294,6 +354,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.bind(this.domPanel.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
 
         this.updateTitle();
+        this.updateContainerState();
 
         return this.domPanel.get();
     }
@@ -387,7 +448,15 @@ export class PanelContainer extends Component implements IDockContainer {
 
     prepareForDocking() {
         this.dockManager.getDialogRootElement().appendChild(this.domContentContainer.get());
+        this.containerState = PanelContainerState.Docked;
+        this.updateContainerState();
     }
+
+    prepareForFloating() {
+        this.containerState = PanelContainerState.Floating;
+        this.updateContainerState();
+    }
+
 
     /**
      * Closing Facilities
