@@ -19,6 +19,8 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.splitterPanel = new SplitterPanel(this.childContainers, this.orientation);
     }
 
+    handleContextMenuAction(actionName: string): void {}
+
     updateContainerState(): void {
         this.splitterPanel.updateContainerState();
     }

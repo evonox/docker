@@ -1,7 +1,7 @@
 import { Component } from "../framework/Component";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
-import { SplitterBar } from "./SplitterBar";
+import { ResizedPayload, SplitterBar } from "./SplitterBar";
 import { OrientationKind } from "../common/enumerations";
 import { ArrayUtils } from "../utils/ArrayUtils";
 
@@ -11,6 +11,8 @@ export class SplitterPanel extends Component {
 
     private domSplitterPanel: DOM<HTMLElement>;
     private splitterBars: SplitterBar[] = [];
+
+    private ratios: number[] = [];
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         super();
@@ -27,6 +29,9 @@ export class SplitterPanel extends Component {
         this.removeFromDOM();
         this.childContainers = children;
         this.constructSplitterDOMInternals();
+
+        this.deriveRatiosFromContentSize();
+        this.applyRatios();   
     }
 
     updateContainerState(): void {
@@ -54,83 +59,125 @@ export class SplitterPanel extends Component {
     }
 
     getRatios(): number[] {
-        const panelSize = this.getSplitPanelSize();
-        const results = [];
-        for(const container of this.childContainers) {
-            const childSize = this.getVaryingSize(container.getDOM());
-            results.push(childSize / panelSize);
-        }
-        return results;
+        return [...this.ratios];
+        // const panelSize = this.getSplitPanelSize();
+        // const results = [];
+        // for(const container of this.childContainers) {
+        //     const childSize = this.getVaryingSize(container.getDOM());
+        //     results.push(childSize / panelSize);
+        // }
+        // return results;
     }
 
     setRatios(ratios: number[]) {
-        const panelSize = this.getSplitPanelSize();
-        for(let i = 0; i < ratios.length; i++) {
-            const container = this.childContainers[i];
-            const size = ratios[i] * panelSize;
-            this.changeContainerVaryingSize(container, size);
+        this.ratios = [...ratios];
+        this.applyRatios();
+        // const panelSize = this.getSplitPanelSize();
+        // for(let i = 0; i < ratios.length; i++) {
+        //     const container = this.childContainers[i];
+        //     const size = ratios[i] * panelSize;
+        //     this.changeContainerVaryingSize(container, size);
+        // }
+    }
+
+    private handleResizeEvent(payload: ResizedPayload) {
+        console.dir(payload);
+        this.recalcRatioBySize(payload.prev, payload.prevSize);
+        this.recalcRatioBySize(payload.next, payload.nextSize);
+        this.applyRatios();
+    }
+
+    private recalcRatioBySize(container: IDockContainer, size: number) {
+        const index = this.childContainers.indexOf(container);
+        const totalSize = this.getVaryingSize(this.domSplitterPanel);
+        this.ratios[index] = size / totalSize;
+    }
+
+    private deriveRatiosFromContentSize() {
+        const totalSize = this.getVaryingSize(this.domSplitterPanel);
+        this.ratios = [];
+        for(const container of this.childContainers) {
+            const size = this.orientation === OrientationKind.Row ? container.getWidth() : container.getHeight();
+            this.ratios.push(size / totalSize);
         }
+    }
+
+    private applyRatios() {
+        // TODO: CACHE THIS COMPUTATION
+        const barCount = this.splitterBars.length;
+        const barSize = this.splitterBars[0].getBarSize();
+        const barSizePx = `${barSize.toFixed(3)}px`
+        const totalBarSize = barSize * barCount;
+        const totalBarSizePx = `${totalBarSize.toFixed(3)}px`;
+
+        const barSizeDecrement = `calc(${totalBarSizePx} / ${barCount + 1} * ${barCount})`;
+
+        let ratioMappings: string[] = [];
+        for(let i = 0; i < this.ratios.length; i++) {
+            if(i > 0) {
+                ratioMappings.push(barSizePx);
+            }
+            const ratio = this.ratios[i];            
+            const ratioMapping = `calc( ${(ratio * 100).toFixed(3)}% - ${barSizeDecrement})`;
+            ratioMappings.push(ratioMapping);
+        }
+        
+        const ratioMappingPropertyValue = ratioMappings.join(" ");
+        this.domSplitterPanel.css("--docker-ratio-mapping", ratioMappingPropertyValue);
     }
 
     resize(width: number, height: number) {
         if(this.childContainers.length <= 1)
             return;
+        this.applyRatios();
 
-
-        // Set the container dimension
-        this.domSplitterPanel.width(width).height(height);
+        // // Set the container dimension
+        // this.domSplitterPanel.width(width).height(height);
 
         // Adjust the fixed non-varying dimension
-        for(let i = 0; i < this.childContainers.length; i++) {
-            const childContainer = this.childContainers[i];
+        // for(let i = 0; i < this.childContainers.length; i++) {
+        //     const childContainer = this.childContainers[i];
 
-            if(this.orientation === OrientationKind.Row) {
-                childContainer.resize(childContainer.getWidth(), height);
-            } else {
-                childContainer.resize(width, childContainer.getHeight());
-            }
+        //     if(this.orientation === OrientationKind.Row) {
+        //         childContainer.resize(childContainer.getWidth(), height);
+        //     } else {
+        //         childContainer.resize(width, childContainer.getHeight());
+        //     }
 
-            if(i < this.splitterBars.length) {
-                const fixedDimension = this.orientation === OrientationKind.Row ? height : width;
-                this.splitterBars[i].adjustFixedDimension(fixedDimension);
-            }            
-        }
+        //     if(i < this.splitterBars.length) {
+        //         const fixedDimension = this.orientation === OrientationKind.Row ? height : width;
+        //         this.splitterBars[i].adjustFixedDimension(fixedDimension);
+        //     }            
+        // }
 
-        // Adjust the varying dimension
-        let totalChildPanelSize = 0;
-        this.childContainers.forEach(container => {
-            const varyingSize = this.orientation === OrientationKind.Row ? 
-                container.getWidth() : container.getHeight();
-            totalChildPanelSize += varyingSize;
-        });
+        // // Adjust the varying dimension
+        // let totalChildPanelSize = 0;
+        // this.childContainers.forEach(container => {
+        //     const varyingSize = this.orientation === OrientationKind.Row ? 
+        //         container.getWidth() : container.getHeight();
+        //     totalChildPanelSize += varyingSize;
+        // });
 
 
-        // Compute the scale multiplier as ratio between requried and available space
-        const barSize = this.splitterBars[0].getBarSize();
-        const targetTotalPanelSize = this.getVaryingSize(this.domSplitterPanel)
-            - barSize * (this.childContainers.length - 1);
-        totalChildPanelSize = Math.max(totalChildPanelSize, 1);
-        const scaleMultiplier = targetTotalPanelSize / totalChildPanelSize;
-
-        console.dir(totalChildPanelSize);
-        console.dir(targetTotalPanelSize);
-        console.dir(scaleMultiplier);
+        // // Compute the scale multiplier as ratio between requried and available space
+        // const barSize = this.splitterBars[0].getBarSize();
+        // const targetTotalPanelSize = this.getVaryingSize(this.domSplitterPanel)
+        //     - barSize * (this.childContainers.length - 1);
+        // totalChildPanelSize = Math.max(totalChildPanelSize, 1);
+        // const scaleMultiplier = targetTotalPanelSize / totalChildPanelSize;
 
         // Adjust the varying size accordingly
-        let totalNewSize = 0;
-        for(let i = 0; i < this.childContainers.length; i++) {
-            const childContainer = this.childContainers[i];
-            const originalSize = this.getVaryingSize(childContainer.getDOM());
-            const newSize = Math.floor(originalSize * scaleMultiplier);
+        // let totalNewSize = 0;
+        // for(let i = 0; i < this.childContainers.length; i++) {
+        //     const childContainer = this.childContainers[i];
+        //     const originalSize = this.getVaryingSize(childContainer.getDOM());
+        //     const newSize = Math.floor(originalSize * scaleMultiplier);
             
-            totalNewSize += newSize;
+        //     totalNewSize += newSize;
 
 
-            this.changeContainerVaryingSize(childContainer, newSize);
-        }
-
-        console.log("TOTAL NEW SIZE");
-        console.dir(totalNewSize);
+        //     this.changeContainerVaryingSize(childContainer, newSize);
+        // }
     }
 
     private changeContainerVaryingSize(container: IDockContainer, size: number) {
@@ -164,6 +211,10 @@ export class SplitterPanel extends Component {
         this.domSplitterPanel = DOM.create("div").addClass("DockerTS-SplitterPanel")
             .addClass(this.orientation === OrientationKind.Row ? "DockerTS-SplitterPanel--Row" : "DockerTS-SplitterPanel--Column");
         this.constructSplitterDOMInternals();
+
+        this.deriveRatiosFromContentSize();
+        this.applyRatios();   
+
         return this.domSplitterPanel.get();
     }
 
@@ -180,6 +231,7 @@ export class SplitterPanel extends Component {
             const prevContainer = this.childContainers[i];
             const nextContainer = this.childContainers[i + 1]
             const splitterBar = new SplitterBar(prevContainer, nextContainer, this.orientation);
+            splitterBar.on("onResized", this.handleResizeEvent.bind(this));
             this.splitterBars.push(splitterBar);
 
             this.domSplitterPanel.appendChild(prevContainer.getDOM());

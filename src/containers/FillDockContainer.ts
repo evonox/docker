@@ -20,9 +20,11 @@ export class FillDockContainer implements IDockContainer {
 
     constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
         this.domContainer = DOM.create("div");
-        this.tabHost = new TabHost(this.tabStripDirection);
+        this.tabHost = new TabHost(this.dockManager, this.tabStripDirection);
         this.domContainer.appendChild(this.tabHost.getDOM());
     }
+
+    handleContextMenuAction(actionName: string): void {}
 
     updateContainerState(): void {
         this.tabHost.updateContainerState();

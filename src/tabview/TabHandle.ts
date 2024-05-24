@@ -1,3 +1,4 @@
+import { MOUSE_BTN_RIGHT } from "../common/constants";
 import { Component } from "../framework/Component";
 import { property, state } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
@@ -66,6 +67,7 @@ export class TabHandle extends Component {
         this.domRoot.appendChild(this.closeButton.getDOM());
 
         this.bind(this.domRoot.get(), "mousedown", this.handleMouseDown);
+        this.bind(this.domRoot.get(), "contextmenu", this.handleShowContextMenu.bind(this));
 
 
         // HIDE CLOSE BUTTON IF GRAYED OR DISALLOWED BY PANEL CONTAINER
@@ -96,6 +98,8 @@ export class TabHandle extends Component {
         event.preventDefault();
         this.currentX = event.pageX;        
         this.triggerEvent("onSelected");
+        if(event.button === MOUSE_BTN_RIGHT)
+            return;
 
         DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
     }
@@ -116,5 +120,10 @@ export class TabHandle extends Component {
 
     private handleMouseUp(event: MouseEvent) {
         this.domRoot.removeClass("dockspan-tab-handle-dragged");        
+    }
+
+    private handleShowContextMenu(event: MouseEvent) {
+        event.preventDefault();
+        this.triggerEvent("onContextMenu", event);
     }
  }

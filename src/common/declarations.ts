@@ -38,6 +38,7 @@ export interface IDockContainer extends IEventEmitter {
 
     // On Query Panel Context Menu
     onQueryContextMenu(config: IContextMenuAPI): void;
+    handleContextMenuAction(actionName: string): void;
 
 
     // Dimensions / Resizing & Layouting

@@ -6,6 +6,7 @@ import { TabPage } from "./TabPage";
 import { ContainerType, TabHostDirection } from "../common/enumerations";
 
 import "./TabHost.css";
+import { DockManager } from "../facade/DockManager";
 
 export class TabHost extends Component {
 
@@ -26,7 +27,7 @@ export class TabHost extends Component {
     private domSeparator: DOM<HTMLElement>;
     private domContent: DOM<HTMLElement>;
 
-    constructor(private tabStripDirection: TabHostDirection) {
+    constructor(private dockManager: DockManager, private tabStripDirection: TabHostDirection) {
         super();
         this.initializeComponent();
     }
@@ -100,7 +101,7 @@ export class TabHost extends Component {
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
                 child.setHeaderVisibility(this.tabStripDirection !== TabHostDirection.Top);
-                const tabPage = new TabPage(child);
+                const tabPage = new TabPage(this.dockManager, child);
                 tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
                 tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
                 this.tabPages.push(tabPage);
@@ -108,6 +109,7 @@ export class TabHost extends Component {
                 this.domContent.appendChild(tabPage.getDOM());
             }
         }
+
 
         // TODO: HANDLE ACTIVE TAB RESTORATION
 
@@ -193,10 +195,5 @@ export class TabHost extends Component {
             const isSelected = tabPage === this.activeTab;
             tabPage.setSelected(isSelected, isSelected ? isActive : false);
         }
-
-        // TODO: HOTFIX: Think of proper solution - WHEN PANEL SET VISIBLE - RESIZE IT
-        setTimeout(() => {
-            this.resize(this.domHost.getWidth(), this.domHost.getHeight());
-        });       
     }   
 }

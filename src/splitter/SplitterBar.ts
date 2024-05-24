@@ -7,6 +7,13 @@ import { DragOverflowGuard, DragOverflowState, OverflowDirection } from "../util
 
 import "./SplitterBar.css";
 
+export interface ResizedPayload {
+    prev: IDockContainer;
+    next: IDockContainer;
+    prevSize: number;
+    nextSize: number;
+}
+
 /**
  * SplitterBar Component
  */
@@ -112,13 +119,22 @@ export class SplitterBar extends Component {
             delta = nextMinWidth - nextWidth;
             const guardCoordinate = this.lastPosX + delta;
             this.overflowGuard.startDragOverflow(guardCoordinate, OverflowDirection.Incrementing);
-        }        
+        }
+
         // New Widths
         const newPrevWidth = prevWidth + delta;
         const newNextWidth = nextWidth - delta;
+
+        // Trigger Resize Event
+        const payload: ResizedPayload = {
+            prev: this.prevContainer, next: this.nextContainer,
+            prevSize: newPrevWidth, nextSize: newNextWidth
+        };
+        this.triggerEvent("onResized", payload);
+
         // Resize the containers
-        this.prevContainer.resize(newPrevWidth, this.prevContainer.getHeight());
-        this.nextContainer.resize(newNextWidth, this.nextContainer.getHeight());
+        // this.prevContainer.resize(newPrevWidth, this.prevContainer.getHeight());
+        // this.nextContainer.resize(newNextWidth, this.nextContainer.getHeight());
     }
 
     private processDraggingY(delta: number, event: MouseEvent) {

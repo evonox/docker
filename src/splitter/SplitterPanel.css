@@ -1,14 +1,13 @@
 
 
 .DockerTS-SplitterPanel {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
 }
 
 .DockerTS-SplitterPanel--Row {
-    flex-direction: row;
+    grid-template-columns: var(--docker-ratio-mapping)
 }
 
 .DockerTS-SplitterPanel--Column {
-    flex-direction: column;
+    grid-template-rows: var(--docker-ratio-mapping)
 }

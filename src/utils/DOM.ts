@@ -167,6 +167,16 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
+    hide(): DOM<T> {
+        this.css("display", "none");
+        return this;
+    }
+
+    show(): DOM<T> {
+        this.css("display", "");
+        return this;
+    }
+
     get(): T {
         return this.element;
     }

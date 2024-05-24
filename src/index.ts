@@ -15,7 +15,22 @@ dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
             api.setPanelTitle("Panel Number 1");
             return domElement;
         },
-        getMinHeight: () => 125
+        getMinHeight: () => 125,
+        onQueryContextMenu: (config) => {
+            config.appendMenuItem({
+                displayOrder: 1,
+                icon: `<i class="fa fa-bars"></i>`,
+                title: "Menu Item One",
+                actionName: "Action One"            
+            });   
+            config.appendMenuItem({displayOrder: 50, separator: true});
+            config.appendMenuItem({displayOrder: 101, title: "Menu Item Two", actionName: "Action2"});
+            config.appendMenuItem({displayOrder: 102, title: "Menu Item Three", actionName: "Action3"});
+        },
+        onActionInvoked: (actionName) => {
+            console.log(`ACTION INVOKED: ${actionName}`);
+        }
+
     }
 });
 
@@ -139,19 +154,19 @@ async function performDocking() {
 
     try {
         const containerOne = await dockManager.createPanel("panel1");
-        const containerTwo = await dockManager.createPanel("panel2");
-        const containerThree = await dockManager.createPanel("panel3");
-        const containerLeft = await dockManager.createPanel("panel4");
-        const containerBottom = await dockManager.createPanel("panel5");
-        const containerFloat = await dockManager.createPanel("panel6");
+        // const containerTwo = await dockManager.createPanel("panel2");
+        // const containerThree = await dockManager.createPanel("panel3");
+        // const containerLeft = await dockManager.createPanel("panel4");
+        // const containerBottom = await dockManager.createPanel("panel5");
+        // const containerFloat = await dockManager.createPanel("panel6");
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
-        dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
-        dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
-        dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
-        dockManager.dockDown(dockManager.getDocumentNode(), containerBottom, 0.25);
+        // dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
+        // dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
+        // dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
+        // dockManager.dockDown(dockManager.getDocumentNode(), containerBottom, 0.25);
 
-        dockManager.floatDialog(containerFloat, {x: 50, y: 50, w: 500, h: 200});
+        // dockManager.floatDialog(containerFloat, {x: 50, y: 50, w: 500, h: 200});
     }
     catch(err) {
         console.dir(err);
