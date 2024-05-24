@@ -82,7 +82,7 @@ export class FillDockContainer implements IDockContainer {
     }
 
     resize(width: number, height: number): void {
-        this.domContainer.width(width).height(height);
+        // this.domContainer.width(width).height(height);
         this.tabHost.resize(width, height);
     }
 

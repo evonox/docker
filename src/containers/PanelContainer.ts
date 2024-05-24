@@ -133,6 +133,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this._isVisible = visible;
         if(visible) {
             this.domContentFrame.show();
+            this.updateContentLayout();
         } else {
             this.domContentFrame.hide();
         }

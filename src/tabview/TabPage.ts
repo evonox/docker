@@ -13,7 +13,10 @@ import { ContextMenu } from "../core/ContextMenu";
 export class TabPage extends Component {
 
     @state({defaultValue: false})
-    selected: boolean;
+    isSelected: boolean;
+
+    @state({defaultValue: false})
+    isActive: boolean;
 
     private domContentWrapper: DOM<HTMLElement>;
 
@@ -35,25 +38,13 @@ export class TabPage extends Component {
     }
 
     setActive(flag: boolean) {
-        this.tabHandle.setActive(flag);
+        this.isSelected = true;
+        this.isActive = flag;
     }
 
-
     setSelected(flag: boolean, isActive: boolean) {
-        this.selected = flag;
-        this.tabHandle.setSelected(flag);
-        this.tabHandle.setActive(isActive);
-
-        if(this.selected) {
-            this.container.setVisible(true);
-            // TODO: FORCE RESIZE - QUERY SIZE FROM THE HOST??
-            // TODO: SET ACTIVE PANEL TO DOCK CONTAINER
-        }
-        else {
-            this.container.setVisible(false);
-        }
-
-
+        this.isSelected = flag;
+        this.isActive = isActive;
     }
 
     getMinWidth(): number {
@@ -69,7 +60,10 @@ export class TabPage extends Component {
     }
 
     updateContainerState(): void {
-        this.container.updateContainerState();
+        if(this.dockManager.getActivePanel() === this.container) {
+            this.isSelected = true;
+            this.isActive = true;
+        }       
     }    
 
     protected onInitialized(): void {
@@ -91,12 +85,23 @@ export class TabPage extends Component {
     protected onInitialRender(): HTMLElement {
         this.domContentWrapper = DOM.create("div").appendChild(this.container.getDOM());
         this.updateTabTitle();
+
+        this.container.setVisible(this.isSelected);
+
         return this.domContentWrapper.get();
     }
 
     protected onUpdate(element: HTMLElement): void {
-        this.domContentWrapper.css("display", this.selected ? "block" : "none");
-        this.container.setVisible(this.selected);
+        this.tabHandle.setSelected(this.isSelected);
+        this.tabHandle.setActive(this.isActive);
+
+        this.container.setVisible(this.isSelected);
+
+        if(this.isSelected) {
+            this.domContentWrapper.show();
+        } else {
+            this.domContentWrapper.hide();
+        }
     }
 
     private handleTabSelected() {

@@ -161,6 +161,7 @@ async function performDocking() {
         // const containerFloat = await dockManager.createPanel("panel6");
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
+        dockManager.setActivePanel(containerOne);
         // dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
         // dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
         // dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);

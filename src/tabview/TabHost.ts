@@ -64,13 +64,13 @@ export class TabHost extends Component {
     }
 
     resize(width: number, height: number) {
-        this.domHost.width(width).height(height);
+        // this.domHost.width(width).height(height);
 
         const tabStripHeight = this.domTabStrip.getHeight();
         const separatorHeight = this.domSeparator.getHeight();
         const contentHeight = height - tabStripHeight - separatorHeight;
 
-        this.domContent.height(contentHeight);
+        // this.domContent.height(contentHeight);
 
         if(this.activeTab) {
             this.activeTab.resize(width, contentHeight);
@@ -131,15 +131,17 @@ export class TabHost extends Component {
     protected onDisposed(): void {}
 
     protected onInitialRender(): HTMLElement {
-        this.domHost = DOM.create("div").addClass("dockspan-tab-host");
+        this.domHost = DOM.create("div").addClass("DockerTS-TabHost");
         this.domTabStrip = DOM.create("div").addClass("DockerTS-TabStrip");
         this.domSeparator = DOM.create("div").addClass("DockerTS-TabStrip__Separator");
-        this.domContent = DOM.create("div").attr("tabIndex", "0").addClass("dockspan-tab-content");
+        this.domContent = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-TabContent");
 
         if(this.tabStripDirection === TabHostDirection.Top) {
-            this.domHost.appendChildren([this.domTabStrip, this.domSeparator, this.domContent]);
+            this.domHost.appendChildren([this.domTabStrip, this.domSeparator, this.domContent])
+                .addClass("DockerTS-TabHost--Top");
         } else if(this.tabStripDirection === TabHostDirection.Bottom) {
-            this.domHost.appendChildren([this.domContent, this.domSeparator, this.domTabStrip]);
+            this.domHost.appendChildren([this.domContent, this.domSeparator, this.domTabStrip])
+                .addClass("DockerTS-TabHost--Bottom");
         } else {
             throw new Error("Unsupported TabStripDirection");
         }
@@ -150,12 +152,7 @@ export class TabHost extends Component {
         return this.domHost.get();
     }
 
-    protected onUpdate(element: HTMLElement): void {
-        this.domTabStrip.toggleClass("dockspan-tab-handle-list-container-visible", this.displayTabHandles);
-        this.domSeparator.toggleClass("dockspan-tab-handle-content-seperator-visible", this.displayTabHandles);
-
-        this.domSeparator.toggleClass("dockspan-tab-handle-content-seperator-active", this.isActive);
-    }
+    protected onUpdate(element: HTMLElement): void {}
 
     private handleMouseDown(event: MouseEvent) {
         /**

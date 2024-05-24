@@ -1,4 +1,20 @@
 
+.DockerTS-TabHost {
+    display: grid;
+}
+
+.DockerTS-TabHost--Top {
+    grid-template-rows: auto auto 1fr;
+}
+
+.DockerTS-TabHost--Bottom {
+    grid-template-rows: 1fr auto auto;
+}
+
+.DockerTS-TabContent {
+    display: grid;
+}
+
 .DockerTS-TabStrip {
     display: flex;
     flex-direction: row;
