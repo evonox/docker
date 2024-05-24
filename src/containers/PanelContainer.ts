@@ -7,14 +7,14 @@ import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
 import { ContainerType, PanelContainerState, PanelType } from "../common/enumerations";
-import { IPoint, ISize } from "../common/dimensions";
+import { IPoint, IRect, ISize } from "../common/dimensions";
 import { PanelButtonBar } from "../core/PanelButtonBar";
 
 import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND } from "../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -24,6 +24,8 @@ export class PanelContainer extends Component implements IDockContainer {
     private domTitle: DOM<HTMLElement>;
     private domTitleText: DOM<HTMLElement>;
     private domContentHost: DOM<HTMLElement>;
+
+    private domMaximizeRegionHost: DOM<HTMLElement>;
 
     private domContentWrapper: DOM<HTMLElement>;
     private domContent: HTMLElement;
@@ -45,6 +47,8 @@ export class PanelContainer extends Component implements IDockContainer {
     // Dimensions & Resizing State
     private _lastDialogSize: ISize;
     private _lastExpandedHeight: number;
+    private _lastFloatingRect: IRect;
+    private _lastZIndex: number;
 
     private _isVisible: boolean = false;
 
@@ -212,6 +216,46 @@ export class PanelContainer extends Component implements IDockContainer {
         this.triggerEvent("onCollapsed");
     }
 
+    restorePanel() {
+        if(this.containerState !== PanelContainerState.Maximized)
+            return;
+        this.containerState = PanelContainerState.Floating;
+        
+        this.domPanel.css("z-index", String(this._lastZIndex))
+            .left(this._lastFloatingRect.x).top(this._lastFloatingRect.y)
+            .width(this._lastFloatingRect.w).height(this._lastFloatingRect.h);
+    }
+
+    // TODO: In Future support maximizing from more states.
+    maximizePanel() {
+        if(this.containerState !== PanelContainerState.Floating)
+            return;
+        this.containerState = PanelContainerState.Maximized;
+        // const panelBounds = this.domPanel.getBounds();
+        // this._lastFloatingRect = {
+        //     x: panelBounds.left, y: panelBounds.y, w: panelBounds.width, h: panelBounds.height
+        // };
+        // this._lastZIndex = parseInt(this.domPanel.getCss("z-index"));
+
+        const containerBounds = this.dockManager.getContainerBoundingRect();
+        const zIndexMaximizedPanel = this.dockManager.config.zIndexes.zIndexMaximizedPanel;
+        this.domMaximizeRegionHost.applyRect(containerBounds).zIndex(zIndexMaximizedPanel)
+            .appendChild(this.domPanelHeader).appendChild(this.domContentContainer)
+            .appendTo(document.body);
+
+        // TODO: TEMP JS RESIZING
+        this.domPanelHeader.width(containerBounds.width);
+        this.domContentContainer.width(containerBounds.width).height(containerBounds.height - this.domPanelHeader.getHeight())
+            .left(containerBounds.left).top(this.domPanelHeader.getHeight());
+
+        // const containerBounds = this.dockManager.getContainerBoundingRect();
+        // this.setDialogPosition(containerBounds.x, containerBounds.y);
+        // this.resize(containerBounds.width, containerBounds.height);
+        // this.domPanel.left(containerBounds.left).top(containerBounds.top)
+        //     .width(containerBounds.width).height(containerBounds.height)
+        //     .css("z-index", String(zIndexMaximizedPanel));
+    }
+
     /**
      * RECALCULATE SIZE OF INTERNALS - NOTIFY ON RESIZE THE PANEL
      * REMOVE JS DIMENSION CALCULATION AS MUCH AS POSSIBLE
@@ -309,6 +353,10 @@ export class PanelContainer extends Component implements IDockContainer {
             this.collapsePanel();
         } else if(actionName === PANEL_ACTION_EXPAND) {
             this.expandPanel();
+        } else if(actionName === PANEL_ACTION_MAXIMIZE) {
+            this.maximizePanel();
+        } else if(actionName === PANEL_ACTION_RESTORE) {
+            this.restorePanel();
         }
 
         this.updateHeaderButtonVisibility();
@@ -339,6 +387,8 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domTitle = DOM.create("div").addClasses(["DockerTS-HeaderTitleBar"]);
         this.domTitleText = DOM.create("div");
         this.domContentHost = DOM.create("div").addClass("DockerTS-PanelContent").appendTo(this.domPanel);
+
+        this.domMaximizeRegionHost = DOM.create("div").addClass("DockerTS-MaximizeRegionHost");
 
         this.domContentWrapper = DOM.create("div")
                 .addClass("panel-content-wrapper")
@@ -510,11 +560,12 @@ export class PanelContainer extends Component implements IDockContainer {
         if(contextMenuConfig.getMenuItems().length === 0)
             return;
 
+        const zIndexContextMenu = this.dockManager.config.zIndexes.zIndexContextMenu;
         const domContextMenu = new ContextMenu(contextMenuConfig);
         domContextMenu.on("onAction", (actionName) => {
             this.api.onActionInvoked?.(actionName);
         });
-        domContextMenu.show(event);
+        domContextMenu.show(event, zIndexContextMenu);
     }
 
     /**

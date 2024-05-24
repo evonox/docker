@@ -48,3 +48,11 @@
     overflow: hidden;
     background: whitesmoke;
 }
+
+.DockerTS-MaximizeRegionHost {
+    box-sizing: border-box;
+    position: absolute;    
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: red;
+}

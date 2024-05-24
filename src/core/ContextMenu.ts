@@ -20,9 +20,12 @@ export class ContextMenu extends Component {
         this.initializeComponent();
     }
 
-    show(event: MouseEvent ) {
+    show(event: MouseEvent, zIndex: number ) {
         this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
-            .left(event.pageX).top(event.pageY).appendTo(document.body);
+            .left(event.pageX).top(event.pageY)
+            .css("z-index", String(zIndex))
+            .appendTo(document.body);
+            
         this.bind(window, "mousedown", this.handleMouseDown.bind(this), {capture: true});
     }
 

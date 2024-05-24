@@ -13,6 +13,8 @@ export interface IDockConfig {
         zIndexTabHost?: number;
         zIndexTabHandle?: number;
         zIndexWheel?: number;
+        zIndexMaximizedPanel?: number;
+        zIndexContextMenu?: number;
     }
 }
 
@@ -25,6 +27,8 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         zIndexDialogCounter: 10001,
         zIndexTabHost: 1000,
         zIndexTabHandle: 100,
-        zIndexWheel: 999999
+        zIndexWheel: 1e6 - 1,
+        zIndexMaximizedPanel: 1e6,
+        zIndexContextMenu: 1e6 + 1
     }
 }

@@ -1,3 +1,4 @@
+import { IRect } from "../common/dimensions";
 
 const COORDINATE_PRECISION = 3;
 
@@ -93,6 +94,24 @@ export class DOM<T extends HTMLElement> {
             this.css("height", value);
         } else {
             this.css("height", value.toFixed(COORDINATE_PRECISION) + "px");
+        }
+        return this;
+    }
+
+    zIndex(value: number): DOM<T> {
+        this.css("z-index", String(value));
+        return this;
+    }
+
+    getZIndex(): number {
+        return parseInt(this.getCss("z-index"));
+    }
+
+    applyRect(rect: DOMRect | IRect): DOM<T> {
+        if(rect instanceof DOMRect) {
+            this.left(rect.left).top(rect.top).width(rect.width).height(rect.height);
+        } else {
+            this.left(rect.x).top(rect.y).width(rect.w).height(rect.h);
         }
         return this;
     }
