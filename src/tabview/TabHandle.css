@@ -5,10 +5,10 @@
     flex-wrap: nowrap;    
     align-items: center;
 
-    padding: 2px 6px;
-    padding-right: 16px;
+    padding: 2px 8px;
     cursor: pointer;
 
+    column-gap: 4px;
 
     border: 1px solid gray;
 
@@ -49,6 +49,7 @@
     position: relative;
     font-style: italic;
     padding-right: 4px;
+    margin-right: 8px;
 }
 
 .DockerTS-TabHandle--HasChanges::after {

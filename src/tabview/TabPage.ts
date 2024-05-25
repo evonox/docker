@@ -81,6 +81,7 @@ export class TabPage extends Component {
         this.tabHandle.on("onTabClicked", this.handleTabSelected.bind(this));
         this.tabHandle.on("onTabMoved", this.handleTabMoved.bind(this));
         this.tabHandle.on("onContextMenu", this.handleShowContextMenu.bind(this));
+        this.tabHandle.on("onCloseClicked", this.handleCloseButtonClick.bind(this));
 
         this.titleSubscription = this.container.on("onTitleChanged", this.handleTitleChanged.bind(this));
         this.focusSubscription = this.container.on("onFocused", this.handlePanelFocused.bind(this));
@@ -117,6 +118,10 @@ export class TabPage extends Component {
         } else {
             this.domContentWrapper.hide();
         }
+    }
+
+    private handleCloseButtonClick() {
+        console.log("onClose Click");
     }
 
     private handleTabSelected() {

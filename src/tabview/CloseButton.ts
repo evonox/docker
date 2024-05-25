@@ -1,7 +1,9 @@
+import { CLOSE_BUTTON_ICON } from "../core/panel-default-buttons";
 import { Component } from "../framework/Component";
 import { property } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
 
+import "./CloseButton.css"
 
 export class CloseButton extends Component {
 
@@ -22,20 +24,24 @@ export class CloseButton extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domButton = DOM.create("div").addClass("dockspan-tab-handle-close-button");
-        this.bind(this.domButton.get(), "click", this.handleButtonClick);
+        this.domButton = DOM.create("div").html(CLOSE_BUTTON_ICON).addClass("DockerTS-CloseButton");
+        this.bind(this.domButton.get(), "mousedown", this.handleButtonClick);
         return this.domButton.get();
     }
 
     protected onUpdate(element: HTMLElement): void {
         if(this.visible) {
-            this.domButton.css("display", "block");
+            this.domButton.show();
         } else {
-            this.domButton.css("display", "none");
+            this.domButton.hide();
         }
     }
 
-    private handleButtonClick() {
+    private handleButtonClick(event: MouseEvent) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        
         this.triggerEvent("click");
     }
 }

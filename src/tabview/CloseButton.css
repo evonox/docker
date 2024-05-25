@@ -1,0 +1,20 @@
+
+.DockerTS-CloseButton {
+    width: 0.75em;
+    height: 0.75em;
+
+    fill: var(--docker-ts-primary-on-color);
+    stroke: var(--docker-ts-primary-on-color);
+
+    cursor: pointer;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.DockerTS-CloseButton:hover, .DockerTS-CloseButton:active {
+    fill: var(--docker-ts-hover-button-color);
+    stroke: var(--docker-ts-hover-button-color);
+}
