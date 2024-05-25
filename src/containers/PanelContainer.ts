@@ -15,6 +15,7 @@ import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
+import { AnimationHelper } from "../utils/animation-helper";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -125,6 +126,14 @@ export class PanelContainer extends Component implements IDockContainer {
 
     getDockManager(): DockManager {
         return this.dockManager;
+    }
+
+    getContentFrameDOM() {
+        return this.domContentFrame;
+    }
+
+    getFrameHeaderDOM() {
+        return this.domFrameHeader;
     }
     
     isHidden(): boolean {
@@ -259,6 +268,16 @@ export class PanelContainer extends Component implements IDockContainer {
             || this.previousContainerState === PanelContainerState.Minimized) {
             this.containerState = PanelContainerState.Docked;
             this.domContentFrame.zIndex("");
+
+            const originalBounds = this.domPanelPlaceholder.getBounds();
+
+            // AnimationHelper.animatePosition(this.domContentFrame.get(), {
+            //     x: originalBounds.left, y: originalBounds.y, w: originalBounds.width, h: originalBounds.height
+            // }).then(() => {
+            //     this.domContentFrame.zIndex("");
+            // });
+    
+
         } else if(this.previousContainerState === PanelContainerState.Floating) {
             // TODO: TO BE DONE
         }
@@ -276,12 +295,21 @@ export class PanelContainer extends Component implements IDockContainer {
             return;
         this.previousContainerState = this.containerState;
         this.wasVisibleHeaderBeforeMaximization = this.isHeaderVisible();
+
+        this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
         this.containerState = PanelContainerState.Maximized;
 
+        const containerBounds = this.dockManager.getContainerBoundingRect();
         this.setHeaderVisibility(true);
-        this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
-
         this.updateLayoutState();
+        // AnimationHelper.animateMaximize(this, {
+        //     x: containerBounds.left, y: containerBounds.y, w: containerBounds.width, h: containerBounds.height
+        // }).then(() => {
+        //     this.setHeaderVisibility(true);   
+        // });
+
+
+
         // const panelBounds = this.domPanel.getBounds();
         // this._lastFloatingRect = {
         //     x: panelBounds.left, y: panelBounds.y, w: panelBounds.width, h: panelBounds.height

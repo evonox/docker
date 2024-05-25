@@ -66,6 +66,16 @@ export class DOM<T extends HTMLElement> {
         return this.element.innerHTML;
     }
 
+    getLeft(): number {
+        const bounds = this.element.getBoundingClientRect();
+        return bounds.left;
+    }
+
+    getTop(): number {
+        const bounds = this.element.getBoundingClientRect();
+        return bounds.top;
+    }
+
     getWidth(): number {
         return this.element.clientWidth;
     }
@@ -125,7 +135,11 @@ export class DOM<T extends HTMLElement> {
     }
 
     zIndex(value: number | string): DOM<T> {
-        this.css("z-index", String(value));
+        if(value === "") {
+            this.element.style.setProperty("z-index", "");
+        } else {
+            this.element.style.setProperty("z-index", String(value));
+        }
         return this;
     }
 

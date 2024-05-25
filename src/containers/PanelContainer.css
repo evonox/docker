@@ -50,6 +50,8 @@
     position: absolute;
     display: grid;
     grid-template-rows: auto 1fr;
+
+    border: 1px solid darkgray;
 }
 
 .DockerTS-ContentFrame.DockerTS-ContentFrame--NoHeader {
