@@ -176,9 +176,21 @@ export class SplitterBar extends Component {
         // New Heights
         const newPrevHeight = prevHeight  + delta;
         const newNextHeight = nextHeight  - delta;
+
+        // Trigger Resize Event
+        const payload: ResizedPayload = {
+            prev: this.prevContainer, next: this.nextContainer,
+            prevSize: newPrevHeight, nextSize: newNextHeight
+        };
+
+
+        console.dir(payload);
+
+        this.triggerEvent("onResized", payload);
+
         // Resize the containers
-        this.prevContainer.resize(this.prevContainer.getWidth(), newPrevHeight);
-        this.nextContainer.resize(this.nextContainer.getWidth(), newNextHeight);
+        // this.prevContainer.resize(this.prevContainer.getWidth(), newPrevHeight);
+        // this.nextContainer.resize(this.nextContainer.getWidth(), newNextHeight);
     }
 
     private notifyGlobalResizeEvent() {

@@ -46,6 +46,7 @@
 
 /* CSS Class Hosting the panel header and content */
 .DockerTS-ContentFrame {
+    z-index: 1;
     position: absolute;
     display: grid;
     grid-template-rows: auto 1fr;

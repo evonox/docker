@@ -9,6 +9,7 @@ import "./SplitterPanel.css";
 
 export class SplitterPanel extends Component {
 
+    private domSplitterPanelWrapper: DOM<HTMLElement>;
     private domSplitterPanel: DOM<HTMLElement>;
     private splitterBars: SplitterBar[] = [];
 
@@ -35,11 +36,12 @@ export class SplitterPanel extends Component {
     }
 
     updateContainerState(): void {
+        this.applyRatios(1);
         this.childContainers.forEach(child => child.updateContainerState());
     }
 
     updateLayoutState(): void {
-        console.dir(this.childContainers);
+        this.applyRatios(1);
         this.childContainers.forEach(child => child.updateLayoutState());       
     }
 
@@ -63,11 +65,7 @@ export class SplitterPanel extends Component {
         }
 
         this.setRatios(newRatios);
-
-        setTimeout(() => {
-            console.log("UPDATE LAYOUT STATE");
-            this.updateLayoutState();
-        }, 2000);;
+        this.updateLayoutState();
     }
 
     getRatios(): number[] {
@@ -314,8 +312,12 @@ export class SplitterPanel extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
+        this.domSplitterPanelWrapper = DOM.create("div").addClass("DockerTS-SplitterPanelWrapper");
         this.domSplitterPanel = DOM.create("div").addClass("DockerTS-SplitterPanel")
-            .addClass(this.orientation === OrientationKind.Row ? "DockerTS-SplitterPanel--Row" : "DockerTS-SplitterPanel--Column");
+            .addClass(
+                this.orientation === OrientationKind.Row 
+                ? "DockerTS-SplitterPanel--Row" : "DockerTS-SplitterPanel--Column"
+            ).appendTo(this.domSplitterPanelWrapper);
         this.constructSplitterDOMInternals();
 
         this.computeInitialRatios();
@@ -323,7 +325,7 @@ export class SplitterPanel extends Component {
 
         this.updateLayoutState();
 
-        return this.domSplitterPanel.get();
+        return this.domSplitterPanelWrapper.get();
     }
 
     protected onUpdate(element: HTMLElement): void {}

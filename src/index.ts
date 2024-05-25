@@ -166,7 +166,7 @@ async function performDocking() {
         const containerThree = await dockManager.createPanel("panel3");
         const containerLeft = await dockManager.createPanel("panel4");
         const containerBottom = await dockManager.createPanel("panel5");
-        // const containerFloat = await dockManager.createPanel("panel6");
+        const containerFloat = await dockManager.createPanel("panel6");
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
@@ -174,6 +174,7 @@ async function performDocking() {
         const dockLeftNode = dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
         dockManager.setActivePanel(containerOne);
         dockManager.dockFill(dockLeftNode, containerBottom);
+        dockManager.dockDown(dockManager.getDocumentNode(), containerFloat, 0.4);
 
         // dockManager.floatDialog(containerFloat, {x: 50, y: 50, w: 500, h: 200});
     }

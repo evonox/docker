@@ -1,13 +1,22 @@
 
+.DockerTS-SplitterPanelWrapper {
+    position: relative;
+}
 
 .DockerTS-SplitterPanel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
     display: grid;
 }
 
 .DockerTS-SplitterPanel--Row {
-    grid-template-columns: var(--docker-ratio-mapping)
+    grid-template-columns: var(--docker-ratio-mapping);
 }
 
 .DockerTS-SplitterPanel--Column {
-    grid-template-rows: var(--docker-ratio-mapping)
+    grid-template-rows: var(--docker-ratio-mapping);
 }
