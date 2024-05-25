@@ -3,10 +3,11 @@ import { property, state } from "../framework/decorators";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
-import { ContainerType, TabOrientation } from "../common/enumerations";
+import { ContainerType, SelectionState, TabOrientation } from "../common/enumerations";
 
 import "./TabHost.css";
 import { DockManager } from "../facade/DockManager";
+import { PanelContainer } from "../containers/PanelContainer";
 
 export class TabHost extends Component {
 
@@ -34,7 +35,7 @@ export class TabHost extends Component {
 
     setActive(isActive: boolean) {
         this.isActive = isActive;
-        this.activeTab?.setActive(isActive);
+        this.activeTab?.setSelectionState(SelectionState.Focused);
     }
 
     getActiveTab(): TabPage | undefined {
@@ -50,31 +51,31 @@ export class TabHost extends Component {
     }
 
     getMinWidth(): number {
-        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinWidth()), 0);
+        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinWidth()), 0);
     }
 
     getMinHeight(): number {
-        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getMinHeight()), 0);
+        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinHeight()), 0);
     }
 
     updateLayoutState() {
         for(const tabPage of this.tabPages) {
-            tabPage.updateLayoutState();
+            tabPage.getContainer().updateLayoutState();
         }
     }
 
 
     updateContainerState(): void {
         for(const tabPage of this.tabPages) {
-            tabPage.updateContainerState();
+            tabPage.getContainer().updateContainerState();
         }
         const activePanel = this.dockManager.getActivePanel();
         const selectedTabPage = this.tabPages.find(page => page.getContainer() === activePanel);
         
         if(selectedTabPage !== undefined && this.activeTab !== selectedTabPage) {
-            this.activeTab?.setSelected(false, false);
+            this.activeTab?.setSelectionState(SelectionState.Unselected);
             this.activeTab = selectedTabPage;
-            this.activeTab.setSelected(true, true);
+            this.activeTab.setSelectionState(SelectionState.Focused);
         }
     }
 
@@ -88,7 +89,7 @@ export class TabHost extends Component {
         // this.domContent.height(contentHeight);
 
         if(this.activeTab) {
-            this.activeTab.resize(width, contentHeight);
+            // this.activeTab.resize(width, contentHeight);
         }
 
         requestAnimationFrame(() => this.resizeTabStripElement(width, height));
@@ -116,7 +117,7 @@ export class TabHost extends Component {
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
                 child.setHeaderVisibility(this.tabStripDirection !== TabOrientation.Top);
-                const tabPage = new TabPage(this.dockManager, child, this.tabStripDirection);
+                const tabPage = new TabPage(this.dockManager, child as PanelContainer, this.tabStripDirection);
                 tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
                 tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
                 this.tabPages.push(tabPage);
@@ -205,7 +206,7 @@ export class TabHost extends Component {
         this.activeTab = page;
         for(const tabPage of this.tabPages) {
             const isSelected = tabPage === this.activeTab;
-            tabPage.setSelected(isSelected, isSelected ? isActive : false);
+            tabPage.setSelectionState(isSelected ? SelectionState.Focused : SelectionState.Unselected);
         }
     }   
 }

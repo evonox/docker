@@ -26,6 +26,7 @@ export class CloseButton extends Component {
     protected onInitialRender(): HTMLElement {
         this.domButton = DOM.create("div").html(CLOSE_BUTTON_ICON).addClass("DockerTS-CloseButton");
         this.bind(this.domButton.get(), "mousedown", this.handleButtonClick);
+
         return this.domButton.get();
     }
 
@@ -42,6 +43,6 @@ export class CloseButton extends Component {
         event.stopImmediatePropagation();
         event.stopPropagation();
         
-        this.triggerEvent("click");
+        this.triggerEvent("onClick");
     }
 }

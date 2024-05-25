@@ -10,24 +10,26 @@ import { DockManager } from "../facade/DockManager";
 import { ContextMenu } from "../core/ContextMenu";
 import { SelectionState, TabOrientation } from "../common/enumerations";
 
-
+/**
+ * TabPage - component for a single tab inside Document Manager, TabbedPanelContainer or FillDockContainer
+ * 
+ * Events:
+ *       onTabMoved - triggered when the user requests the tab reorder
+ */
 export class TabPage extends Component {
 
-    @state({defaultValue: false})
-    isSelected: boolean;
-
-    @state({defaultValue: false})
-    isActive: boolean;
-
-    private domContentWrapper: DOM<HTMLElement>;
+    @state({defaultValue: SelectionState.Unselected})
+    selectionState: SelectionState;
 
     private tabHandle: TabHandle;
+    private domContentWrapper: DOM<HTMLElement>;
+
     private titleSubscription: ComponentEventSubscription;
     private focusSubscription: ComponentEventSubscription;
 
     constructor(
         private dockManager: DockManager, 
-        private container: IDockContainer,
+        private container: PanelContainer,
         private tabOrientation: TabOrientation
     ) {
         super();
@@ -42,42 +44,36 @@ export class TabPage extends Component {
         return this.container;
     }
 
-    setActive(flag: boolean) {
-        this.isSelected = true;
-        this.isActive = flag;
+    setSelectionState(state: SelectionState) {
+        this.selectionState = state;
     }
 
-    setSelected(flag: boolean, isActive: boolean) {
-        this.isSelected = flag;
-        this.isActive = isActive;
-        if(this.isSelected === false) {
-            this.isActive = false;
-        }
-    }
+    // FOCUS: ARE THESE WRAPPERS NECESSARY???
 
-    getMinWidth(): number {
-        return this.container.getMinWidth();
-    }
+    // getMinWidth(): number {
+    //     return this.container.getMinWidth();
+    // }
 
-    getMinHeight(): number {
-        return this.container.getMinHeight();
-    }
+    // getMinHeight(): number {
+    //     return this.container.getMinHeight();
+    // }
 
-    resize(width: number, height: number) {
-        this.container.resize(width, height);
-    }
+    // updateContainerState(): void {
+    //     this.container.updateContainerState();
+    // }    
 
-    updateLayoutState() {
-        this.container.updateLayoutState();
-    }
+    // updateLayoutState() {
+    //     this.container.updateLayoutState();
+    // }
 
-    updateContainerState(): void {
-        this.container.updateContainerState();
-    }    
+    /**
+     * Component Life-Cycle Handlers
+     */
 
     protected onInitialized(): void {
         this.tabHandle = new TabHandle();
         this.tabHandle.orientation = this.tabOrientation;
+
         this.tabHandle.on("onTabClicked", this.handleTabSelected.bind(this));
         this.tabHandle.on("onTabMoved", this.handleTabMoved.bind(this));
         this.tabHandle.on("onContextMenu", this.handleShowContextMenu.bind(this));
@@ -90,6 +86,7 @@ export class TabPage extends Component {
 
     protected onDisposed(): void {
         this.tabHandle.dispose();
+
         this.titleSubscription.unsubscribe();
         this.focusSubscription.unsubscribe();
     }
@@ -101,44 +98,28 @@ export class TabPage extends Component {
             
         this.updateTabTitle();
 
-        this.container.setVisible(this.isSelected);
-
         return this.domContentWrapper.get();
     }
 
     protected onUpdate(element: HTMLElement): void {
-        this.tabHandle.setSelectionState(this.isSelected ? SelectionState.Selected : SelectionState.Unselected);
-        if(this.isActive) {
-            this.tabHandle.setSelectionState(SelectionState.Focused);
-        }
+        this.tabHandle.setSelectionState(this.selectionState);
 
-        this.container.setVisible(this.isSelected);
-
-        if(this.isSelected) {
-            this.domContentWrapper.show();
-        } else {
+        if(this.selectionState === SelectionState.Unselected) {
             this.domContentWrapper.hide();
+            this.container.setVisible(false);
+        } else {
+            this.domContentWrapper.show();
+            this.container.setVisible(true);
         }
     }
+
+    /**
+     * Event Handler Implementatios
+     */
+
 
     private handleCloseButtonClick() {
-        console.log("onClose Click");
-    }
-
-    private handleTabSelected() {
-        this.dockManager.setActivePanel(this.container as PanelContainer);
-        this.triggerEvent("onTabPageSelected", {tabPage: this, isActive: true});
-        // DOCK CONTAINER - NOTIFY ON TAB CHANGED
-    }
-
-    private handleTabDoubleClicked() {
-        (this.container as PanelContainer).maximizePanel();
-    }
-
-    private updateTabTitle() {
-        const title = (this.container as PanelContainer).getTitleHtml();
-        this.tabHandle.titleTemplate = title;
-        this.tabHandle.isModifiedState = this.container.hasChanges();
+        this.dockManager.requestClose(this.container);
     }
 
     private handleTitleChanged() {
@@ -149,18 +130,39 @@ export class TabPage extends Component {
         this.handleTabSelected();
     }
 
+    private handleTabSelected() {
+        this.dockManager.setActivePanel(this.container);
+        this.dockManager.notifyOnTabChange(this);
+    }
+
+    private handleTabDoubleClicked() {
+        this.container.maximizePanel();
+    }
+
     private handleTabMoved(payload: any) {
         this.triggerEvent("onTabMoved", payload);
+    }
+
+    /**
+     * Misc Helper Methods
+     */
+
+    private updateTabTitle() {
+        const title = (this.container as PanelContainer).getTitleHtml();
+        this.tabHandle.titleTemplate = title;
+        this.tabHandle.isModifiedState = this.container.hasChanges();
     }
 
     private handleShowContextMenu(event: MouseEvent) {
         event.preventDefault();
 
+        // Request container to provide the context menu definition
         const contextMenuConfig = new ContextMenuConfig();
         this.container.onQueryContextMenu?.(contextMenuConfig);
         if(contextMenuConfig.getMenuItems().length === 0)
             return;
 
+        // Show the context menu
         const zIndexContextMenu = this.dockManager.config.zIndexes.zIndexContextMenu;
         const domContextMenu = new ContextMenu(contextMenuConfig);
         domContextMenu.on("onAction", (actionName) => {

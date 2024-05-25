@@ -19,6 +19,7 @@ import "./TabHandle.css";
  * 
  * TO-DOs:
  *      - bind drag-and-drop to initiate the panel undock operation
+ *      - implement drag-and-drop tab reorder feature
  */
 
 export class TabHandle extends Component {
@@ -59,7 +60,7 @@ export class TabHandle extends Component {
     protected onInitialized(): void {
         this.closeButton = new CloseButton();
         this.closeButton.visible = this.closeButtonVisible;
-        this.closeButton.on("click", this.handleCloseButtonClick.bind(this));
+        this.closeButton.on("onClick", this.handleCloseButtonClick.bind(this));
     }
 
     protected onDisposed(): void {
@@ -120,6 +121,10 @@ export class TabHandle extends Component {
         this.triggerEvent("onContextMenu", event);
     }
 
+    private handleMouseDblClick(event: MouseEvent) {
+        this.triggerEvent("onTabDblClicked");
+    }
+
     /**
      * TODO: REWORK AFTER THE REST IS TESTED
      * TODO: MOVING ANIMATION????
@@ -138,9 +143,6 @@ export class TabHandle extends Component {
             "pointer", DetectionMode.withThreshold);
     }
 
-    private handleMouseDblClick(event: MouseEvent) {
-        this.triggerEvent("onTabDblClicked");
-    }
 
 
     private handleMouseMove(event: MouseEvent) {
