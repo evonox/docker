@@ -12,6 +12,7 @@ import "./TabHandle.css";
  * TabHandle Component
  * Events:
  *      onTabClicked    - tab handle was clicked
+ *      onTabDblClicked - tab handle was double clicked - (triggers panel maximization)
  *      onTabMoved      - tab reorder was requested by drag-and-drop
  *      onCloseClicked  - close button was clicked
  *      onContextMenu   - user requests to show context menu
@@ -73,6 +74,7 @@ export class TabHandle extends Component {
         this.domRoot.appendChild(this.closeButton.getDOM());
 
         this.bind(this.domRoot.get(), "mousedown", this.handleMouseDown.bind(this));
+        this.bind(this.domRoot.get(), "dblclick", this.handleMouseDblClick.bind(this));
         this.bind(this.domRoot.get(), "contextmenu", this.handleShowContextMenu.bind(this));
 
         return this.domRoot.get();
@@ -127,7 +129,6 @@ export class TabHandle extends Component {
     private currentX: number;
 
     private handleMouseDown(event: MouseEvent) {
-        event.preventDefault();
         this.currentX = event.pageX;        
         this.triggerEvent("onTabClicked");
         if(event.button === MOUSE_BTN_RIGHT)
@@ -135,6 +136,11 @@ export class TabHandle extends Component {
 
         DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), "pointer");
     }
+
+    private handleMouseDblClick(event: MouseEvent) {
+        this.triggerEvent("onTabDblClicked");
+    }
+
 
     private handleMouseMove(event: MouseEvent) {
         this.domRoot.addClass("dockspan-tab-handle-dragged");

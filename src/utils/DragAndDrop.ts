@@ -1,42 +1,73 @@
 import { DOM } from "./DOM";
 import * as  _ from "lodash-es";
+import { IPoint } from "./overlay-helper";
 
 export interface MouseEventHandler {
     (event: MouseEvent): void;
 }
 
+/**
+ * Drag-and-Drop Helper Class
+ */
 export class DragAndDrop {
 
     private static BLOCKER_ZINDEX = 0;
     private static FRAME_RATE = 0;
+    private static MOVE_DETECTION_THRESHOLD = 5;
+
+    private static domBlocker: DOM<HTMLElement>;
 
     static initialize(blockerZIndex: number, frameRate: number) {
         this.BLOCKER_ZINDEX = blockerZIndex;
         this.FRAME_RATE = frameRate;
     }
 
-    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing") {
-
-        event.preventDefault();
-
-        let domBlocker = DOM.create("div").addClass("DockerTS-Blocker")
+    private static createBlocker(cursor: string) {
+        this.domBlocker = DOM.create("div").addClass("DockerTS-Blocker")
             .css("position", "absolute").left(0).top(0).width("100%").height("100%")
             .css("cursor", cursor).css("z-index", String(this.BLOCKER_ZINDEX))
             .appendTo(document.body);
+    }
 
+    private static removeBlocker() {
+        this.domBlocker?.removeFromDOM();
+        this.domBlocker = undefined;
+    }
+
+    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing") {
+
+        let isDragAndDropStarted = false;
         let isDragAndDropCancelled = false;
 
+        let initialPosition: IPoint = {x: event.pageX, y: event.pageY};
+
+        const shouldTriggerDragAndDrop = (event: MouseEvent) => {
+            return Math.abs(event.pageX - initialPosition.x) > this.MOVE_DETECTION_THRESHOLD
+                || Math.abs(event.pageY - initialPosition.y) > this.MOVE_DETECTION_THRESHOLD;
+        }
+
+
         let handleMouseMove = (e: MouseEvent) => {
-            e.preventDefault();           
-            if(isDragAndDropCancelled === false) {
-                mousemove(e);
+            if(isDragAndDropStarted === false) {
+                if(shouldTriggerDragAndDrop(e)) {
+                    this.createBlocker(cursor);
+                    isDragAndDropStarted = true;
+                }
+            } else {
+                e.preventDefault();           
+                if(isDragAndDropCancelled === false) {
+                    mousemove(e);
+                }   
             }
+
         }
 
         handleMouseMove = _.throttle(handleMouseMove, 1000 / this.FRAME_RATE, {leading: true, trailing: true});
 
         const handleMouseUp = (e: MouseEvent) => {
-            e.preventDefault();
+            event.preventDefault();
+
+            this.removeBlocker();
 
             window.removeEventListener("mousemove", handleMouseMove, {capture: true});
             window.removeEventListener("mouseup", handleMouseUp, {capture: true});
@@ -46,14 +77,12 @@ export class DragAndDrop {
                 mouseup(e)
             }
 
-            domBlocker.removeFromDOM();
-            domBlocker = undefined;
         }
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if(e.key === "Escape") {
                 isDragAndDropCancelled = true;
-                domBlocker.css("cursor", "default");
+                this.domBlocker.css("cursor", "default");
 
                 e.preventDefault();
             }

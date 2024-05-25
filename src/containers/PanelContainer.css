@@ -1,7 +1,4 @@
 
-.DockerTS-PanelPlaceholder {
-}
-
 .DockerTS-FrameHeader {
     display: flex;
     flex-direction: row;
@@ -33,7 +30,12 @@
 
     box-sizing: border-box;
     padding: 3px 4px;
+}
 
+.DockerTS-HeaderTitleText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .DockerTS-PanelContent {

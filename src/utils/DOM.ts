@@ -17,6 +17,10 @@ export class DOM<T extends HTMLElement> {
         this.element.remove();
     }
 
+    hasClass(name: string): boolean {
+        return this.element.classList.contains(name);
+    }
+
     addClass(name: string): DOM<T> {
         this.element.classList.add(name);
         return this;
@@ -120,7 +124,7 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
-    zIndex(value: number): DOM<T> {
+    zIndex(value: number | string): DOM<T> {
         this.css("z-index", String(value));
         return this;
     }

@@ -83,7 +83,7 @@ dockManager.registerPanelType("panel4", "panel", "singleton", (dockManager) => {
             api.setPanelTitle("Left View");
             return domElement;
         },
-        getMinWidth: () => 200,
+        getMinWidth: () => 100,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,

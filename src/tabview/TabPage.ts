@@ -82,6 +82,7 @@ export class TabPage extends Component {
         this.tabHandle.on("onTabMoved", this.handleTabMoved.bind(this));
         this.tabHandle.on("onContextMenu", this.handleShowContextMenu.bind(this));
         this.tabHandle.on("onCloseClicked", this.handleCloseButtonClick.bind(this));
+        this.tabHandle.on("onTabDblClicked", this.handleTabDoubleClicked.bind(this));
 
         this.titleSubscription = this.container.on("onTitleChanged", this.handleTitleChanged.bind(this));
         this.focusSubscription = this.container.on("onFocused", this.handlePanelFocused.bind(this));
@@ -128,6 +129,10 @@ export class TabPage extends Component {
         this.dockManager.setActivePanel(this.container as PanelContainer);
         this.triggerEvent("onTabPageSelected", {tabPage: this, isActive: true});
         // DOCK CONTAINER - NOTIFY ON TAB CHANGED
+    }
+
+    private handleTabDoubleClicked() {
+        (this.container as PanelContainer).maximizePanel();
     }
 
     private updateTabTitle() {

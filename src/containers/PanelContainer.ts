@@ -54,6 +54,9 @@ export class PanelContainer extends Component implements IDockContainer {
     private containerState: PanelContainerState;
     private isCollapsed: boolean = false;
 
+    private wasVisibleHeaderBeforeMaximization: boolean;
+    private previousContainerState: PanelContainerState;
+
     // Icon & Title State
     private _iconHtml: string = "";
     private _title: string = "";
@@ -111,8 +114,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private updateTitle() {
         this.domTitle.html(this._iconHtml);
-        this.domTitleText.text(this._title).appendTo(this.domTitle);
-        this.domTitle.toggleClass("has-changes", this._hasChanges);
+        this.domTitleText.addClass("DockerTS-HeaderTitleText").text(this._title).appendTo(this.domTitle);
 
         this.triggerEvent("onTitleChanged", this.getTitleHtml());
     }
@@ -137,6 +139,10 @@ export class PanelContainer extends Component implements IDockContainer {
         } else {
             this.domContentFrame.hide();
         }
+    }
+
+    isHeaderVisible() {
+        return this.domContentFrame.hasClass("DockerTS-ContentFrame--NoHeader") === false;
     }
 
     setHeaderVisibility(visible: boolean): void {
@@ -247,18 +253,35 @@ export class PanelContainer extends Component implements IDockContainer {
     restorePanel() {
         if(this.containerState !== PanelContainerState.Maximized)
             return;
-        this.containerState = PanelContainerState.Floating;
+        // Note: can be floating, minimized or docked
+
+        if(this.previousContainerState === PanelContainerState.Docked 
+            || this.previousContainerState === PanelContainerState.Minimized) {
+            this.containerState = PanelContainerState.Docked;
+            this.domContentFrame.zIndex("");
+        } else if(this.previousContainerState === PanelContainerState.Floating) {
+            // TODO: TO BE DONE
+        }
+        this.setHeaderVisibility(this.wasVisibleHeaderBeforeMaximization);
+        this.updateLayoutState();
         
-        this.domPanelPlaceholder.css("z-index", String(this._lastZIndex))
-            .left(this._lastFloatingRect.x).top(this._lastFloatingRect.y)
-            .width(this._lastFloatingRect.w).height(this._lastFloatingRect.h);
+        // this.domPanelPlaceholder.css("z-index", String(this._lastZIndex))
+        //     .left(this._lastFloatingRect.x).top(this._lastFloatingRect.y)
+        //     .width(this._lastFloatingRect.w).height(this._lastFloatingRect.h);
     }
 
     // TODO: In Future support maximizing from more states.
     maximizePanel() {
-        if(this.containerState !== PanelContainerState.Floating)
+        if(this.containerState === PanelContainerState.Maximized)
             return;
+        this.previousContainerState = this.containerState;
+        this.wasVisibleHeaderBeforeMaximization = this.isHeaderVisible();
         this.containerState = PanelContainerState.Maximized;
+
+        this.setHeaderVisibility(true);
+        this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+
+        this.updateLayoutState();
         // const panelBounds = this.domPanel.getBounds();
         // this._lastFloatingRect = {
         //     x: panelBounds.left, y: panelBounds.y, w: panelBounds.width, h: panelBounds.height
@@ -452,6 +475,13 @@ export class PanelContainer extends Component implements IDockContainer {
 
         this.domFrameHeader.appendChild(this.domTitle);
         this.domFrameHeader.appendChild(this.buttonBar.getDOM());
+        this.bind(this.domFrameHeader.get(), "dblclick", () => {
+            if(this.containerState === PanelContainerState.Maximized) {
+                this.restorePanel();
+            } else {
+                this.maximizePanel();
+            }
+        });
         this.bind(this.domFrameHeader.get(), "contextmenu", this.handleContextMenuClick.bind(this));
 
         // Create the content container
