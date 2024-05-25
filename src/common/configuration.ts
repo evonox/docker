@@ -4,6 +4,7 @@
  */
 
 export interface IDockConfig {
+    tabStripScrollOffset?: number;
     defaultPanelLabel?: string;
     defaultMinWidth?: number,
     defaultMinHeight?: number;
@@ -21,6 +22,7 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    tabStripScrollOffset: 85,
     defaultPanelLabel: "Untitled",
     defaultMinWidth: 50,
     defaultMinHeight: 50,

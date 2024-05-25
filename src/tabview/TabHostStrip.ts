@@ -2,7 +2,7 @@ import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { TabOrientation } from "../common/enumerations";
 import { ContextMenu } from "../core/ContextMenu";
 import { TabStripButtonBar } from "../core/TabStripButtonBar";
-import { TABSTRIP_SHOW_MENU } from "../core/panel-default-buttons";
+import { TABSTRIP_SCROLL_LEFT, TABSTRIP_SCROLL_RIGHT, TABSTRIP_SHOW_MENU } from "../core/panel-default-buttons";
 import { DockManager } from "../facade/DockManager";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
@@ -17,14 +17,21 @@ import "./TabHostStrip.css";
  * Events:
  *      onTabActivated  - triggered when a tab is activated from the context menu
  *      onTabReordered  - trigger when user requested tab reorder
+ * TODO:
+ *      - HANDLE TAB REODER FEATURE IN THE NEAR FUTURE 
  */
 export class TabHostStrip extends Component {
 
     private domTabStrip: DOM<HTMLElement>;
     private domTabHandleContainer: DOM<HTMLElement>;
+    private domButtonBarContainer: DOM<HTMLElement>;
 
     private tabHandles: TabHandle[] = [];
     private buttonBar: TabStripButtonBar;
+
+    private resizeObserver: ResizeObserver;
+
+    private isButtonBarVisible = false;
 
     constructor(
         private dockManager: DockManager,
@@ -49,6 +56,10 @@ export class TabHostStrip extends Component {
     }
 
     protected onDisposed(): void {
+        this.resizeObserver.unobserve(this.domTabStrip.get());
+        this.resizeObserver.disconnect();
+        this.resizeObserver = undefined;
+
         this.buttonBar.dispose();
     }
 
@@ -63,43 +74,59 @@ export class TabHostStrip extends Component {
 
         this.domTabHandleContainer = DOM.create("div").addClass("DockerTS-TabStrip__TabHandleContainer")
             .appendTo(this.domTabStrip);
-        this.domTabStrip.appendChild(this.buttonBar.getDOM());
+        this.domButtonBarContainer = DOM.create("div").addClass("DockerTS-TabStrip__ButtonBar")
+            .css("visibility", "hidden")
+            .appendChild(this.buttonBar.getDOM()).appendTo(this.domTabStrip);
 
         this.buttonBar.on("onClicked", ({actionName, event}) => {
-            if(actionName === TABSTRIP_SHOW_MENU) {
+            if(actionName === TABSTRIP_SCROLL_LEFT) {
+                this.handleScrollLeft();
+            } else if(actionName === TABSTRIP_SCROLL_RIGHT) {
+                this.handleScrollRight();
+            } else if(actionName === TABSTRIP_SHOW_MENU) {
                 this.handleShowTabStripPopup(event);
             }
         });
 
+        this.resizeObserver = new ResizeObserver(() => this.checkTabStripOverflowStatus());
+        this.resizeObserver.observe(this.domTabStrip.get());
+
         return this.domTabStrip.get();
     }
 
-    protected onUpdate(element: HTMLElement): void {
-        // TODO: RESIZE OBSERVER - MEASURE SCROLL WIDTH AND CLIENT WITH OF HANDLE DOM CONTAINER
-        // TODO: UPDATE SHOWING AND HIDING BUTTONS
-        // TODO: PROCESS SCROLL LEFT AND RIGHT
-        // TODO; PROCESS CONTEXT MENU POPUP WITH ACTION TRIGGER
-        // TODO: HANDLE TAB REODER FEATURE IN THE NEAR FUTURE 
-    }
+    protected onUpdate(element: HTMLElement): void {}
 
-    // TODO: INVOKED BY THE RESIZER ELEMENT
     private checkTabStripOverflowStatus() {
-
+        if(this.isButtonBarVisible === false && this.isTabStripOverflown() === true) {
+            this.isButtonBarVisible = true;
+            this.domButtonBarContainer.css("visibility", "visible")
+                .addClass("DockerTS-TabStrip__ButtonBar--Visible");
+        } else if(this.isButtonBarVisible === true && this.isTabStripOverflown() === false) {
+            this.isButtonBarVisible = false;
+            this.domButtonBarContainer.removeClass("DockerTS-TabStrip__ButtonBar--Visible")
+                .once("transitionend", () => {
+                    this.domButtonBarContainer.css("visibility", "hidden");
+                });
+        }
     }
 
-    // TODO: MEASURE CLIENT WIDTH OR HEIGHT
     private isTabStripOverflown(): boolean {
-        throw 0;
+        const domNode  = this.domTabHandleContainer.get();
+        if(this.orientation === TabOrientation.Top || this.orientation === TabOrientation.Bottom) {
+            return domNode.scrollWidth > domNode.clientWidth;
+        } else {
+            return domNode.scrollHeight > domNode.clientHeight;
+        }
     }
 
-    // NEED TO BIND MOUSE DOWN AND UP EVENTS
     private handleScrollLeft() {
-
+        const scrollOffset = this.dockManager.config.tabStripScrollOffset;
+        this.domTabHandleContainer.get().scrollBy({left: -scrollOffset, top: 0, behavior: "smooth"})
     }
 
-    // NEED TO BIND MOUSE DOWN AND UP EVENTS
     private handleScrollRight() {
-
+        const scrollOffset = this.dockManager.config.tabStripScrollOffset;
+        this.domTabHandleContainer.get().scrollBy({left: scrollOffset, top: 0, behavior: "smooth"})
     }
 
     private handleShowTabStripPopup(event: MouseEvent) {

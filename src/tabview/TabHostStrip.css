@@ -4,17 +4,16 @@
  */
 
 .DockerTS-TabStrip {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
     background: var(--docker-ts-tabstrip-background);
 }
 
 .DockerTS-TabStrip--Horizontal {
-    flex-direction: row;
+    grid-template-columns: 1fr auto;
 }
 
 .DockerTS-TabStrip--Vertical {
-    flex-direction: column;
+    grid-template-rows: 1fr auto;
 }
 
 .DockerTS-TabStrip__TabHandleContainer {
@@ -30,4 +29,25 @@
 
 .DockerTS-TabStrip--Vertical .DockerTS-TabStrip__TabHandleContainer {
     flex-direction: column;
+}
+
+.DockerTS-TabStrip__ButtonBar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;   
+
+    padding-left: 10px;
+
+    background: var(--docker-ts-primary-color);
+    opacity: 0;
+    
+    transition: opacity 350ms;
+
+    box-shadow: -3px 0px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.DockerTS-TabStrip__ButtonBar--Visible {
+    transition: opacity 350ms;
+    opacity: 1;
 }

@@ -239,6 +239,14 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
+    once(eventName: string, handler: (event: Event) => void) {
+        const handleEventOnce = (event: Event) => {
+            this.element.removeEventListener(eventName, handleEventOnce);
+            handler(event);
+        }
+        this.element.addEventListener(eventName, handleEventOnce);
+    }
+
     get(): T {
         return this.element;
     }
