@@ -13,6 +13,14 @@ export class DOM<T extends HTMLElement> {
 
     constructor(private element: T) {}
 
+    removeAllChildren(): DOM<T> {
+        const domElements = this.element.children;
+        for(let i = 0; i < domElements.length; i++) {
+            domElements.item(i).remove();
+        }
+        return this;
+    }
+
     removeFromDOM() {
         this.element.remove();
     }
@@ -189,6 +197,20 @@ export class DOM<T extends HTMLElement> {
             container.appendChild(this.element);
         }
         return this;
+    }
+
+    prependChild(child: HTMLElement | DOM<HTMLElement>): DOM<T> {
+        const firstElement = this.element.firstChild;
+        if(firstElement === null) {
+            return this.appendChild(child);
+        } else {
+            if(child instanceof DOM) {
+                this.element.insertBefore(child.get(), firstElement);
+            } else {
+                this.element.insertBefore(child, firstElement);
+            }
+            return this;   
+        }
     }
 
     appendChild(child: HTMLElement | DOM<HTMLElement>): DOM<T> {

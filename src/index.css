@@ -11,6 +11,8 @@
     --docker-ts-context-menu-background: lightgray;
     --docker-ts-context-menu-color: #444;
     --docker-ts-context-menu-border-color: #999;
+
+    --docker-ts-tabstrip-background: #727272;
 }
 
 .DockerTS--DisableSelection {

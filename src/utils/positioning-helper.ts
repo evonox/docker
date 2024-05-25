@@ -12,7 +12,7 @@ const AUTOMATIC_MY_POSITIONS: IOverlayAutoPosition = [
     {at: "", my: "left, top"},
     {at: "", my: "left, bottom"},
     {at: "", my: "right, bottom"},
-    {at: "", my: "right, bottom"}
+    {at: "", my: "right, top"}
 ]
 
 export class AutoPositioningHelper {

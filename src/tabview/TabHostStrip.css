@@ -1,0 +1,33 @@
+
+/**
+ *  CSS Layouting of TabHostStrip Component
+ */
+
+.DockerTS-TabStrip {
+    display: flex;
+    flex-wrap: nowrap;
+    background: var(--docker-ts-tabstrip-background);
+}
+
+.DockerTS-TabStrip--Horizontal {
+    flex-direction: row;
+}
+
+.DockerTS-TabStrip--Vertical {
+    flex-direction: column;
+}
+
+.DockerTS-TabStrip__TabHandleContainer {
+    flex: 1;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.DockerTS-TabStrip--Horizontal .DockerTS-TabStrip__TabHandleContainer {
+    flex-direction: row;
+}
+
+.DockerTS-TabStrip--Vertical .DockerTS-TabStrip__TabHandleContainer {
+    flex-direction: column;
+}

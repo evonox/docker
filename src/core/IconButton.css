@@ -14,6 +14,11 @@
     padding-right: 0.3rem;
 }
 
+.IconButton svg {
+    width: inherit;
+    height: inherit;
+}
+
 .IconButton:hover {
     fill: var(--docker-ts-hover-button-color);
     stroke: var(--docker-ts-hover-button-color);

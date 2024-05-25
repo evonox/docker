@@ -99,6 +99,14 @@ export class PanelContainer extends Component implements IDockContainer {
         this.updateTitle();
     }
 
+    getTitle(): string {
+        return this._title;
+    }
+
+    getTitleIcon(): string {
+        return this._iconHtml;
+    }
+
     setTitleIcon(iconHtml: string) {
         this._iconHtml = iconHtml;
         this.updateTitle();

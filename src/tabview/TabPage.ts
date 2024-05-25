@@ -36,8 +36,8 @@ export class TabPage extends Component {
         this.initializeComponent();
     }
 
-    getTabHandleDOM() {
-        return this.tabHandle.getDOM();
+    getTabHandle() {
+        return this.tabHandle;
     }
 
     getContainer(): IDockContainer {
@@ -130,7 +130,8 @@ export class TabPage extends Component {
 
     private updateTabTitle() {
         const title = (this.container as PanelContainer).getTitleHtml();
-        this.tabHandle.titleTemplate = title;
+        this.tabHandle.icon = this.container.getTitleIcon();
+        this.tabHandle.title = this.container.getTitle();
         this.tabHandle.isModifiedState = this.container.hasChanges();
     }
 

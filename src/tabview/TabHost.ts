@@ -8,6 +8,7 @@ import { ContainerType, SelectionState, TabOrientation } from "../common/enumera
 import "./TabHost.css";
 import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
+import { TabHostStrip } from "./TabHostStrip";
 
 export class TabHost extends Component {
 
@@ -24,7 +25,8 @@ export class TabHost extends Component {
     private activeTab?: TabPage;
 
     private domHost: DOM<HTMLElement>;
-    private domTabStrip: DOM<HTMLElement>;
+    // private domTabStrip: DOM<HTMLElement>;
+    private tabStrip: TabHostStrip;
     private domSeparator: DOM<HTMLElement>;
     private domContent: DOM<HTMLElement>;
 
@@ -82,9 +84,9 @@ export class TabHost extends Component {
     resize(width: number, height: number) {
         // this.domHost.width(width).height(height);
 
-        const tabStripHeight = this.domTabStrip.getHeight();
-        const separatorHeight = this.domSeparator.getHeight();
-        const contentHeight = height - tabStripHeight - separatorHeight;
+        // const tabStripHeight = this.domTabStrip.getHeight();
+        // const separatorHeight = this.domSeparator.getHeight();
+        // const contentHeight = height - tabStripHeight - separatorHeight;
 
         // this.domContent.height(contentHeight);
 
@@ -113,6 +115,8 @@ export class TabHost extends Component {
             }
         }
 
+        // TODO: MANAGE WHICH TAB PAGES REMOVE AND WHICH TO KEEP
+        //this.tabStrip.removeAllTabHandles();
         const childPanels = children.filter(c => c.getContainerType() === ContainerType.Panel);
         for(const child of childPanels) {
             if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
@@ -121,7 +125,7 @@ export class TabHost extends Component {
                 tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
                 tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
                 this.tabPages.push(tabPage);
-                this.domTabStrip.appendChild(tabPage.getTabHandleDOM());
+                this.tabStrip.attachTabHandle(tabPage.getTabHandle());
                 this.domContent.appendChild(tabPage.getDOM());
             }
         }
@@ -142,21 +146,24 @@ export class TabHost extends Component {
 
 
 
-    protected onInitialized(): void {}
+    protected onInitialized(): void {
+        this.tabStrip = new TabHostStrip(this.dockManager, this.tabStripDirection);
+    }
 
-    protected onDisposed(): void {}
+    protected onDisposed(): void {
+        this.tabStrip.dispose();
+    }
 
     protected onInitialRender(): HTMLElement {
         this.domHost = DOM.create("div").addClass("DockerTS-TabHost");
-        this.domTabStrip = DOM.create("div").addClass("DockerTS-TabStrip");
         this.domSeparator = DOM.create("div").addClass("DockerTS-TabStrip__Separator");
         this.domContent = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-TabContent");
 
         if(this.tabStripDirection === TabOrientation.Top) {
-            this.domHost.appendChildren([this.domTabStrip, this.domSeparator, this.domContent])
+            this.domHost.appendChildren([this.tabStrip.getDOM(), this.domSeparator, this.domContent])
                 .addClass("DockerTS-TabHost--Top");
         } else if(this.tabStripDirection === TabOrientation.Bottom) {
-            this.domHost.appendChildren([this.domContent, this.domSeparator, this.domTabStrip])
+            this.domHost.appendChildren([this.domContent, this.domSeparator, this.tabStrip.getDOM()])
                 .addClass("DockerTS-TabHost--Bottom");
         } else {
             throw new Error("Unsupported TabStripDirection");

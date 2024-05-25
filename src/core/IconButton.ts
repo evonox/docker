@@ -36,7 +36,11 @@ export class IconButton extends Component {
 
     protected onInitialRender(): HTMLElement {
         this.domButton = DOM.create("div").addClass("IconButton");
+
+        this.bind(this.domButton.get(), "mousedown", this.handleButtonPressed.bind(this));
+        this.bind(this.domButton.get(), "mouseup", this.handleButtonReleased.bind(this));
         this.bind(this.domButton.get(), "click", this.handleButtonClick.bind(this));
+
         return this.domButton.get();
     }
     protected onUpdate(element: HTMLElement): void {
@@ -44,8 +48,20 @@ export class IconButton extends Component {
             .attr("title", this.title);
     }
 
+    private handleButtonPressed(event: MouseEvent) {
+        event.preventDefault();
+        this.triggerEvent("onPressed", {actionName: this.actionName, event});
+    }
+
+    private handleButtonReleased(event: MouseEvent) {
+        event.preventDefault();
+        this.triggerEvent("onReleased", {actionName: this.actionName, event});
+    }
+
     private handleButtonClick(event: MouseEvent) {
         event.preventDefault();
+        this.triggerEvent("onClicked", {actionName: this.actionName, event});
+
         this.triggerEvent("onAction", this.actionName);
     }
 }

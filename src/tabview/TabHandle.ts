@@ -27,8 +27,11 @@ export class TabHandle extends Component {
     @property({defaultValue: TabOrientation.Bottom})
     orientation: TabOrientation;
 
+    @property({defaultValue:  ""})
+    icon: string;
+
     @property({defaultValue: ""})
-    titleTemplate: string;
+    title: string;
 
     @property({defaultValue: false})
     closeButtonVisible: boolean;
@@ -86,7 +89,8 @@ export class TabHandle extends Component {
         this.applySelectionCSS();
 
         this.closeButton.visible = this.closeButtonVisible;
-        this.domTitle.html(this.titleTemplate).attr("title", this.domTitle.getText());
+        const domIcon = DOM.create("div").html(this.icon);
+        this.domTitle.html("").text(this.title).prependChild(domIcon).attr("title", this.title);
 
         this.domTitle.toggleClass("DockerTS-TabHandle--HasChanges", this.isModifiedState);
     }
