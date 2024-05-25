@@ -12,7 +12,7 @@ export class DOMUpdateInitiator {
 
     // Make local copy of update handlers and reset it
     // Reason: We must be ready to accept the update requests for the next browser rendering frame
-    private static handleUpdateTick() {
+    private static processAllUpdates() {
         const updateHandlers = [...this.updateHandlers];
         this.updateHandlers = [];
 
@@ -28,8 +28,13 @@ export class DOMUpdateInitiator {
             // Note: Before processing the handler queue - reset the flag to accept 
             // the update requests for the next animation frame
             this.isUpdatedRequested = false;
-            this.handleUpdateTick();
+            this.processAllUpdates();
         });
+    }
+
+    // Note: Use this method sparingly only for edge cases
+    static forceAllEnqueuedUpdates() {
+        this.processAllUpdates();
     }
 
     static requestDOMUpdate(handler: () => void) {

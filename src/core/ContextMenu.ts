@@ -6,6 +6,8 @@ import { MenuItem } from "./MenuItem";
 import { MenuSeparator } from "./MenuSeparator";
 
 import "./ContextMenu.css"
+import { AutoPositioningHelper } from "../utils/positioning-helper";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class ContextMenu extends Component {
 
@@ -21,12 +23,19 @@ export class ContextMenu extends Component {
     }
 
     show(event: MouseEvent, zIndex: number ) {
-        this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
-            .left(event.pageX).top(event.pageY)
-            .css("z-index", String(zIndex))
-            .appendTo(document.body);
+        // Note: For proper measuring for the context menu being in viewport 
+        // we need to perform all enqueued DOM updates
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
             
-        this.bind(window, "mousedown", this.handleMouseDown.bind(this), {capture: true});
+        const contextMenuPosition = AutoPositioningHelper.computeAutomaticallyOverlayPosition(
+            this.domContextMenu.get(), {x: event.pageX, y: event.pageY}
+        );
+
+        this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
+            .left(contextMenuPosition.x).top(contextMenuPosition.y)
+            .zIndex(zIndex).appendTo(document.body);
+            
+        this.bind(window, "mousedown", this.handleMouseDown.bind(this), {capture: true});   
     }
 
     hide() {
