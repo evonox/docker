@@ -2,6 +2,11 @@ import { DOM } from "./DOM";
 import * as  _ from "lodash-es";
 import { IPoint } from "./overlay-helper";
 
+export enum DetectionMode {
+    withThreshold,  // Drag-and-drop starts after moving a given number of pixels
+    Immeadiate      // Drag-and-drop starts immediatelly
+}
+
 export interface MouseEventHandler {
     (event: MouseEvent): void;
 }
@@ -34,10 +39,17 @@ export class DragAndDrop {
         this.domBlocker = undefined;
     }
 
-    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing") {
+    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing", detectionMode: DetectionMode = DetectionMode.Immeadiate) {
 
         let isDragAndDropStarted = false;
         let isDragAndDropCancelled = false;
+
+        if(detectionMode === DetectionMode.Immeadiate) {
+            event.preventDefault();
+            
+            isDragAndDropStarted = true;
+            this.createBlocker(cursor);
+        }
 
         let initialPosition: IPoint = {x: event.pageX, y: event.pageY};
 

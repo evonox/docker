@@ -3,7 +3,7 @@ import { SelectionState, TabOrientation } from "../common/enumerations";
 import { Component } from "../framework/Component";
 import { property, state } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
-import { DragAndDrop } from "../utils/DragAndDrop";
+import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { CloseButton } from "./CloseButton";
 
 import "./TabHandle.css";
@@ -134,7 +134,8 @@ export class TabHandle extends Component {
         if(event.button === MOUSE_BTN_RIGHT)
             return;
 
-        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), "pointer");
+        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), 
+            "pointer", DetectionMode.withThreshold);
     }
 
     private handleMouseDblClick(event: MouseEvent) {
