@@ -48,24 +48,6 @@ export class TabPage extends Component {
         this.selectionState = state;
     }
 
-    // FOCUS: ARE THESE WRAPPERS NECESSARY???
-
-    // getMinWidth(): number {
-    //     return this.container.getMinWidth();
-    // }
-
-    // getMinHeight(): number {
-    //     return this.container.getMinHeight();
-    // }
-
-    // updateContainerState(): void {
-    //     this.container.updateContainerState();
-    // }    
-
-    // updateLayoutState() {
-    //     this.container.updateLayoutState();
-    // }
-
     /**
      * Component Life-Cycle Handlers
      */
@@ -116,7 +98,6 @@ export class TabPage extends Component {
     /**
      * Event Handler Implementatios
      */
-
 
     private handleCloseButtonClick() {
         this.dockManager.requestClose(this.container);
