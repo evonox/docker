@@ -1,7 +1,6 @@
 import { Component } from "../framework/Component";
 import { ComponentEventSubscription } from "../framework/component-events";
 import { state } from "../framework/decorators";
-import { IDockContainer } from "../common/declarations";
 import { TabHandle } from "./TabHandle";
 import { DOM } from "../utils/DOM";
 import { PanelContainer } from "../containers/PanelContainer";
@@ -40,7 +39,7 @@ export class TabPage extends Component {
         return this.tabHandle;
     }
 
-    getContainer(): IDockContainer {
+    getContainer(): PanelContainer {
         return this.container;
     }
 

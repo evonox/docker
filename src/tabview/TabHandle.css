@@ -29,6 +29,11 @@
     border-top: 0 none;
 }
 
+.DockerTS-TabHandle--Selected {
+    color: white;
+    background: linear-gradient(to bottom, #444, #000);
+}
+
 
 .DockerTS-TabHandle--Focused {
     background: linear-gradient(to bottom, var(--docker-ts-primary-color), var(--docker-ts-primary-dark-color));

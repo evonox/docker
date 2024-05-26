@@ -41,15 +41,20 @@ export class TabHostStrip extends Component {
         this.initializeComponent();
     }
 
-    removeAllTabHandles() {
-        this.tabHandles = [];
-        this.domTabHandleContainer.removeAllChildren();
-    }
 
     attachTabHandle(tabHandle: TabHandle) {
         this.tabHandles.push(tabHandle);
         this.domTabHandleContainer.appendChild(tabHandle.getDOM());
     }
+
+    detachTabHandle(tabHandle: TabHandle) {
+        const index = this.tabHandles.indexOf(tabHandle);
+        if(index >= 0) {
+            tabHandle.detachFromDOM();
+            this.tabHandles.splice(index, 1);
+        }
+    }
+
 
     protected onInitialized(): void {
         this.buttonBar = new TabStripButtonBar();

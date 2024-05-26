@@ -1,31 +1,23 @@
 import { Component } from "../framework/Component";
-import { property, state } from "../framework/decorators";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { TabPage } from "./TabPage";
 import { ContainerType, SelectionState, TabOrientation } from "../common/enumerations";
-
-import "./TabHost.css";
 import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
 import { TabHostStrip } from "./TabHostStrip";
 
+import "./TabHost.css";
+import { ArrayUtils } from "../utils/ArrayUtils";
+
 export class TabHost extends Component {
 
-    @property({defaultValue: false})
-    displayCloseButton: boolean;
-
-    @state()
-    isActive = false;
-
-    @state({defaultValue: true})
-    displayTabHandles: boolean;
-
+    // Tab Page references
     private tabPages: TabPage[] = [];
-    private activeTab?: TabPage;
+    private selectedTab?: TabPage;
 
+    // Internal DOM references
     private domHost: DOM<HTMLElement>;
-    // private domTabStrip: DOM<HTMLElement>;
     private tabStrip: TabHostStrip;
     private domSeparator: DOM<HTMLElement>;
     private domContent: DOM<HTMLElement>;
@@ -35,20 +27,20 @@ export class TabHost extends Component {
         this.initializeComponent();
     }
 
-    setActive(isActive: boolean) {
-        this.isActive = isActive;
-        this.activeTab?.setSelectionState(SelectionState.Focused);
+    getSelectedTab(): TabPage | undefined {
+        return this.selectedTab;
     }
 
-    getActiveTab(): TabPage | undefined {
-        return this.activeTab;
-    }
-
-    setActiveTab(container: IDockContainer) {
-        const currentPage = this.tabPages.find(tp => tp.getContainer() === container);
-        if(currentPage) {
-            this.updateSelectedTabPage(currentPage, true);
-            // TODO: SET ACTIVE PANEL TO DOCK CONTAINER
+    focusActiveTab(container: IDockContainer) {
+        if(this.isContainerInsideHost(container) === false) {
+            this.selectedTab.setSelectionState(SelectionState.Selected);
+        } else {
+            this.selectedTab?.setSelectionState(SelectionState.Unselected);
+            const newActiveTabPage = this.getTabPageForContainer(container);
+            if(newActiveTabPage !== undefined) {
+                this.selectedTab = newActiveTabPage;
+                newActiveTabPage.setSelectionState(SelectionState.Focused);
+            }
         }
     }
 
@@ -61,90 +53,78 @@ export class TabHost extends Component {
     }
 
     updateLayoutState() {
-        for(const tabPage of this.tabPages) {
-            tabPage.getContainer().updateLayoutState();
-        }
+        this.tabPages.forEach(tabPage => tabPage.getContainer().updateLayoutState());
     }
-
 
     updateContainerState(): void {
-        for(const tabPage of this.tabPages) {
-            tabPage.getContainer().updateContainerState();
-        }
+        this.tabPages.forEach(tabPage => tabPage.getContainer().updateContainerState());
+
         const activePanel = this.dockManager.getActivePanel();
-        const selectedTabPage = this.tabPages.find(page => page.getContainer() === activePanel);
-        
-        if(selectedTabPage !== undefined && this.activeTab !== selectedTabPage) {
-            this.activeTab?.setSelectionState(SelectionState.Unselected);
-            this.activeTab = selectedTabPage;
-            this.activeTab.setSelectionState(SelectionState.Focused);
+        if(activePanel !== this.selectedTab?.getContainer()) {
+            if(this.isContainerInsideHost(activePanel)) {
+                this.focusActiveTab(activePanel);
+            } else {
+                this.selectedTab?.setSelectionState(SelectionState.Selected);
+            }
+        } else {
+            this.selectedTab?.setSelectionState(SelectionState.Focused);
         }
-    }
-
-    resize(width: number, height: number) {
-        // this.domHost.width(width).height(height);
-
-        // const tabStripHeight = this.domTabStrip.getHeight();
-        // const separatorHeight = this.domSeparator.getHeight();
-        // const contentHeight = height - tabStripHeight - separatorHeight;
-
-        // this.domContent.height(contentHeight);
-
-        if(this.activeTab) {
-            // this.activeTab.resize(width, contentHeight);
-        }
-
-        requestAnimationFrame(() => this.resizeTabStripElement(width, height));
-    }
-
-    // TODO: SHOW BUTTONS TO SCROLL TAB HANDLES IN CASE OF OVERFLOW
-    resizeTabStripElement(width: number, height?: number) {
-
-
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
+        // Save selected tab index
+        let selectedTabIndex = this.tabPages.indexOf(this.selectedTab);
+
+        // Remove old tab pages
         const tabPages = [...this.tabPages];
         for(const tabPage of tabPages) {
             if(children.includes(tabPage.getContainer()) === false) {
+                this.tabStrip.detachTabHandle(tabPage.getTabHandle());
+                ArrayUtils.removeItem(this.tabPages, tabPage);
                 tabPage.dispose();
-                const index = this.tabPages.indexOf(tabPage);
-                if(index >= 0) {
-                    this.tabPages.splice(index, 1);
-                }
             }
         }
 
-        // TODO: MANAGE WHICH TAB PAGES REMOVE AND WHICH TO KEEP
-        //this.tabStrip.removeAllTabHandles();
-        const childPanels = children.filter(c => c.getContainerType() === ContainerType.Panel);
-        for(const child of childPanels) {
-            if(tabPages.filter(tp => tp.getContainer() === child).length === 0) {
-                child.setHeaderVisibility(this.tabStripDirection !== TabOrientation.Top);
-                const tabPage = new TabPage(this.dockManager, child as PanelContainer, this.tabStripDirection);
-                tabPage.on("onTabMoved", this.handleMoveTab.bind(this));
-                tabPage.on("onTabPageSelected", this.handleTabPageSelected.bind(this));
+        if(children.length === 0)
+            return;
+
+        // Add tab pages for new child containrs
+        for(const childContainer of children) {
+            if(childContainer.getContainerType() !== ContainerType.Panel)
+                throw new Error("ERROR: Only panel containers are allowed to be inserted inside TabHost");
+            if(this.isContainerInsideHost(childContainer) === false) {
+                childContainer.setHeaderVisibility(this.tabStripDirection !== TabOrientation.Top);
+
+                const tabPage = new TabPage(this.dockManager, childContainer as PanelContainer, 
+                    this.tabStripDirection);
+
                 this.tabPages.push(tabPage);
                 this.tabStrip.attachTabHandle(tabPage.getTabHandle());
                 this.domContent.appendChild(tabPage.getDOM());
             }
         }
 
-
-        // TODO: HANDLE ACTIVE TAB RESTORATION
-
-        this.displayTabHandles = this.tabPages.length > 0;
-
-        if(this.activeTab) {
-            this.handleTabPageSelected({tabPage: this.activeTab, isActive: false});
+        if(this.selectedTab === undefined || children.includes(this.selectedTab.getContainer()) === false) {
+            this.selectedTab = undefined;
+            // Note: if selected tab is removed, we select the preceeding one 
+            // (only selecting , not giving focus)
+            selectedTabIndex = Math.max(0, selectedTabIndex - 1); 
+            this.selectedTab = this.tabPages[selectedTabIndex];
+            this.selectedTab.setSelectionState(SelectionState.Selected);
         }
     }
 
-    private performTabsLayout(indexes: number[]) {
-
+    private isContainerInsideHost(container: IDockContainer): boolean {
+        return this.getTabPageForContainer(container) !== undefined;
     }
 
+    private getTabPageForContainer(container: IDockContainer): TabPage | undefined {
+        return this.tabPages.find(page => page.getContainer() === container);
+    }
 
+    /**
+     * Component Life-Cycle Methods
+     */
 
     protected onInitialized(): void {
         this.tabStrip = new TabHostStrip(this.dockManager, this.tabStripDirection);
@@ -169,51 +149,8 @@ export class TabHost extends Component {
             throw new Error("Unsupported TabStripDirection");
         }
 
-        this.bind(this.domContent.get(), "focus", this.handleFocus);
-        this.bind(this.domContent.get(), "mousedown", this.handleMouseDown);
-
         return this.domHost.get();
     }
 
     protected onUpdate(element: HTMLElement): void {}
-
-    private handleMouseDown(event: MouseEvent) {
-        /**
-         *          if (this.activeTab && this.dockManager.activePanel != this.activeTab.panel)
-            this.dockManager.activePanel = this.activeTab.panel;
-
-         * 
-         */
-
-    }
-
-    private handleFocus(event: FocusEvent) {
-        /**
-         *  if (this.activeTab && this.dockManager.activePanel != this.activeTab.panel)
-                this.dockManager.activePanel = this.activeTab.panel;
-         */
-
-    }
-
-    private handleMoveTab(event: any) {
-        /**
-         *    let index = Array.prototype.slice.call(this.tabListElement.childNodes).indexOf(e.self.elementBase);
-                this.change(this, handle, e.self, e.state, index);
-
-         * 
-         */
-
-    }
-
-    private handleTabPageSelected(payload: any) {
-        this.updateSelectedTabPage(payload.tabPage, payload.isActive);
-    }
-
-    private updateSelectedTabPage(page: TabPage, isActive: boolean) {
-        this.activeTab = page;
-        for(const tabPage of this.tabPages) {
-            const isSelected = tabPage === this.activeTab;
-            tabPage.setSelectionState(isSelected ? SelectionState.Focused : SelectionState.Unselected);
-        }
-    }   
 }

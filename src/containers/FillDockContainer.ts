@@ -61,7 +61,7 @@ export class FillDockContainer implements IDockContainer {
     }    
 
     setActiveChild(container: IDockContainer): void {
-        this.tabHost.setActiveTab(container);
+        this.tabHost.focusActiveTab(container);
     }
 
     setVisible(visible: boolean): void {}
@@ -88,7 +88,7 @@ export class FillDockContainer implements IDockContainer {
 
     resize(width: number, height: number): void {
         // this.domContainer.width(width).height(height);
-        this.tabHost.resize(width, height);
+        // this.tabHost.resize(width, height);
     }
 
     getContainerType(): ContainerType {
