@@ -86,10 +86,7 @@ export class FillDockContainer implements IDockContainer {
         this.tabHost.performLayout(children, relayoutEvenIfEqual);
     }
 
-    resize(width: number, height: number): void {
-        // this.domContainer.width(width).height(height);
-        // this.tabHost.resize(width, height);
-    }
+    resize(width: number, height: number): void {}
 
     getContainerType(): ContainerType {
         return ContainerType.FillLayout;
