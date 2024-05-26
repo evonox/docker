@@ -9,8 +9,12 @@ import { TabHostStrip } from "./TabHostStrip";
 
 import "./TabHost.css";
 import { ArrayUtils } from "../utils/ArrayUtils";
+import { state } from "../framework/decorators";
 
 export class TabHost extends Component {
+
+    @state()
+    private isFocused: boolean;
 
     // Tab Page references
     private tabPages: TabPage[] = [];
@@ -42,6 +46,9 @@ export class TabHost extends Component {
                 newActiveTabPage.setSelectionState(SelectionState.Focused);
             }
         }
+
+        this.isFocused = this.selectedTab.getSelectionState() === SelectionState.Focused;
+
     }
 
     getMinWidth(): number {
@@ -65,9 +72,11 @@ export class TabHost extends Component {
                 this.focusActiveTab(activePanel);
             } else {
                 this.selectedTab?.setSelectionState(SelectionState.Selected);
+                this.isFocused = false;
             }
         } else {
             this.selectedTab?.setSelectionState(SelectionState.Focused);
+            this.isFocused = true;
         }
     }
 
@@ -128,6 +137,10 @@ export class TabHost extends Component {
 
     protected onInitialized(): void {
         this.tabStrip = new TabHostStrip(this.dockManager, this.tabStripDirection);
+        this.tabStrip.on("onTabActivated", tabIndex => {
+            const activePanel = this.tabPages[tabIndex].getContainer();
+            this.dockManager.setActivePanel(activePanel);
+        });
     }
 
     protected onDisposed(): void {
@@ -152,5 +165,7 @@ export class TabHost extends Component {
         return this.domHost.get();
     }
 
-    protected onUpdate(element: HTMLElement): void {}
+    protected onUpdate(element: HTMLElement): void {
+        this.domSeparator.toggleClass("DockerTS-TabStrip__Separator--Focused", this.isFocused);
+    }
 }

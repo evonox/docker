@@ -1,9 +1,9 @@
 
 .DockerTS-FrameHeader {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+
+    overflow: hidden;
 
     user-select: none;
 
@@ -17,12 +17,8 @@
 }
 
 .DockerTS-HeaderTitleBar {
-    flex: 1;
-
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr;
 
     cursor: pointer;
 

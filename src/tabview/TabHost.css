@@ -15,17 +15,13 @@
     display: grid;
 }
 
-.DockerTS-TabStrip {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    min-height: 1.6rem;
-    background: lightgray;
+.DockerTS-TabStrip__Separator {
+    background: #000;
+    height: 5px;
 }
 
-.DockerTS-TabStrip__Separator {
+.DockerTS-TabStrip__Separator--Focused {
     background: var(--docker-ts-primary-color);
-    height: 5px;
 }
 
 .DockerTS-TabPage--ContentWrapper {

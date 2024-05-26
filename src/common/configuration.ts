@@ -24,7 +24,7 @@ export interface IDockConfig {
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     tabStripScrollOffset: 85,
     defaultPanelLabel: "Untitled",
-    defaultMinWidth: 50,
+    defaultMinWidth: 150,
     defaultMinHeight: 50,
     dragAndDropFrameRate: 120, 
     zIndexes: {

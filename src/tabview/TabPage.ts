@@ -47,6 +47,10 @@ export class TabPage extends Component {
         this.selectionState = state;
     }
 
+    getSelectionState(): SelectionState {
+        return this.selectionState;
+    }
+
     /**
      * Component Life-Cycle Handlers
      */
