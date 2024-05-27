@@ -46,8 +46,6 @@
     position: absolute;
     display: grid;
     grid-template-rows: auto 1fr;
-
-    border: 1px solid darkgray;
 }
 
 .DockerTS-ContentFrame.DockerTS-ContentFrame--NoHeader {
@@ -57,15 +55,4 @@
 .DockerTS-ContentContainer {
     overflow: hidden;
     background: whitesmoke;
-}
-
-.DockerTS-MaximizeRegionHost {
-    box-sizing: border-box;
-    position: absolute;    
-    display: grid;
-    grid-template-rows: auto 1fr;
-    background: red;
-}
-
-.DockerTS-PanelPlaceholder {
 }

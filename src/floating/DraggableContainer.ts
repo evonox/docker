@@ -5,8 +5,10 @@ import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { IState } from "../common/serialization";
 import { IContextMenuAPI } from "../common/panel-api";
-import { IPoint, ISize } from "../common/dimensions";
+import { IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
+import { DockManager } from "../facade/DockManager";
+import { DragOverflowGuard, DragOverflowState, OverflowDirection } from "../utils/DragOverflowGuard";
 
 
 export class DraggableContainer implements IDockContainer {
@@ -14,18 +16,16 @@ export class DraggableContainer implements IDockContainer {
     private domEventMouseDown: DOMMouseEvent;
     private eventManager = new ComponentEventManager();
 
-    constructor(private delegate: IDockContainer, private topElement: HTMLElement, private dragHandle: HTMLElement) {
+    private guardX: DragOverflowGuard = new DragOverflowGuard();
+    private guardY: DragOverflowGuard = new DragOverflowGuard();
+
+    constructor(private dockMananger: DockManager, private delegate: IDockContainer, private topElement: HTMLElement, private dragHandle: HTMLElement) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
 
         this.domEventMouseDown = new DOMEvent<MouseEvent>(this.dragHandle);
         this.domEventMouseDown.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
-
-        // // Note: will this be needed?
-        // const domBounds = DOM.from(this.topElement).getBounds();
-        // DOM.from(this.topElement)
-        //     .css("left", domBounds.left.toFixed(3) + "px")
-        //     .css("top", domBounds.top.toFixed(3) + "px");
     }
+
     updateLayoutState(): void {
         this.delegate.updateLayoutState();
     }
@@ -83,9 +83,13 @@ export class DraggableContainer implements IDockContainer {
     }
 
     private startDragging(event: MouseEvent) {
+        // TODO: ADD OPACITY 0.5 ON DRAGGED STUFF WITH TRANSITION
         DOM.from(this.delegate.getDOM()).addClass("draggable-dragging-active");
+
+        this.guardX.reset();
+        this.guardY.reset();
+
         this.eventManager.triggerEvent("onDraggableDragStart", event);
-        // TODO: SOME OTHER STUFF
     }
 
     private stopDragging(event: MouseEvent) {
@@ -95,10 +99,27 @@ export class DraggableContainer implements IDockContainer {
 
     private handleMouseMove(event: MouseEvent) {
         event.preventDefault();
-        const dx = event.pageX - this.lastMousePosition.x;
-        const dy = event.pageY - this.lastMousePosition.y;
+        let dx = event.pageX - this.lastMousePosition.x;
+        let dy = event.pageY - this.lastMousePosition.y;
 
-        // TODO: CHECK THE BOUNDS USING DOCKER MANAGER
+        [dx, dy] = this.constrainDialogInsideViewport(dx, dy, event);
+
+        let overflowState = this.guardX.isInDragOverflow(event.pageX);
+        if(overflowState === DragOverflowState.InOverflowState) {
+            dx = 0;
+        } else if(overflowState === DragOverflowState.OverflowStateTerminated) {
+            dx = this.guardX.adjustDeltaAfterOverflow(dx, event.pageX);
+            this.guardX.reset();
+        }
+
+        overflowState = this.guardY.isInDragOverflow(event.pageY);
+        if(overflowState === DragOverflowState.InOverflowState) {
+            dy = 0;
+        } else if(overflowState === DragOverflowState.OverflowStateTerminated) {
+            dy = this.guardY.adjustDeltaAfterOverflow(dy, event.pageY);
+            this.guardY.reset();
+        }
+
 
         this.performDrag(dx, dy);
 
@@ -113,6 +134,45 @@ export class DraggableContainer implements IDockContainer {
         const x = domBounds.left + dx;
         const y = domBounds.top + dy;
         DOM.from(this.topElement).left(x).top(y);
+    }
+
+    // Check if the dragged dialog is inside DockerTS Viewport
+    private constrainDialogInsideViewport(dx: number, dy: number, event: MouseEvent): [number, number] {
+        const domBounds = DOM.from(this.topElement).getBounds();
+        const domViewport = this.dockMananger.getContainerBoundingRect();
+        // Compute current bounds
+        const bounds: IRect = {
+            x: domBounds.left + dx,
+            y: domBounds.top + dy,
+            w: domBounds.width,
+            h: domBounds.height
+        };
+            
+        // Left, right and bottom edge can hide the floating dialog only by half
+        const middlePoint: IPoint = {
+            x: bounds.x + bounds.w / 2,
+            y: bounds.y + bounds.h / 2
+        }
+        // Constrain the bounds
+        if(middlePoint.x < domViewport.left) {
+            dx = domViewport.left - (domBounds.left + domBounds.width / 2);
+            this.guardX.startDragOverflow(event.pageX, OverflowDirection.Decrementing);
+        }
+        if(middlePoint.x > domViewport.right) {
+            dx = domViewport.right - (domBounds.left + domBounds.width / 2);
+            this.guardX.startDragOverflow(event.pageX, OverflowDirection.Incrementing);
+        }
+        // Top edge must not be crossed
+        if(bounds.y < domViewport.top) {
+            dy = domViewport.top - domBounds.top;
+            this.guardY.startDragOverflow(this.lastMousePosition.y + dy, OverflowDirection.Decrementing);
+        }
+        if(middlePoint.y > domViewport.bottom) {
+            dy = domViewport.bottom - (domBounds.top + domBounds.height / 2);
+            this.guardY.startDragOverflow(this.lastMousePosition.y + dy, OverflowDirection.Incrementing);
+        }   
+
+        return [dx, dy];
     }
 
     dispose(): void {

@@ -32,7 +32,7 @@ export class ResizeHandle extends Component {
     protected onDisposed(): void {}
 
     protected onInitialRender(): HTMLElement {
-        this.domHandle = DOM.create("div");
+        this.domHandle = DOM.create("div").addClass("DockerTS-ResizeHandle");
         this.updateHandleCssClass();
         
         this.bind(this.domHandle.get(), "mousedown", this.handleMouseDown);

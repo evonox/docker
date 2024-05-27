@@ -1,9 +1,40 @@
+.DockerTS-ResizeHandle {
+    pointer-events: all;
+}
+
+.DockerTS-ResizeHandle::after {
+    content: " ";
+    opacity: 0;
+}
+
+.DockerTS-ResizeHandle:hover::after {
+    content: " ";
+    background: #444;
+    opacity: 0.5;
+    transition-delay: 550ms;
+    transition-duration: 700ms;
+    transition-property: opacity;
+}
+
+.DockerTS-ResizeHandle:active::after {
+    opacity: 0.5;
+}
 
 .ResizeHandler--North {
     position: absolute;
     left: var(--rh-corner-size);
     right: var(--rh-corner-size);
+    top: calc(0px - var(--rh-handle-size) / 2);
+    height: var(--rh-handle-size);
+    cursor: n-resize;
+}
+
+.ResizeHandler--North:hover::after {
+    content: " ";
+    position: absolute;
+    left: calc(-1px - var(--rh-corner-size));
     top: 0;
+    right: calc(-1px - var(--rh-corner-size));;
     height: var(--rh-handle-size);
 }
 
@@ -11,15 +42,36 @@
     position: absolute;
     left: var(--rh-corner-size);
     right: var(--rh-corner-size);
+    bottom: calc(0px - var(--rh-handle-size) / 2);
+    height: var(--rh-handle-size);
+    cursor: s-resize;
+}
+
+.ResizeHandler--South:hover::after {
+    content: " ";
+    position: absolute;
+    left: calc(-1px - var(--rh-corner-size));
     bottom: 0;
+    right: calc(-1px - var(--rh-corner-size));;
     height: var(--rh-handle-size);
 }
+
 
 .ResizeHandler--West {
     position: absolute;
     top: var(--rh-corner-size);
     bottom: var(--rh-corner-size);
+    left: calc(0px - var(--rh-handle-size) / 2);
+    width: var(--rh-handle-size);
+    cursor: w-resize;
+}
+
+.ResizeHandler--West:hover::after {
+    content: " ";
+    position: absolute;
+    top: calc(-1px - var(--rh-corner-size));
     left: 0;
+    bottom: calc(-1px - var(--rh-corner-size));;
     width: var(--rh-handle-size);
 }
 
@@ -27,9 +79,20 @@
     position: absolute;
     top: var(--rh-corner-size);
     bottom: var(--rh-corner-size);
+    right: calc(0px - var(--rh-handle-size) / 2);
+    width: var(--rh-handle-size);
+    cursor: e-resize;
+}
+
+.ResizeHandler--East:hover::after {
+    content: " ";
+    position: absolute;
+    top: calc(-1px - var(--rh-corner-size));
     right: 0;
+    bottom: calc(-1px - var(--rh-corner-size));;
     width: var(--rh-handle-size);
 }
+
 
 .ResizeHandler--NorthEast {
     position: absolute;
@@ -37,6 +100,7 @@
     top: 0;
     width: var(--rh-corner-size);
     height: var(--rh-corner-size);
+    cursor: ne-resize;
 }
 
 .ResizeHandler--NorthWest {
@@ -45,6 +109,7 @@
     top: 0;
     width: var(--rh-corner-size);
     height: var(--rh-corner-size);
+    cursor: nw-resize;
 }
 
 .ResizeHandler--SouthEast {
@@ -53,6 +118,7 @@
     bottom: 0;
     width: var(--rh-corner-size);
     height: var(--rh-corner-size);
+    cursor: se-resize;
 }
 
 .ResizeHandler--SouthWest {
@@ -61,4 +127,5 @@
     bottom: 0;
     width: var(--rh-corner-size);
     height: var(--rh-corner-size);
+    cursor: sw-resize;
 }

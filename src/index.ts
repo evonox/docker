@@ -133,7 +133,7 @@ dockManager.registerPanelType("panel6", "panel", "transient", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
-            domElement.innerText = "FLOATING DIALOG";
+            domElement.innerText = "FLOATING DIALOG: " + options.getValue("key");
             api.setPanelFAIcon("fa fa-bars");
             api.setPanelTitle("Floating Test Dialog");
             return domElement;
@@ -169,7 +169,8 @@ async function performDocking() {
         const containerThree3 = await dockManager.createPanel("panel3", {key: "4"});
         const containerLeft = await dockManager.createPanel("panel4");
         const containerBottom = await dockManager.createPanel("panel5");
-        const containerFloat = await dockManager.createPanel("panel6");
+        const containerFloat = await dockManager.createPanel("panel6", {key: "BOTTOM"});
+        const containerFloat2 = await dockManager.createPanel("panel6", {key: "FLOATING"});
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
@@ -182,7 +183,7 @@ async function performDocking() {
         dockManager.dockFill(dockLeftNode, containerBottom);
         dockManager.dockDown(dockManager.getDocumentNode(), containerFloat, 0.4);
 
-        // dockManager.floatDialog(containerFloat, {x: 50, y: 50, w: 500, h: 200});
+        dockManager.floatDialog(containerFloat2, {x: 50, y: 50, w: 500, h: 200});
     }
     catch(err) {
         console.dir(err);

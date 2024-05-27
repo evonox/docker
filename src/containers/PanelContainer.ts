@@ -46,6 +46,7 @@ export class PanelContainer extends Component implements IDockContainer {
     
 
 
+    private domDialogFrame: HTMLElement;
 
     private domGrayingPlaceholder: HTMLElement;
 
@@ -226,9 +227,12 @@ export class PanelContainer extends Component implements IDockContainer {
     setDialogPosition(x: number, y: number) {
         //this.domPanel.left(x).top(y);
         // this.domContentContainer.left(x).top(y + this.domFrameHeader.getHeight());
+        const bounds = this.domDialogFrame.getBoundingClientRect();
+        this.domContentFrame.left(x).top(y).width(bounds.width).height(bounds.height);
     }
 
-    setPanelDimensions(width: number, heigth: number) {
+    setPanelDimensions(width: number, height: number) {
+        this.domContentFrame.width(width).height(height);
         //this.domPanelPlaceholder.width(width).height(heigth);
     }
 
@@ -384,7 +388,7 @@ export class PanelContainer extends Component implements IDockContainer {
         if(this.isHidden())
             return;
 
-        console.log("UPDATING LAYOUT STATE");
+        console.log("UPDATING LAYOUT STATE - RENDERING");
         console.dir(this);
         console.dir(this.containerState);
 
@@ -395,6 +399,10 @@ export class PanelContainer extends Component implements IDockContainer {
             console.dir(rect);
         } else if(this.containerState === PanelContainerState.Maximized) {
             rect = this.dockManager.getContainerBoundingRect();
+        } else if(this.containerState === PanelContainerState.Floating) {
+            rect = this.domDialogFrame.getBoundingClientRect();
+            console.log("DIALOG FRAME");
+            console.dir(rect);
         }
 
         this.domContentFrame.applyRect(rect);
@@ -408,6 +416,11 @@ export class PanelContainer extends Component implements IDockContainer {
         }
 
         this.updateHeaderButtonVisibility();
+
+        if(this.containerState === PanelContainerState.Floating) {
+            const zIndex = DOM.from(this.domDialogFrame).getZIndex();
+            this.domContentFrame.zIndex(zIndex);
+        }
     }
 
     private updateHeaderButtonVisibility() {
@@ -637,14 +650,22 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     prepareForDocking() {
+        if(this.domDialogFrame) {
+            this.panelPlaceholderRO.unobserve(this.domDialogFrame);
+        }
+
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
         this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }
 
-    prepareForFloating() {
+    prepareForFloating(domDialogFrame: HTMLElement) {
+        this.domDialogFrame = domDialogFrame;
+        this.panelPlaceholderRO.observe(this.domDialogFrame);
+
         this.containerState = PanelContainerState.Floating;
         this.updateContainerState();
+        this.updateLayoutState();
     }
 
 

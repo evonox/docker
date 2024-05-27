@@ -50,11 +50,15 @@ export class Dialog implements IEventEmitter {
         return this.eventManager.subscribeOnce(eventName, handler);
     }
 
+    getDialogFrameDOM() {
+        return this.domDialog.get();
+    }
+
     private initialize() {
         // Construct Dialog DOM & Decorators
         this.domDialog = DOM.create("div").attr("tabIndex", "0").addClass("DockerTS-Dialog")
             .appendChild(this.panel.getDOM())
-        this.draggable = new DraggableContainer(this.panel, this.domDialog.get(), this.panel.getHeaderElement());
+        this.draggable = new DraggableContainer(this.dockManager, this.panel, this.domDialog.get(), this.panel.getHeaderElement());
         this.resizable = new ResizableContainer(this.draggable, this.domDialog.get(), this.disableResize);        
         this.domDialog.appendTo(this.dockManager.getDialogRootElement());
 
@@ -86,7 +90,9 @@ export class Dialog implements IEventEmitter {
             this.grayOutParent.grayOut(true);
         }
 
-        this.panel.prepareForFloating();
+        this.panel.prepareForFloating(this.domDialog.get());
+
+        this.panel.updateLayoutState();
 
         // Bring the dialog to the front
         this.bringToFront();
@@ -106,6 +112,10 @@ export class Dialog implements IEventEmitter {
         this.domDialog.left(this.position.x).top(this.position.y);
 
         this.panel.setDialogPosition(this.position.x, this.position.y);
+        
+        this.panel.updateLayoutState();
+
+
         this.dockManager.notifyOnChangeDialogPosition(this, x, y);
     }
 
@@ -165,15 +175,18 @@ export class Dialog implements IEventEmitter {
     }
 
     resize(width: number, height: number) {
+        this.domDialog.width(width).height(height);
         this.resizable.resize(width, height);
+        this.panel.updateLayoutState();
     }
 
     bringToFront() {
         // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
         const nextZIndex = this.dockManager.genNextDialogZIndex();
-        this.domDialog.css("zIndex", String(nextZIndex));
+        this.domDialog.css("z-index", String(nextZIndex));
         this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
+        this.panel.updateContainerState();
     }
 
     private handleOnFocus() {
