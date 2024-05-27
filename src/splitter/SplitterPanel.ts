@@ -6,6 +6,8 @@ import { OrientationKind } from "../common/enumerations";
 import { ArrayUtils } from "../utils/ArrayUtils";
 
 import "./SplitterPanel.css";
+import { MathHelper } from "../utils/math-helper";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class SplitterPanel extends Component {
 
@@ -13,11 +15,16 @@ export class SplitterPanel extends Component {
     private domSplitterPanel: DOM<HTMLElement>;
     private splitterBars: SplitterBar[] = [];
 
-    private ratios: number[] = [];
+    private containerSizes: number[] = [];
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         super();
         this.initializeComponent();
+    }
+
+    getContainerSize(container: IDockContainer) {
+        const index = this.childContainers.indexOf(container);
+        return this.containerSizes[index];
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
@@ -30,18 +37,17 @@ export class SplitterPanel extends Component {
         this.removeFromDOM();
         this.childContainers = children;
         this.constructSplitterDOMInternals();
-
-        //this.deriveRatiosFromContentSize();
-        //this.applyRatios();
     }
 
     updateContainerState(): void {
-        this.applyRatios(1);
+        this.updateContainerSizes(1);
         this.childContainers.forEach(child => child.updateContainerState());
     }
 
     updateLayoutState(): void {
-        this.applyRatios(1);
+        this.recomputeContainerSizes();
+        this.updateContainerSizes(1);
+
         this.childContainers.forEach(child => child.updateLayoutState());       
     }
 
@@ -51,184 +57,124 @@ export class SplitterPanel extends Component {
         if(index < 0)
             throw new Error("ERROR: Container is not member of splitter panel");
 
-        const oldRatios = this.getRatios();
-        const prevRatio = oldRatios[index];
-        const diffRatio = (prevRatio - ratio) / (this.childContainers.length - 1);
-
-        const newRatios: number[] = []
-        for(let i = 0; i < oldRatios.length; i++) {
-            if(i === index) {
-                newRatios.push(ratio);
-            } else {
-                newRatios.push(oldRatios[i] + diffRatio);
-            }
+        if(this.containerSizes.length === 0) {
+            this.computeInitialSize();
         }
 
-        this.setRatios(newRatios);
-        this.updateLayoutState();
+        const ratios = this.getRatios();
+        ratios[index] = ratio;
+        for(let i = 0; i < ratios.length; i++) {
+            if(index !== i) {
+                ratios[i] = (1 - ratio) / (ratios.length - 1);
+            }
+        }
+        console.log("setContainerRatio");
+        console.dir(ratios);
+
+        this.setRatios(ratios);
     }
 
     getRatios(): number[] {
-        return [...this.ratios];
-        // const panelSize = this.getSplitPanelSize();
-        // const results = [];
-        // for(const container of this.childContainers) {
-        //     const childSize = this.getVaryingSize(container.getDOM());
-        //     results.push(childSize / panelSize);
-        // }
-        // return results;
+        // Compute new content size
+        let totalSize = this.getVaryingSize(this.domSplitterPanel);
+        let barSize = this.splitterBars[0].getBarSize();
+        let contentSize = totalSize - (barSize * this.splitterBars.length);
+
+        return this.containerSizes.map(size => size / contentSize);
     }
 
     setRatios(ratios: number[]) {
-//        this.correctRatioRoundingErrors(ratios, 5);
-        this.ratios = [...ratios];
-//        this.adjustContentPixelRoundingErrors(10);
-        // this.applyRatios();
-        // const panelSize = this.getSplitPanelSize();
-        // for(let i = 0; i < ratios.length; i++) {
-        //     const container = this.childContainers[i];
-        //     const size = ratios[i] * panelSize;
-        //     this.changeContainerVaryingSize(container, size);
-        // }
-    }
+        // Compute new content size
+        let totalSize = this.getVaryingSize(this.domSplitterPanel);
+        let barSize = this.splitterBars[0].getBarSize();
+        let contentSize = totalSize - (barSize * this.splitterBars.length);
 
-    private correctRatioRoundingErrors(ratios: number[], decimalPlaces: number) {
-        const precision = Math.pow(10, decimalPlaces);
-        
-        const ratioSum = ratios.reduce((prev, curr) => prev + curr, 0);
-        console.log("BEFORE SUM");
-        console.log(ratioSum);
+        console.log("setRatios");
+        console.log(contentSize);
 
-        const totalRoundingErr = 1 - ratioSum;
-        ratios = ratios.map(ratio => ratio + totalRoundingErr / ratios.length);
-        ratios = ratios.map(ratio => Math.round(precision * ratio) / precision);
-        const ratioSum2 = ratios.reduce((prev, curr) => prev + curr, 0);
-        console.log("RATIO SUM");
-        console.log(ratioSum2);
-        return ratios;
-    }
-
-    private adjustContentPixelRoundingErrors(decimalPlaces: number) {
-        const round = (value: number) => {
-            const presision = Math.pow(10, decimalPlaces);
-            return Math.round(value * presision) / presision;
-        }
-
-        const sum = (arr: number[]) => {
-            return arr.reduce((prev, curr) => prev + curr, 0);
-        }
-
-        console.log("ADJUST CONTENT");
-        let totalSize = round(this.getVaryingSize(this.domSplitterPanel));
-        let barSize = round(this.splitterBars[0].getBarSize());
-        const contentSize = round(totalSize - (barSize * this.splitterBars.length));
-        
-        const  containerSizes = this.ratios.map(ratio => {
-            return ratio * contentSize;
-        });
-
-        const roundingError = round(contentSize - sum(containerSizes));
-        console.log(roundingError);
-
-        containerSizes[containerSizes.length - 1] += roundingError;
-
-        this.ratios = containerSizes.map(size => {
-            return size / sum(containerSizes);
-        });
+        // Recompute and apply changes
+        this.containerSizes = ratios.map(ratio => ratio * contentSize);
+        console.dir(this.containerSizes);
+        this.updateContainerSizes(1);
     }
 
     private handleResizeEvent(payload: ResizedPayload) {
-        console.dir(payload);
-        this.recalcRatioBySize(payload.prev, payload.prevSize);
-        this.recalcRatioBySize(payload.next, payload.nextSize);
-        this.ratios = this.correctRatioRoundingErrors(this.ratios, 15);
-        this.adjustContentPixelRoundingErrors(10);
-        this.ratios = this.correctRatioRoundingErrors(this.ratios, 15);
-        this.applyRatios(10);
+        const prevIndex = this.childContainers.indexOf(payload.prev);
+        const nextIndex = this.childContainers.indexOf(payload.next);
+
+        console.log("handleResizeEvent");
+        console.dir(payload.prevSize);
+        console.dir(payload.nextSize);;
+        console.dir(payload.prevSize + payload.nextSize);
+
+        this.containerSizes[prevIndex] = payload.prevSize;
+        this.containerSizes[nextIndex] = payload.nextSize;
+
+        this.updateContainerSizes(1);
     }
 
-    private recalcRatioBySize(container: IDockContainer, size: number) {
-        const index = this.childContainers.indexOf(container);
-        const totalSize = this.getVaryingSize(this.domSplitterPanel);
-        this.ratios[index] = size / (totalSize - 5);
+    private recomputeContainerSizes() {
+        // Compute old content size
+        let oldContentSize = MathHelper.sum(this.containerSizes);
+
+        // Compute new content size
+        let totalSize = this.getVaryingSize(this.domSplitterPanel);
+        let barSize = this.splitterBars[0].getBarSize();
+        let newContentSize = totalSize - (barSize * this.splitterBars.length);
+
+        // Recompute the sizes
+        const ratios = this.containerSizes.map(value => value / oldContentSize);
+        this.containerSizes = ratios.map(value => value * newContentSize);
     }
 
-    private deriveRatiosFromContentSize() {
-        const totalSize = this.getVaryingSize(this.domSplitterPanel);
-        this.ratios = [];
-        for(const container of this.childContainers) {
-            const size = this.orientation === OrientationKind.Row ? container.getWidth() : container.getHeight();
-            this.ratios.push(size / totalSize);
-        }
-    }
+    private updateContainerSizes(decimalPlaces: number) {
+        // Compute rounded sizes of container sizes
+        let totalSize = MathHelper.round(this.getVaryingSize(this.domSplitterPanel), decimalPlaces);
+        let barSize = MathHelper.round(this.splitterBars[0].getBarSize(), decimalPlaces);
+        let contentSize = totalSize - (barSize * this.splitterBars.length);
 
-    private applyRatios(decimalPlaces: number) {
-        const round = (value: number) => {
-            const presision = Math.pow(10, decimalPlaces);
-            return Math.round(value * presision) / presision;
-        }
+        console.log("updateContainerSize");
+        console.dir([totalSize, barSize, contentSize]);
 
-        const sum = (arr: number[]) => {
-            return arr.reduce((prev, curr) => prev + curr, 0);
-        }
-
-        console.log("ADJUST CONTENT");
-        let totalSize = round(this.getVaryingSize(this.domSplitterPanel));
-        let barSize = round(this.splitterBars[0].getBarSize());
-        const contentSize = round(totalSize - (barSize * this.splitterBars.length));
-        
-        const  containerSizes = this.ratios.map(ratio => {
-            return ratio * contentSize;
+        let sizes = this.containerSizes.map(value => {
+            console.log("INDEX");
+            console.dir(value);
+            return MathHelper.round(value, decimalPlaces);
         });
 
-        // const roundingError = round(contentSize - sum(containerSizes));
-        // console.log(roundingError);
+        sizes = [...this.containerSizes];
 
-        // containerSizes[containerSizes.length - 1] += roundingError;
-        const barSizePx = `${barSize.toFixed(10)}px`;
+        console.dir(this.containerSizes);
+        console.dir(sizes);
 
-        let ratioMappings: string[] = [];
-        for(let i = 0; i < containerSizes.length; i++) {
-            if(i > 0) {
-                ratioMappings.push(barSizePx);
-            }
-            const ratioMapping = `${containerSizes[i].toFixed(10)}px`;
-            ratioMappings.push(ratioMapping);
+        // Correct the rounding error
+        console.log(MathHelper.sum(sizes));
+        let roundingError = contentSize - MathHelper.sum(sizes);
+        console.dir(roundingError);
+
+        for(let i = 0; i < sizes.length; i++) {
+            sizes[i] += roundingError / sizes.length;
         }
-        
-        const ratioMappingPropertyValue = ratioMappings.join(" ");
-        this.domSplitterPanel.css("--docker-ratio-mapping", ratioMappingPropertyValue);
 
+        // Compute the CSS property value
+        let propertyValueParts: string[] = [];
+        for(let i = 0; i < sizes.length; i++) {
+            if(i > 0) {
+                propertyValueParts.push(barSize.toFixed(decimalPlaces) + "px");
+            }
+            propertyValueParts.push(sizes[i].toFixed(decimalPlaces) + "px");
+        }
+        const propertyValue = propertyValueParts.join(" ");
 
-
-
-        // // TODO: CACHE THIS COMPUTATION
-        // const barCount = this.splitterBars.length;
-        // const barSize = this.splitterBars[0].getBarSize();
-        // const barSizePx = `${barSize.toFixed(3)}px`
-        // const totalBarSize = barSize * barCount;
-        // const totalBarSizePx = `${totalBarSize.toFixed(3)}px`;
-
-        // const barSizeDecrement = `calc(${totalBarSizePx} / ${barCount + 1} * ${barCount})`;
-
-        // let ratioMappings: string[] = [];
-        // for(let i = 0; i < this.ratios.length; i++) {
-        //     if(i > 0) {
-        //         ratioMappings.push(barSizePx);
-        //     }
-        //     const ratio = this.ratios[i];            
-        //     const ratioMapping = `calc( ${(ratio * 100).toFixed(3)}% - ${barSizeDecrement})`;
-        //     ratioMappings.push(ratioMapping);
-        // }
-        
-        // const ratioMappingPropertyValue = ratioMappings.join(" ");
-        // this.domSplitterPanel.css("--docker-ratio-mapping", ratioMappingPropertyValue);
+        // Apply the CSS property value
+        this.domSplitterPanel.css("--docker-ratio-mapping", propertyValue);
     }
 
     resize(width: number, height: number) {
         if(this.childContainers.length <= 1)
             return;
-        this.applyRatios(1);
+        // this.recomputeContainerSizes();
+        // this.updateContainerSizes(1);
 
         // // Set the container dimension
         // this.domSplitterPanel.width(width).height(height);
@@ -287,9 +233,10 @@ export class SplitterPanel extends Component {
         }
     }
 
-    private computeInitialRatios() {
-        const childCount = this.childContainers.length;
-        this.ratios = new Array(childCount).fill(1 / childCount);
+    computeInitialSize() {
+        const count = this.childContainers.length;
+        const ratios = new Array(count).fill(1 / count);
+        this.setRatios(ratios);
     }
 
     private getSplitPanelSize() {
@@ -320,11 +267,6 @@ export class SplitterPanel extends Component {
             ).appendTo(this.domSplitterPanelWrapper);
         this.constructSplitterDOMInternals();
 
-        this.computeInitialRatios();
-        this.applyRatios(1);
-
-        this.updateLayoutState();
-
         return this.domSplitterPanelWrapper.get();
     }
 
@@ -340,19 +282,27 @@ export class SplitterPanel extends Component {
             // Construct the new splitter bar
             const prevContainer = this.childContainers[i];
             const nextContainer = this.childContainers[i + 1]
-            const splitterBar = new SplitterBar(prevContainer, nextContainer, this.orientation);
+            const splitterBar = new SplitterBar(this, prevContainer, nextContainer, this.orientation);
             splitterBar.on("onResized", this.handleResizeEvent.bind(this));
             this.splitterBars.push(splitterBar);
 
-            this.domSplitterPanel.appendChild(prevContainer.getDOM());
+            this.appendContainerToSplitter(prevContainer);
+            //this.domSplitterPanel.appendChild(prevContainer.getDOM());
             this.domSplitterPanel.appendChild(splitterBar.getDOM());
         }
 
-        this.domSplitterPanel.appendChild(ArrayUtils.lastElement(this.childContainers).getDOM());
+        //this.domSplitterPanel.appendChild(ArrayUtils.lastElement(this.childContainers).getDOM());
+        this.appendContainerToSplitter(ArrayUtils.lastElement(this.childContainers));
+
         this.childContainers.forEach(container => {
             container.setHeaderVisibility(true);
             container.setVisible(true);
         });
+    }
+
+    private appendContainerToSplitter(container: IDockContainer) {
+        const domContainer = container.getDOM();
+        this.domSplitterPanel.appendChild(domContainer);
     }
 
     private removeFromDOM() {

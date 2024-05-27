@@ -10,34 +10,63 @@
 
 .DockerTS-SplitterBar--Row {
     position: relative;
-    width: 5px;
-    cursor: col-resize;
+    min-width: 2px;
+    width: 2px;
+    z-index: 2;
 }
 
 .DockerTS-SplitterBar--Row::after {
     content: " ";
     position: absolute;
     left: 50%;
-    width: 10px;
     top: 0;
     height: 100%;
     transform: translate(-50%, 0);
+    cursor: col-resize;
+    width: 14px;
+    background: black;
+    opacity: 0;
+}
+
+.DockerTS-SplitterBar--Row:hover::after {
+    opacity: 0.5;
+    transition-delay: 500ms;
+    transition-property: opacity;
+    transition-duration: 750ms;
+}
+
+.DockerTS-SplitterBar--Row:active::after {
+    opacity: 0.5;
 }
 
 .DockerTS-SplitterBar--Column {
     display: inline-block;
     position: relative;
-    min-height: 5px;
-    height: 5px;
-    cursor: row-resize;
+    min-height: 2px;
+    height: 2px;
+    z-index: 2;
 }
 
 .DockerTS-SplitterBar--Column::after {
     content: " ";
     position: absolute;
+    cursor: row-resize;
     left: 0;
     width: 100%;
     top: 50%;
-    height: 10px;
+    height: 14px;
     transform: translate(0, -50%);
+    background: black;
+    opacity: 0;
+}
+
+.DockerTS-SplitterBar--Column:hover::after {
+    opacity: 0.5;
+    transition-delay: 500ms;
+    transition-property: opacity;
+    transition-duration: 750ms;
+}
+
+.DockerTS-SplitterBar--Column:active::after {
+    opacity: 0.5;
 }

@@ -6,6 +6,7 @@ import { OrientationKind } from "../common/enumerations";
 import { DragOverflowGuard, DragOverflowState, OverflowDirection } from "../utils/DragOverflowGuard";
 
 import "./SplitterBar.css";
+import { SplitterPanel } from "./SplitterPanel";
 
 export interface ResizedPayload {
     prev: IDockContainer;
@@ -27,6 +28,7 @@ export class SplitterBar extends Component {
     private overflowGuard = new DragOverflowGuard();
 
     constructor(
+        private splitterPanel: SplitterPanel,
         private prevContainer: IDockContainer, 
         private nextContainer: IDockContainer,
         private orientation: OrientationKind
@@ -39,13 +41,13 @@ export class SplitterBar extends Component {
         return this.orientation === OrientationKind.Row ? this.domBar.getWidth() : this.domBar.getHeight();
     }
 
-    adjustFixedDimension(size: number) {
-        if(this.orientation === OrientationKind.Row) {
-            this.domBar.height(size);
-        } else {
-            this.domBar.width(size);
-        }
-    }
+    // adjustFixedDimension(size: number) {
+    //     if(this.orientation === OrientationKind.Row) {
+    //         this.domBar.height(size);
+    //     } else {
+    //         this.domBar.width(size);
+    //     }
+    // }
 
     protected onInitialized(): void {}
 
@@ -81,7 +83,6 @@ export class SplitterBar extends Component {
         const deltaY = event.pageY - this.lastPosY;
 
         if(this.orientation === OrientationKind.Row) {
-            console.dir(deltaX);
             this.processDraggingX(deltaX, event);
         } else {
             this.processDraggingY(deltaY, event);
@@ -157,8 +158,8 @@ export class SplitterBar extends Component {
             this.overflowGuard.reset();   
         }
         // Current Heights
-        const prevHeight = this.prevContainer.getHeight();
-        const nextHeight = this.nextContainer.getHeight();
+        const prevHeight = this.splitterPanel.getContainerSize(this.prevContainer);
+        const nextHeight = this.splitterPanel.getContainerSize(this.nextContainer);
         // Minimum Allowed Heights
         const prevMinHeight = this.prevContainer.getMinHeight();
         const nextMinHeight = this.nextContainer.getMinHeight();
@@ -183,17 +184,6 @@ export class SplitterBar extends Component {
             prevSize: newPrevHeight, nextSize: newNextHeight
         };
 
-
-        console.dir(payload);
-
         this.triggerEvent("onResized", payload);
-
-        // Resize the containers
-        // this.prevContainer.resize(this.prevContainer.getWidth(), newPrevHeight);
-        // this.nextContainer.resize(this.nextContainer.getWidth(), newNextHeight);
-    }
-
-    private notifyGlobalResizeEvent() {
-        // TODO: HOW TO NOTIFY DOCK MANAGER TO PERFORM LAYOUTING BASED ON DRAGGING???
     }
 }
