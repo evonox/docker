@@ -141,6 +141,9 @@ export class TabHost extends Component {
             const activePanel = this.tabPages[tabIndex].getContainer();
             this.dockManager.setActivePanel(activePanel);
         });
+        this.tabStrip.on("onTabReordered", ({from, to}) => {
+            this.handleReorderTabs(from, to);
+        })
     }
 
     protected onDisposed(): void {
@@ -167,5 +170,23 @@ export class TabHost extends Component {
 
     protected onUpdate(element: HTMLElement): void {
         this.domSeparator.toggleClass("DockerTS-TabStrip__Separator--Focused", this.isFocused);
+    }
+
+    private handleReorderTabs(from: number, to: number) {
+        // Perform child container reordering
+        let childContainers = this.tabPages.map(page => page.getContainer());
+        const movedContainer = childContainers[from];
+        childContainers.splice(from, 1);
+        childContainers.splice(to, 0, movedContainer);
+       
+        // Free all the internals
+        this.performLayout([], false);
+        // Introduce the new children layout
+        this.performLayout(childContainers, false);
+        // Set Active Panel
+        this.selectedTab = undefined;
+        this.updateContainerState();
+        this.updateLayoutState();
+        this.dockManager.setActivePanel(movedContainer);
     }
 }

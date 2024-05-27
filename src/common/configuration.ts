@@ -18,6 +18,7 @@ export interface IDockConfig {
         zIndexMaximizedPanel?: number;
         zIndexContextMenu?: number;
         zIndexDragAndDropBlocker?: number;
+        zIndexTabReorderOperation?: number;
     }
 }
 
@@ -35,6 +36,7 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         zIndexWheel: 1e6 - 1,
         zIndexMaximizedPanel: 1e6,
         zIndexContextMenu: 1e6 + 1,
-        zIndexDragAndDropBlocker: 1e6 + 2
+        zIndexDragAndDropBlocker: 1e6 + 2,
+        zIndexTabReorderOperation: 1e6 - 1
     }
 }

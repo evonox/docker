@@ -129,41 +129,10 @@ export class TabHandle extends Component {
         this.triggerEvent("onTabDblClicked");
     }
 
-    /**
-     * TODO: REWORK AFTER THE REST IS TESTED
-     * TODO: MOVING ANIMATION????
-     */
-
-    private previousX: number;
-    private currentX: number;
-
     private handleMouseDown(event: MouseEvent) {
-        this.currentX = event.pageX;        
+        this.triggerEvent("onMouseDown", {event, tabHandle: this});
         this.triggerEvent("onTabClicked");
         if(event.button === MOUSE_BTN_RIGHT)
             return;
-
-        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), 
-            "pointer", DetectionMode.withThreshold);
-    }
-
-
-
-    private handleMouseMove(event: MouseEvent) {
-        this.domRoot.addClass("dockspan-tab-handle-dragged");
-
-        this.previousX = this.currentX;
-        this.currentX = event.pageX;
-        const direction = this.currentX - this.previousX;
-        const domRect = this.domRoot.getBounds();
-        const moveDirection = direction < 0 ? "left" : "right";
-
-        if((event.pageX < domRect.left && direction < 0) || (event.pageX > domRect.right && direction > 0)) {
-            this.triggerEvent("onTabMoved", moveDirection);
-        }
-    }
-
-    private handleMouseUp(event: MouseEvent) {
-        this.domRoot.removeClass("dockspan-tab-handle-dragged");        
     }
  }

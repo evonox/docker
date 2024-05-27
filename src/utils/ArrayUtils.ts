@@ -12,7 +12,7 @@ export class ArrayUtils {
 
     static removeItem<T>(array: T[], value: any): T[] | false {
         let idx = array.indexOf(value);
-        if (idx < 0) {
+        if (idx  >= 0) {
             return array.splice(idx, 1);
         }
         return false;

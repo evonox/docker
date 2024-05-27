@@ -4,8 +4,41 @@ import { PanelContainer } from "../containers/PanelContainer";
 
 declare var Velocity: any;
 
+export interface IAnimation {
+    commit(): void;
+    cancel(): void;
+}
+
 
 export class AnimationHelper {
+
+    static animateTabReorderTranslation(target: HTMLElement, targetLeftCoordinate: number): IAnimation {
+        let isAnimationRunning = true;
+        let sourceLeftCoordinate: number = parseFloat(target.style.left);
+
+        Velocity(target, {left: targetLeftCoordinate}, {
+            duration: 150,
+            easing: "ease-in-out",
+            complete: () => isAnimationRunning = false
+        });
+
+        return {
+            commit: () => {
+                if(isAnimationRunning) {
+                    isAnimationRunning = false;
+                    Velocity(target, "stop")
+                    target.style.left = targetLeftCoordinate.toFixed(3) + "px";
+                }
+            },
+            cancel: () => {
+                if(isAnimationRunning) {
+                    isAnimationRunning = false;
+                    Velocity(target, "stop")
+                    target.style.left = sourceLeftCoordinate.toFixed(3) + "px";
+                }
+            }
+        }
+    }
 
     static async animateMaximize(container: PanelContainer, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {

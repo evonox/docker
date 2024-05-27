@@ -13,6 +13,16 @@ export class DOM<T extends HTMLElement> {
 
     constructor(private element: T) {}
 
+    getElement(): T {
+        return this.element;
+    }
+
+    getOffsetParent(): DOM<HTMLElement> {
+        if(this.element.offsetParent instanceof HTMLElement) {
+            return new DOM<HTMLElement>(this.element.offsetParent);
+        }
+    }
+
     removeAllChildren(): DOM<T> {
         const domElements = this.element.children;
         for(let i = 0; i < domElements.length; i++) {

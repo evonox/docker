@@ -5,7 +5,9 @@ import { TabStripButtonBar } from "../core/TabStripButtonBar";
 import { TABSTRIP_SCROLL_LEFT, TABSTRIP_SCROLL_RIGHT, TABSTRIP_SHOW_MENU } from "../core/panel-default-buttons";
 import { DockManager } from "../facade/DockManager";
 import { Component } from "../framework/Component";
+import { TabReorderOperation } from "../operations/TabReorderOperation";
 import { DOM } from "../utils/DOM";
+import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { TabHandle } from "./TabHandle";
 
 import "./TabHostStrip.css";
@@ -17,8 +19,6 @@ import "./TabHostStrip.css";
  * Events:
  *      onTabActivated  - triggered when a tab is activated from the context menu
  *      onTabReordered  - trigger when user requested tab reorder
- * TODO:
- *      - HANDLE TAB REODER FEATURE IN THE NEAR FUTURE 
  */
 export class TabHostStrip extends Component {
 
@@ -45,16 +45,21 @@ export class TabHostStrip extends Component {
     attachTabHandle(tabHandle: TabHandle) {
         this.tabHandles.push(tabHandle);
         this.domTabHandleContainer.appendChild(tabHandle.getDOM());
+        tabHandle.on("onMouseDown", event => this.handleTabOrderingRequest(event));
     }
 
     detachTabHandle(tabHandle: TabHandle) {
         const index = this.tabHandles.indexOf(tabHandle);
         if(index >= 0) {
+            tabHandle.off("onMouseDown");
             tabHandle.detachFromDOM();
             this.tabHandles.splice(index, 1);
         }
     }
 
+    queryAttachedHandles(): TabHandle[] {
+        return [...this.tabHandles];
+    }
 
     protected onInitialized(): void {
         this.buttonBar = new TabStripButtonBar();
@@ -155,5 +160,27 @@ export class TabHostStrip extends Component {
             this.triggerEvent("onTabActivated", tabPageIndex);
         });
         contextMenu.show(event, zIndex);
+    }
+
+    /**
+     * Starts the tab ordering request
+     */
+    private handleTabOrderingRequest({event, tabHandle}: any) {
+        const reorderingOperation = new TabReorderOperation(
+            this.dockManager, this, tabHandle
+        );
+        reorderingOperation.processMouseDown(event);
+
+        reorderingOperation.on("onTabReorder", payload => {
+            this.triggerEvent("onTabReordered", payload);
+        })
+
+        DragAndDrop.start(event, 
+            event => reorderingOperation.processMouseMove(event),
+             event => reorderingOperation.processMouseUp(event),
+            "pointer", 
+            () => reorderingOperation.processCancelRequest(), 
+            DetectionMode.withThreshold
+        );
     }
 }

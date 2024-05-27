@@ -62,13 +62,13 @@ dockManager.registerPanelType("panel2", "panel", "singleton", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel3", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("panel3", "panel", "transient", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
-            domElement.innerText = "DockerTS Panel Three";
+            domElement.innerText = "DockerTS Panel Three " + options.getValue("key");
             api.setPanelFAIcon("fa fa-hamburger");
-            api.setPanelTitle("Panel Number 3");
+            api.setPanelTitle("Panel Number 3 - " + options.getValue("key"));
             return domElement;
         }
     }
@@ -163,7 +163,10 @@ async function performDocking() {
     try {
         const containerOne = await dockManager.createPanel("panel1");
         const containerTwo = await dockManager.createPanel("panel2");
-        const containerThree = await dockManager.createPanel("panel3");
+        const containerThree = await dockManager.createPanel("panel3", {key: "1"});
+        const containerThree1 = await dockManager.createPanel("panel3", {key: "2"});
+        const containerThree2 = await dockManager.createPanel("panel3", {key: "3"});
+        const containerThree3 = await dockManager.createPanel("panel3", {key: "4"});
         const containerLeft = await dockManager.createPanel("panel4");
         const containerBottom = await dockManager.createPanel("panel5");
         const containerFloat = await dockManager.createPanel("panel6");
@@ -171,6 +174,9 @@ async function performDocking() {
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
         dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
+        dockManager.dockFill(dockManager.getDocumentNode(), containerThree1);
+        dockManager.dockFill(dockManager.getDocumentNode(), containerThree2);
+        dockManager.dockFill(dockManager.getDocumentNode(), containerThree3);
         const dockLeftNode = dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
         dockManager.setActivePanel(containerOne);
         dockManager.dockFill(dockLeftNode, containerBottom);

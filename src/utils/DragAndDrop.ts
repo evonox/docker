@@ -11,6 +11,11 @@ export interface MouseEventHandler {
     (event: MouseEvent): void;
 }
 
+// Note: This handler is invoked when the user requests cancelling Drag-And-Drop by Escape key
+export interface DragDropCancelHandler {
+    (): void;
+}
+
 /**
  * Drag-and-Drop Helper Class
  */
@@ -39,7 +44,7 @@ export class DragAndDrop {
         this.domBlocker = undefined;
     }
 
-    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing", detectionMode: DetectionMode = DetectionMode.Immeadiate) {
+    static start(event: MouseEvent, mousemove: MouseEventHandler, mouseup: MouseEventHandler, cursor: string = "grabbing", onCancelled: DragDropCancelHandler = () => {},  detectionMode: DetectionMode = DetectionMode.Immeadiate) {
 
         let isDragAndDropStarted = false;
         let isDragAndDropCancelled = false;
@@ -74,7 +79,7 @@ export class DragAndDrop {
 
         }
 
-        handleMouseMove = _.throttle(handleMouseMove, 1000 / this.FRAME_RATE, {leading: true, trailing: true});
+        handleMouseMove = _.throttle(handleMouseMove, 1000 / this.FRAME_RATE, {leading: true, trailing: false});
 
         const handleMouseUp = (e: MouseEvent) => {
             event.preventDefault();
@@ -92,11 +97,13 @@ export class DragAndDrop {
         }
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            if(e.key === "Escape") {
+            if(e.key === "Escape" && ! isDragAndDropCancelled) {
                 isDragAndDropCancelled = true;
                 this.domBlocker.css("cursor", "default");
 
                 e.preventDefault();
+
+                onCancelled();
             }
         }
 
