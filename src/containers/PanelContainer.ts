@@ -14,7 +14,7 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 
@@ -59,8 +59,6 @@ export class PanelContainer extends Component implements IDockContainer {
     // Dimensions & Resizing State
     private _lastDialogSize: ISize;
     private _lastExpandedHeight: number;
-    private _lastFloatingRect: IRect;
-    private _lastZIndex: number;
 
     private _isVisible: boolean = false;
 
@@ -135,6 +133,10 @@ export class PanelContainer extends Component implements IDockContainer {
 
     getContentFrameDOM() {
         return this.domContentFrame;
+    }
+
+    getContentContainerDOM() {
+        return this.domContentContainer;
     }
 
     getFrameHeaderDOM() {
@@ -256,6 +258,9 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     expandPanel() {
+        this.state.expand();
+        return;
+
         if(this.containerState !== PanelContainerState.Floating)
             return;
         if(! this.isCollapsed)
@@ -267,6 +272,8 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     collapsePanel() {
+        this.state.collapse();
+        return;
         if(this.containerState !== PanelContainerState.Floating)
             return;
         if(this.isCollapsed)
@@ -309,6 +316,12 @@ export class PanelContainer extends Component implements IDockContainer {
         // this.domPanelPlaceholder.css("z-index", String(this._lastZIndex))
         //     .left(this._lastFloatingRect.x).top(this._lastFloatingRect.y)
         //     .width(this._lastFloatingRect.w).height(this._lastFloatingRect.h);
+    }
+
+    minimizePanel() {
+        this.state.minimize().then(() => {
+            this.updateLayoutState();
+        })
     }
 
     // TODO: In Future support maximizing from more states.
@@ -417,14 +430,14 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     private updateHeaderButtonVisibility() {
-        if(this.containerState === PanelContainerState.Floating) {
-            this.showHeaderButton(PANEL_ACTION_EXPAND, this.isCollapsed);
-            this.showHeaderButton(PANEL_ACTION_COLLAPSE, ! this.isCollapsed);
+        // if(this.containerState === PanelContainerState.Floating) {
+        //     this.showHeaderButton(PANEL_ACTION_EXPAND, this.isCollapsed);
+        //     this.showHeaderButton(PANEL_ACTION_COLLAPSE, ! this.isCollapsed);
             
-        } else {
-            this.showHeaderButton(PANEL_ACTION_EXPAND, false);
-            this.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
-        }
+        // } else {
+        //     this.showHeaderButton(PANEL_ACTION_EXPAND, false);
+        //     this.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+        // }
 
     }
 
@@ -479,6 +492,8 @@ export class PanelContainer extends Component implements IDockContainer {
             this.maximizePanel();
         } else if(actionName === PANEL_ACTION_RESTORE) {
             this.restorePanel();
+        } else if(actionName === PANEL_ACTION_MINIMIZE) {
+            this.minimizePanel();
         }
 
         this.updateHeaderButtonVisibility();

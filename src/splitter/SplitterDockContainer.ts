@@ -29,6 +29,10 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.splitterPanel.updateLayoutState();
     }
 
+    isHidden(): boolean {
+        return false;
+    }
+
     setHeaderVisibility(visible: boolean): void {}
 
     queryLoadedSize(): ISize {

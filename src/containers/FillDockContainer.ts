@@ -37,6 +37,10 @@ export class FillDockContainer implements IDockContainer {
 
     setHeaderVisibility(visible: boolean): void {}
 
+    isHidden(): boolean {
+        return false;
+    }
+
     queryLoadedSize(): ISize {
         return {...this._loadedSize};
     }

@@ -54,6 +54,10 @@ export class DraggableContainer implements IDockContainer {
         return this.delegate.getMinimumChildNodeCount();
     }
 
+    isHidden(): boolean {
+        return this.delegate.isHidden();
+    }
+
     setActiveChild(container: IDockContainer): void {
         return this.delegate.setActiveChild(container);
     }
@@ -85,6 +89,9 @@ export class DraggableContainer implements IDockContainer {
     private startDragging(event: MouseEvent) {
         // TODO: ADD OPACITY 0.5 ON DRAGGED STUFF WITH TRANSITION
         DOM.from(this.delegate.getDOM()).addClass("draggable-dragging-active");
+
+        if(this.delegate.isHidden())
+            return;
 
         this.guardX.reset();
         this.guardY.reset();

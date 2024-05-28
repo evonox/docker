@@ -9,8 +9,9 @@
 
 .DockerTS-ResizeHandle:hover::after {
     content: " ";
-    background: #444;
-    opacity: 0.5;
+    background: darkcyan;
+    opacity: 0.35;
+    border-radius: calc(var(--rh-handle-size) / 2);
     transition-delay: 550ms;
     transition-duration: 700ms;
     transition-property: opacity;

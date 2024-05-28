@@ -40,32 +40,97 @@ export class AnimationHelper {
         }
     }
 
-    static async animateMaximize(container: PanelContainer, targetRect: IRect): Promise<void> {
+    static async animatePanelCollapse(domDialog: HTMLElement, domContent: HTMLElement, headerHeight: number): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(container.getContentFrameDOM(), 
+            Velocity(domDialog, {height: headerHeight}, {
+                duration: 250,
+                easing: "easeInSine",
+                complete: () => resolve()
+            });
+            Velocity(domContent, {height: 0, opacity: 0}, {
+                duration: 250,
+                easing: "easeInSine",
+                complete: () => resolve()
+            });
+        });
+    }
+
+    static async animatePanelExpand(domDialog: HTMLElement, domContent: HTMLElement, dialogHeight: number, contentHeight: number): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(domDialog, {height: dialogHeight}, {
+                duration: 400,
+                easing: "easeOutCubic",
+                complete: () => resolve()
+            });
+            Velocity(domContent, {height: contentHeight, opacity: 1}, {
+                duration: 400,
+                easing: "easeOutCubic",
+                complete: () => resolve()
+            });
+        });
+    }
+
+
+
+    static async animateMaximize(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
-                500,
                 {
                     duration: 500,
                     easing: "ease-in-out",
                     complete: () => resolve()
                 }
             );
-
-            
-
-        // // Animate panel maximization 
-        // this.setHeaderVisibility(true);
-        // //this.domFrameHeader.css("opacity", "0");
-        // this.domContentFrame.top(this.domContentFrame.getTop() - this.domFrameHeader.getHeight())
-            // header.style.opacity = "0";
-
-            // Velocity(header, {opacity: 1}, {
-            //     duration: 3000, 
-            //     complete: () => header.style.opacity = "1"
-            // });
-
-
         });
     }
+
+    static async animateMaximizeNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, headerHeight: number, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(headerElement, {height: headerHeight}, {
+                duration: 300                
+            });
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                {
+                    delay: 300,
+                    duration: 500,
+                    easing: "ease-in-out",
+                    complete: () => resolve(),
+                }
+            );
+        });
+    }
+
+
+    static async animateRestoreNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                {
+                    duration: 500,
+                    easing: "ease-in-out",
+                }
+            );
+            Velocity(headerElement, {height: 0}, {
+                duration: 300,
+                delay: 500,
+                complete: () => resolve()
+            })
+        });       
+    }
+
+    static async animateRestore(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                {
+                    duration: 500,
+                    easing: "ease-in-out",
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
+
 }

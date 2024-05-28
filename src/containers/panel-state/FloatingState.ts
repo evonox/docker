@@ -1,8 +1,10 @@
 import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
+import { AnimationHelper } from "../../utils/animation-helper";
 import { PanelContainer } from "../PanelContainer";
 import { PanelStateBase } from "./PanelStateBase";
 import { SharedStateConfig } from "./SharedStateConfig";
@@ -11,6 +13,10 @@ import { SharedStateConfig } from "./SharedStateConfig";
 export class FloatingState extends PanelStateBase {
 
     private dialogFrameRO: ResizeObserver;
+
+    private isCollapsed: boolean;
+    private lastDialogExpandedHeight: number;
+    private lastContentExpandedHeight: number;
 
 
     constructor(dockManager: DockManager, panel: PanelContainer, config: SharedStateConfig, private dialog: Dialog) {
@@ -29,18 +35,20 @@ export class FloatingState extends PanelStateBase {
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         this.dialogFrameRO.observe(domDialogFrame);       
 
-        const previousPosition =  this.config.get("dialogPosition");
+        const previousPosition =  this.config.get("originalRect");
         if(previousPosition !== undefined) {
             const domDialog = this.dialog.getDialogFrameDOM();
             DOM.from(domDialog).applyRect(previousPosition);
         }
 
+        this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, true);
+        this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
+        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
+        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
+
+        this.panel.updateLayoutState();
+
         this.dialog.bringToFront();
-
-        // this.setVisible(true);
-        // this.updatePanelState();
-        // this.updateLayoutState();
-
     }
 
     public leaveState(): void {
@@ -68,14 +76,69 @@ export class FloatingState extends PanelStateBase {
             w: parseFloat(cssStyle.width),
             h: parseFloat(cssStyle.height)
         };
-        this.config.set("dialogPosition", rect);
+        this.config.set("originalRect", rect);
 
 
         const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
+
+        const viewportRect = this.dockManager.getContainerBoundingRect();
+        if(this.isCollapsed) {
+            const domContent = this.panel.getContentContainerDOM();
+            domContent.css("opacity", "1");
+        }
+
+
+        await AnimationHelper.animateMaximize(this.dialog.getDialogFrameDOM(), {
+            x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
+        });
 
 
         return true;
+    }
+
+    public async minimize(): Promise<boolean> {
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
+        this.dialog.hide();
+        
+        return true;
+    }
+
+    public async expand(): Promise<boolean> {
+        if(! this.isCollapsed)
+            return false;
+        this.isCollapsed = false;
+
+        const domDialogFrame = this.dialog.getDialogFrameDOM();
+        const domContentContainer = this.panel.getContentContainerDOM();
+        await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
+                this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
+        DOM.from(domDialogFrame).height(this.lastDialogExpandedHeight);
+        domContentContainer.height(this.lastContentExpandedHeight);
+
+        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
+        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
+    }
+
+    public async collapse(): Promise<boolean> {
+        if(this.isCollapsed)
+            return false;
+        this.isCollapsed = true;
+
+        const domDialogFrame = this.dialog.getDialogFrameDOM();
+        const domFrameHeader = this.panel.getFrameHeaderDOM();
+        const domContentContainer = this.panel.getContentContainerDOM();
+
+        const headerHeight = domFrameHeader.getHeight();
+
+        this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
+        this.lastContentExpandedHeight = domContentContainer.getHeight();
+        await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
+        DOM.from(domDialogFrame).height(headerHeight);
+
+        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, true);
+        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
     }
 
 

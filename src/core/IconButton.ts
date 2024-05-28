@@ -50,16 +50,25 @@ export class IconButton extends Component {
 
     private handleButtonPressed(event: MouseEvent) {
         event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
         this.triggerEvent("onPressed", {actionName: this.actionName, event});
     }
 
     private handleButtonReleased(event: MouseEvent) {
         event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
         this.triggerEvent("onReleased", {actionName: this.actionName, event});
     }
 
     private handleButtonClick(event: MouseEvent) {
         event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
         this.triggerEvent("onClicked", {actionName: this.actionName, event});
 
         this.triggerEvent("onAction", this.actionName);

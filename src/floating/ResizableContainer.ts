@@ -31,6 +31,10 @@ export class ResizableContainer implements IDockContainer {
         this.delegate.updateContainerState();
     }
 
+    isHidden(): boolean {
+        return this.delegate.isHidden();
+    }
+
     setHeaderVisibility(visible: boolean): void {
         this.delegate.setHeaderVisibility(visible);
     }
