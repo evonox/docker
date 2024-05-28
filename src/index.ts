@@ -3,6 +3,7 @@ import { DockManager } from "./facade/DockManager"
 
 import "./index.css";
 import { IPanelAPI, IPanelStateAPI } from "./common/panel-api";
+import { DOM } from "./utils/DOM";
 
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
