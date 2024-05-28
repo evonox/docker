@@ -1,4 +1,5 @@
 import { IRect } from "../common/dimensions";
+import { DOMRegistry } from "./DOMRegistry";
 
 const COORDINATE_PRECISION = 3;
 
@@ -11,7 +12,9 @@ export interface CSSClassObject {
  */
 export class DOM<T extends HTMLElement> {
 
-    constructor(private element: T) {}
+    constructor(private element: T) {
+        DOMRegistry.setDOM(this.element, this);
+    }
 
     getElement(): T {
         return this.element;
@@ -262,7 +265,12 @@ export class DOM<T extends HTMLElement> {
     }
 
     static from<T extends HTMLElement>(element: T): DOM<T> {
-        return new DOM(element);
+        let domValue = DOMRegistry.getDOM(element);
+        if(domValue !== undefined) {
+            return domValue as DOM<T>;
+        } else {
+            return new DOM(element);
+        }
     }
 
     static create<K extends keyof HTMLElementTagNameMap>(name: K): DOM<HTMLElementTagNameMap[K]> {
