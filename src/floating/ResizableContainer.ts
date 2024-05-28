@@ -1,4 +1,4 @@
-import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
+import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscription } from "../framework/component-events";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
@@ -12,6 +12,7 @@ import { ContainerType } from "../common/enumerations";
 export class ResizableContainer implements IDockContainer {
 
     private resizeHandles: ResizeHandle[] = [];
+    private eventManager = new ComponentEventManager();
 
     constructor(private delegate: IDockContainer, private topElement: HTMLElement, private disableResize: boolean = false) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -71,7 +72,7 @@ export class ResizableContainer implements IDockContainer {
         this.topElement.appendChild(resizeHandle.getDOM());
         this.resizeHandles.push(resizeHandle);
 
-        resizeHandle.on("mousedown", this.handleMouseDown);
+        resizeHandle.on("onMouseDown", this.handleMouseDown);
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
@@ -90,29 +91,32 @@ export class ResizableContainer implements IDockContainer {
         this.resizeHandles = [];
     }
 
+    /**
+     * Drag-and-drop Functionality for resizing the dialog
+     */
+
     private lastMousePos: IPoint;
     private draggedHandle: ResizeHandle;
 
     private handleMouseDown(payload: any) {
         const { handle, event } = payload;
         this.draggedHandle = handle;
-
         this.lastMousePos = {x: event.pageX, y: event.pageY};
-        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
+
+        DragAndDrop.start(event, 
+            this.handleMouseMove.bind(this), 
+            this.handleMouseUp.bind(this), 
+            handle.getCursor()
+        );
     }
 
     private handleMouseMove(event: MouseEvent) {
-        // TODO: SUSPEND PANEL LAYOUT? WHY?
-        
         const dx = event.pageX - this.lastMousePos.x;
         const dy = event.pageY - this.lastMousePos.y;
 
-        // TODO: CHECK BOUNDS INSIDE CONTAINER
         this.performDrag(this.draggedHandle, dx, dy);
-        this.lastMousePos = {x: event.pageX, y: event.pageY};
 
-        // TODO: RESUME PANEL LAYOUT? WHY?
-        // TODO: NOTIFY - CONTAINER RESIZED
+        this.lastMousePos = {x: event.pageX, y: event.pageY};
     }
 
     private handleMouseUp(event: MouseEvent) {
@@ -123,6 +127,8 @@ export class ResizableContainer implements IDockContainer {
     private performDrag(handle: ResizeHandle, dx: number, dy: number) {
         const bounds = DOM.from(this.topElement).getBounds();
         const rect: IRect = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
+        rect.w = this.delegate.getWidth();
+        rect.h = this.delegate.getHeight();
 
         if(handle.north()) this.resizeNorth(dy, rect);
         if(handle.south()) this.resizeSouth(dy, rect);
@@ -131,18 +137,22 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private resizeNorth(delta: number, bounds: IRect) {
+        console.log("RESIZE NORTH");
         this.resizeContainer(bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
     }
 
     private resizeSouth(delta: number, bounds: IRect) {
+        console.log("RESIZE SOUTH");
         this.resizeContainer(bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
     }
 
     private resizeEast(delta: number, bounds: IRect) {
+        console.log("RESIZE EAST");
         this.resizeContainer(bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
     }
 
     private resizeWest(delta: number, bounds: IRect) {
+        console.log("RESIZE WEST");
         this.resizeContainer(bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
     }
 
@@ -152,14 +162,7 @@ export class ResizableContainer implements IDockContainer {
         bounds.w += delta.dw;
         bounds.h += delta.dh;
 
-        bounds.w = Math.max(bounds.w, this.getMinWidth());
-        bounds.h = Math.max(bounds.h, this.getMinHeight());
-
-        DOM.from(this.topElement)
-            .css("left", bounds.x.toFixed(3) + "px")
-            .css("top", bounds.y.toFixed(3) + "px");
-        
-        this.resize(bounds.w, bounds.h);
+        this.eventManager.triggerEvent("onDialogResized", bounds);
     }
 
     /**
@@ -203,14 +206,30 @@ export class ResizableContainer implements IDockContainer {
     }
 
     on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        return this.delegate.on(eventName, handler);
+        if(this.isInternalEvent(eventName) === false) {
+            return this.delegate.on(eventName, handler);
+        } else {
+            return this.eventManager.subscribe(eventName, handler);
+        }
     }
 
     off(eventName: string): void {
-        this.delegate.off(eventName);
+        if(this.isInternalEvent(eventName) === false) {
+            this.delegate.off(eventName);
+        } else {
+            this.eventManager.unsubscribeAll(eventName);
+        }
     }
 
     once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-        return this.delegate.once(eventName, handler);
+        if(this.isInternalEvent(eventName) === false) {
+            return this.delegate.once(eventName, handler);
+        } else {
+            return this.eventManager.subscribeOnce(eventName, handler);
+        }
+    }
+
+    private isInternalEvent(eventName: string) {
+        return eventName === "onDialogResized";
     }
 }

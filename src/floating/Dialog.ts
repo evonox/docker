@@ -6,10 +6,11 @@ import { DOMEvent } from "../framework/dom-events";
 import { DOM } from "../utils/DOM";
 import { DraggableContainer } from "./DraggableContainer";
 import { ResizableContainer } from "./ResizableContainer";
-import { IPoint } from "../common/dimensions";
+import { IPoint, IRect } from "../common/dimensions";
 import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 import "./Dialog.css";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class Dialog implements IEventEmitter {
 
@@ -56,8 +57,8 @@ export class Dialog implements IEventEmitter {
 
     private initialize() {
         // Construct Dialog DOM & Decorators
-        this.domDialog = DOM.create("div").attr("tabIndex", "0").addClass("DockerTS-Dialog")
-            .appendChild(this.panel.getDOM())
+        this.domDialog = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-Dialog");
+            //.appendChild(this.panel.getDOM())
         this.draggable = new DraggableContainer(this.dockManager, this.panel, this.domDialog.get(), this.panel.getHeaderElement());
         this.resizable = new ResizableContainer(this.draggable, this.domDialog.get(), this.disableResize);        
         this.domDialog.appendTo(this.dockManager.getDialogRootElement());
@@ -83,6 +84,8 @@ export class Dialog implements IEventEmitter {
         this.panel.on("onExpanded", this.handleOnExpand.bind(this));
         this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
 
+        this.resizable.on("onDialogResized", this.handleResizeEvent.bind(this));
+
         // Resize the dialog
         this.resize(this.panel.getWidth(), this.panel.getHeight());
 
@@ -90,7 +93,7 @@ export class Dialog implements IEventEmitter {
             this.grayOutParent.grayOut(true);
         }
 
-        this.panel.prepareForFloating(this.domDialog.get());
+        this.panel.prepareForFloating(this);
 
         this.panel.updateLayoutState();
 
@@ -175,8 +178,9 @@ export class Dialog implements IEventEmitter {
     }
 
     resize(width: number, height: number) {
-        this.domDialog.width(width).height(height);
-        this.resizable.resize(width, height);
+        this.domDialog.width(width).height(height);   
+        this.panel.resize(width, height);
+        //this.resizable.resize(width, height);
         this.panel.updateLayoutState();
     }
 
@@ -187,6 +191,11 @@ export class Dialog implements IEventEmitter {
         this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
         this.panel.updateContainerState();
+    }
+
+    private handleResizeEvent(rect: IRect) {
+        this.setPosition(rect.x, rect.y);
+        this.resize(rect.w, rect.h);
     }
 
     private handleOnFocus() {

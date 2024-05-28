@@ -15,18 +15,12 @@ import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
-import { AnimationHelper } from "../utils/animation-helper";
+import { PanelStateMachine } from "./panel-state/PanelStateMachine";
+import { Dialog } from "../floating/Dialog";
 
 export class PanelContainer extends Component implements IDockContainer {
 
-    // private domContentHost: DOM<HTMLElement>;
-
-    // private domMaximizeRegionHost: DOM<HTMLElement>;
-
-    // private domContentWrapper: DOM<HTMLElement>;
     private domContent: HTMLElement;
-
-
 
     // Frame for panel content - header & content
     private domContentFrame: DOM<HTMLElement>;
@@ -42,13 +36,11 @@ export class PanelContainer extends Component implements IDockContainer {
     
     // Placeholder element for measuring size in Docked State
     private domPanelPlaceholder: DOM<HTMLElement>;
-    private panelPlaceholderRO: ResizeObserver;
+    // private panelPlaceholderRO: ResizeObserver;
     
 
 
     private domDialogFrame: HTMLElement;
-
-    private domGrayingPlaceholder: HTMLElement;
 
     private buttonBar: PanelButtonBar;
 
@@ -73,6 +65,8 @@ export class PanelContainer extends Component implements IDockContainer {
     private _isVisible: boolean = false;
 
     private contentPanelMouseDown: DOMEvent<MouseEvent>;
+
+    private state: PanelStateMachine;
 
     constructor(
         private dockManager: DockManager, 
@@ -122,6 +116,8 @@ export class PanelContainer extends Component implements IDockContainer {
         this.updateTitle();
     }
 
+    // TODO: MOVE TO UPDATE PROCEDURE
+    // TODO: MAKE THE ITEMS REACTIVE STATE 
     private updateTitle() {
         this.domTitle.html(this._iconHtml);
         this.domTitleText.addClass("DockerTS-HeaderTitleText").text(this._title).appendTo(this.domTitle);
@@ -144,21 +140,27 @@ export class PanelContainer extends Component implements IDockContainer {
     getFrameHeaderDOM() {
         return this.domFrameHeader;
     }
+
+    getPlaceholderDOM() {
+        return this.domPanelPlaceholder;
+    }
     
     isHidden(): boolean {
         return ! this._isVisible;
     }
 
+    // TODO: MOVE TO REACTIVE STATE
     setVisible(visible: boolean): void {
         this._isVisible = visible;
         if(visible) {
             this.domContentFrame.show();
-            this.updateContentLayout();
+            this.updateContainerState();
         } else {
             this.domContentFrame.hide();
         }
     }
 
+    // TODO: INTERNAL FLAG?? REACTIVE???
     isHeaderVisible() {
         return this.domContentFrame.hasClass("DockerTS-ContentFrame--NoHeader") === false;
     }
@@ -224,6 +226,7 @@ export class PanelContainer extends Component implements IDockContainer {
         return this.api.getMinHeight?.() ?? this.dockManager.config.defaultMinHeight;
     }
 
+    // TODO: UPDATE USING STATE
     setDialogPosition(x: number, y: number) {
         //this.domPanel.left(x).top(y);
         // this.domContentContainer.left(x).top(y + this.domFrameHeader.getHeight());
@@ -231,19 +234,23 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domContentFrame.left(x).top(y).width(bounds.width).height(bounds.height);
     }
 
+    // TODO: UPDATE USING STATE
     setPanelDimensions(width: number, height: number) {
         this.domContentFrame.width(width).height(height);
         //this.domPanelPlaceholder.width(width).height(heigth);
     }
 
+    // TODO: UPDATE USING STATE
     setPanelZIndex(zIndex: number) {
         this.domContentContainer.css("z-index", String(zIndex));
     }
 
+    // TODO: UPDATE USING STATE
     getLastDialogSize(): ISize {
         return {...this._lastDialogSize};
     }
 
+    // TODO: UPDATE USING STATE
     saveLastDialogSize(size: ISize) {
         this._lastDialogSize = {...size};
     }
@@ -272,6 +279,9 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     restorePanel() {
+        this.state.restore();
+        return;
+
         if(this.containerState !== PanelContainerState.Maximized)
             return;
         // Note: can be floating, minimized or docked
@@ -303,17 +313,20 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // TODO: In Future support maximizing from more states.
     maximizePanel() {
-        if(this.containerState === PanelContainerState.Maximized)
-            return;
-        this.previousContainerState = this.containerState;
-        this.wasVisibleHeaderBeforeMaximization = this.isHeaderVisible();
+        this.state.maximize().then(() => {
+            this.updateLayoutState();
+        });
+        // if(this.containerState === PanelContainerState.Maximized)
+        //     return;
+        // this.previousContainerState = this.containerState;
+        // this.wasVisibleHeaderBeforeMaximization = this.isHeaderVisible();
 
-        this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
-        this.containerState = PanelContainerState.Maximized;
+        //this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+        // this.containerState = PanelContainerState.Maximized;
 
-        const containerBounds = this.dockManager.getContainerBoundingRect();
-        this.setHeaderVisibility(true);
-        this.updateLayoutState();
+        // const containerBounds = this.dockManager.getContainerBoundingRect();
+        // this.setHeaderVisibility(true);
+        // this.updateLayoutState();
         // AnimationHelper.animateMaximize(this, {
         //     x: containerBounds.left, y: containerBounds.y, w: containerBounds.width, h: containerBounds.height
         // }).then(() => {
@@ -352,6 +365,8 @@ export class PanelContainer extends Component implements IDockContainer {
      * REMOVE JS DIMENSION CALCULATION AS MUCH AS POSSIBLE
      */
     resize(width: number, height: number): void {
+        this.state.updateLayoutState();
+        // this.domContentFrame.width(width).height(height);
         // TEMP SOLUTION
         // this.domPanelPlaceholder.width(width).height(height);
 
@@ -381,46 +396,24 @@ export class PanelContainer extends Component implements IDockContainer {
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {}
 
     updateLayoutState(): void {
-        this.updateContentLayout();
-    }
-
-    private updateContentLayout() {
-        if(this.isHidden())
-            return;
-
-        console.log("UPDATING LAYOUT STATE - RENDERING");
-        console.dir(this);
-        console.dir(this.containerState);
-
-        let rect: DOMRect | IRect;
-        if(this.containerState === PanelContainerState.Docked) {
-            rect = this.domPanelPlaceholder.getBounds();
-            console.log("DOCKED");
-            console.dir(rect);
-        } else if(this.containerState === PanelContainerState.Maximized) {
-            rect = this.dockManager.getContainerBoundingRect();
-        } else if(this.containerState === PanelContainerState.Floating) {
-            rect = this.domDialogFrame.getBoundingClientRect();
-            console.log("DIALOG FRAME");
-            console.dir(rect);
-        }
-
-        this.domContentFrame.applyRect(rect);
+        this.state.updateLayoutState();
     }
 
     updateContainerState() {
-        if(this.dockManager.getActivePanel() === this) {
-            this.domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
-        } else {
-            this.domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
-        }
+        // TODO: STATE BASE
+        // if(this.dockManager.getActivePanel() === this) {
+        //     this.domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
+        // } else {
+        //     this.domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
+        // }
 
+        this.state.updatePanelState();
         this.updateHeaderButtonVisibility();
 
-        if(this.containerState === PanelContainerState.Floating) {
-            const zIndex = DOM.from(this.domDialogFrame).getZIndex();
-            this.domContentFrame.zIndex(zIndex);
-        }
+        // if(this.containerState === PanelContainerState.Floating) {
+        //     const zIndex = DOM.from(this.domDialogFrame).getZIndex();
+        //     this.domContentFrame.zIndex(zIndex);
+        // }
     }
 
     private updateHeaderButtonVisibility() {
@@ -502,9 +495,12 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     protected onDisposed(): void {
-        this.panelPlaceholderRO.unobserve(this.domPanelPlaceholder.get());
-        this.panelPlaceholderRO.disconnect();
-        this.panelPlaceholderRO = undefined;
+        this.state.dispose();
+
+        // TODO: MOVE TO STATE
+        // this.panelPlaceholderRO.unobserve(this.domPanelPlaceholder.get());
+        // this.panelPlaceholderRO.disconnect();
+        // this.panelPlaceholderRO = undefined;
 
         this.buttonBar.dispose();
     }
@@ -541,28 +537,30 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
 
         this.domPanelPlaceholder = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-PanelPlaceholder");
-        this.panelPlaceholderRO = new ResizeObserver((entries) => {
-            this.updateContentLayout();
-        });
-        this.panelPlaceholderRO.observe(this.domPanelPlaceholder.get());
-
-        //this.domContentHost = DOM.create("div").addClass("DockerTS-PanelContent").appendTo(this.domPanelPlaceholder);
-
-        //this.domMaximizeRegionHost = DOM.create("div").addClass("DockerTS-MaximizeRegionHost");
-
-        // this.domContentWrapper = DOM.create("div")
-        //         .addClass("panel-content-wrapper")
-        //         .appendTo(this.domContentHost);
+        // this.panelPlaceholderRO = new ResizeObserver((entries) => {
+        //     this.updateContainerState();
+        //     this.updateLayoutState();
+        // });
+        // this.panelPlaceholderRO.observe(this.domPanelPlaceholder.get());
 
         this.bind(this.domContentFrame.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
+
+        this.state = new PanelStateMachine(this.dockManager, this, PanelContainerState.Docked);
 
         this.updateTitle();
         this.updateContainerState();
 
+        setTimeout(() => {
+            this.updateLayoutState();
+        }, 1000);
+
+
         return this.domPanelPlaceholder.get();
     }
     
-    protected onUpdate(element: HTMLElement): void {}
+    protected onUpdate(element: HTMLElement): void {
+        // TODO: TO BE DONE
+    }
 
     /**
      * Persistence Management
@@ -650,22 +648,26 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     prepareForDocking() {
-        if(this.domDialogFrame) {
-            this.panelPlaceholderRO.unobserve(this.domDialogFrame);
-        }
+        // if(this.domDialogFrame) {
+        //     this.panelPlaceholderRO.unobserve(this.domDialogFrame);
+        // }
 
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
         this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }
 
-    prepareForFloating(domDialogFrame: HTMLElement) {
-        this.domDialogFrame = domDialogFrame;
-        this.panelPlaceholderRO.observe(this.domDialogFrame);
+    async prepareForFloating(dialog: Dialog) {
+        this.domDialogFrame = dialog.getDialogFrameDOM();
+        this.setVisible(true);
+        await this.state.floatPanel(dialog);
+        // this.panelPlaceholderRO.observe(this.domDialogFrame);
 
-        this.containerState = PanelContainerState.Floating;
-        this.updateContainerState();
-        this.updateLayoutState();
+        // this.containerState = PanelContainerState.Floating;
+        setTimeout(() => {
+            this.updateContainerState();
+            this.updateLayoutState();   
+        }, 1000);
     }
 
 

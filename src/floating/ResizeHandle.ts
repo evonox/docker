@@ -3,10 +3,6 @@ import { DOM } from "../utils/DOM";
 
 import "./ResizeHandle.css";
 
-// TODO: QUERY FROM THE GLOBAL CONFIGURATION
-const RESIZE_HANDLE_SIZE = 6;
-const RESIZE_HANDLE_CORDER_SIZE = 12;
-
 export interface ResizeHandleType {
     north: boolean;
     south: boolean;
@@ -21,6 +17,12 @@ export class ResizeHandle extends Component {
     constructor(private handleType: ResizeHandleType) {
         super();
         this.initializeComponent();
+    }
+
+    // Note: Mouse Cursor is set in CSS, we must query it using computed style, not element style property
+    getCursor() {
+        const computedStyle = window.getComputedStyle(this.domHandle.get());
+        return computedStyle.getPropertyValue("cursor");
     }
 
     north() { return this.handleType.north; }
@@ -43,7 +45,7 @@ export class ResizeHandle extends Component {
     protected onUpdate(element: HTMLElement): void {}
 
     private handleMouseDown(event: MouseEvent) {
-        this.triggerEvent("mousedown", {event, handle: this});
+        this.triggerEvent("onMouseDown", {event, handle: this});
     }
 
     private updateHandleCssClass() {
