@@ -67,6 +67,14 @@ export interface IContextMenuAPI {
     removeMenuItem(item: IMenuItem): void;
 }
 
+
+export interface IChannel {
+    notify(eventName: string, payload?: any): void;
+    subscribe(eventName: string, handler: (payload?: any) => void): ISubscriptionAPI;
+    subscribeOnce(eventName: string, handler: (payload?: any) => void): ISubscriptionAPI;
+    unsubscribeAll(eventName: string): void;
+}
+
 /**
  * Interface passed to the panel's factory method with the API to influence its state in runtime
  */
@@ -79,6 +87,8 @@ export interface IPanelStateAPI {
     setPanelFAIcon(faIcon: string): void;
     setPanelTitle(title: string): void;
     notifyHasChanges(hasChanges: boolean): void;
+
+    channel(name?: string): IChannel;
 
     addHeaderButton(button: IHeaderButton): void;
     removeHeaderButton(actionName: string): void;

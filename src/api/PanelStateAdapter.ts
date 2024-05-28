@@ -1,6 +1,6 @@
 import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
-import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI } from "../common/panel-api";
+import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI, IChannel } from "../common/panel-api";
 
 /**
  * Adapter object given the bridge between the outer panel state interface 
@@ -9,6 +9,10 @@ import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI } from "../common/panel
 export class PanelStateAdapter implements IPanelStateAPI {
 
     constructor(private panelContainer: PanelContainer) {}
+
+    channel(name?: string): IChannel {
+        return this.panelContainer.getDockManager().getChannel(name);
+    }
 
     activate(): void {
         this.panelContainer.activatePanel();

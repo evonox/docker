@@ -1,7 +1,7 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
 import {  IDeltaPoint, IDeltaRect, IPoint, IRect } from "../common/dimensions";
 import { EventKind, EventPayload } from "../common/events-api";
-import { IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
+import { IChannel, IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
 import { DockWheel } from "../docking-wheel/DockWheel";
 import { Dialog } from "../floating/Dialog";
@@ -20,6 +20,7 @@ import { ContainerType, PanelType } from "../common/enumerations";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
+import { ChannelManager } from "./ChannelManager";
 
 
 /**
@@ -44,6 +45,9 @@ export class DockManager {
 
     // DockManager Event Manager
     private eventManager: ComponentEventManager;
+
+    // Channel Manager
+    private channelManager: ChannelManager;
 
     // Resize Observer
     private resizeObserver: ResizeObserver;
@@ -74,6 +78,7 @@ export class DockManager {
 
         // Initialize other internals
         this.eventManager = new ComponentEventManager();
+        this.channelManager = new ChannelManager();
         // this.dockWheel = new DockWheel(this);
         this.layoutEngine = new DockLayoutEngine(this);
         this.panelTypeRegistry = new DockPanelTypeRegistry();
@@ -129,6 +134,10 @@ export class DockManager {
 
     getDocumentNode(): DockNode {
         return this.context.model.documentManagerNode;
+    }
+
+    getChannel(name?: string): IChannel {
+        return this.channelManager.getChannel(name);
     }
 
     /**

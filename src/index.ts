@@ -2,13 +2,18 @@ import "reflect-metadata"
 import { DockManager } from "./facade/DockManager"
 
 import "./index.css";
+import { IPanelAPI, IPanelStateAPI } from "./common/panel-api";
 
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
 
 dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
+
+    let panelApi: IPanelStateAPI;
+
     return {
         initialize: async (api, options) => {
+            panelApi = api;
             const domElement = document.createElement("h1");
             domElement.innerText = "DockerTS Panel One";
             api.setPanelFAIcon("fa fa-user");
@@ -28,6 +33,11 @@ dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
             config.appendMenuItem({displayOrder: 102, title: "Menu Item Three", actionName: "Action3"});
         },
         onActionInvoked: (actionName) => {
+            if(actionName === "Action One") {
+                panelApi.channel().notify("Focus");
+            } else if(actionName === "Action2") {
+                panelApi.channel("CHANNEL").notify("Focus");
+            }
             console.log(`ACTION INVOKED: ${actionName}`);
         }
 
@@ -48,6 +58,7 @@ dockManager.registerPanelType("panel2", "panel", "singleton", (dockManager) => {
                     }, 2500);
                 }, 1500);
             }, 3000);
+            api.channel().subscribe("Focus", () => api.activate());
             return domElement;
         },
         getMinWidth: () => 500,
@@ -81,6 +92,7 @@ dockManager.registerPanelType("panel4", "panel", "singleton", (dockManager) => {
             domElement.innerText = "Docked Left";
             api.setPanelFAIcon("fa fa-cross");
             api.setPanelTitle("Left View");
+            api.channel("CHANNEL").subscribe("Focus", () => api.activate());
             return domElement;
         },
         getMinWidth: () => 100,
