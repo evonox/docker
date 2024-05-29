@@ -64,6 +64,8 @@ export class FloatingState extends PanelStateBase {
     }
 
     async maximize(): Promise<boolean> {
+        this.dialog.hide();
+
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("panelDialog", this.dialog);
         this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
@@ -88,9 +90,17 @@ export class FloatingState extends PanelStateBase {
     }
 
     public async minimize(): Promise<boolean> {
-        const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
         this.dialog.hide();
+        const domContentFrame = this.panel.getContentFrameDOM();
+
+        const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
+        this.config.set("restoreState", PanelContainerState.Floating);
+        this.config.set("panelDialog", this.dialog);
+        this.config.set("originalRect", rect);
+
+        const minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
+        await AnimationHelper.animateMinimize(domContentFrame.get(), minimizedFreeSlot);
+        domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
         
         return true;
     }

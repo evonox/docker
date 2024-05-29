@@ -160,4 +160,18 @@ export class AnimationHelper {
             );
         });       
     }
+
+    static async animateMinimize(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                {
+                    duration: 450,
+                    easing: "easeInOutCubic",
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
+
 }

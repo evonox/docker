@@ -56,6 +56,10 @@ export class DockManager {
     private lastZIndex: number;
     private lastDialogZIndex: number;
 
+    // Minimized Window Support
+    private lastMinimizedSlotId = 0;
+    private minimizedSlots: number[] = [];
+
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
         this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
         DOM.from(this.container).css("position", "relative")
@@ -269,6 +273,55 @@ export class DockManager {
         this.bindDialogDragEvents(dialog);
 
         return dialog;
+    }
+
+    /**
+     * Minimized Slot Management
+     */
+
+    requestMinimizeSlot(): number {
+        const slotId = this.lastMinimizedSlotId++;
+        this.minimizedSlots.unshift(slotId);
+        this.recomputeMinimizedSlotsCSS();
+        return slotId;
+    }
+
+    releaseMinimizeSlot(slotId: number) {
+        const index = this.minimizedSlots.indexOf(slotId);
+        if(index >= 0) {
+            this.minimizedSlots.splice(index, 1);
+            this.recomputeMinimizedSlotsCSS();
+        }
+    }
+
+    getNextFreeMinimizedSlotRect(): IRect {
+        const containerRect = this.getContainerBoundingRect();
+        const windowWidth = this.config.minimizedWindowWidth;
+        const windowHeight = this.config.minimizedWindowHeight;
+        return {
+            x: containerRect.right - windowWidth * (this.minimizedSlots.length + 1),
+            y: containerRect.bottom - windowHeight,
+            w: windowWidth,
+            h: windowHeight
+        };
+    }
+
+    private recomputeMinimizedSlotsCSS() {
+        // Set the window width
+        const windowWidth = this.config.minimizedWindowWidth;
+        DOM.from(this.container).css("--docker-ts-minimized-width", windowWidth.toFixed(0) + "px");
+        // Compute offsets of the slots
+        let offsetRight = 0;
+        for(let i = this.minimizedSlots.length - 1; i >= 0; i--) {
+            const slotId = this.minimizedSlots[i];
+            const cssVariableName = this.getSlotCSSPropertyName(slotId);
+            DOM.from(this.container).css(cssVariableName, offsetRight.toFixed(0) + "px");
+            offsetRight += windowWidth;
+        }
+    }
+
+    getSlotCSSPropertyName(slotId: number) {
+        return `--docker-ts-slot-${slotId}`;
     }
 
     // TODO: REFACTOR IT

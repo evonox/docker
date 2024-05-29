@@ -129,7 +129,7 @@ export class Dialog implements IEventEmitter {
     }
 
     show() {
-        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString());
+        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString()).css("display", "");
         // TODO: ELEMENT CONTAINER Z-INDEX???
         if(this.isHidden) {
             this.isHidden = false;
