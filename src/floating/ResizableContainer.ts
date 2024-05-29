@@ -9,7 +9,9 @@ import { IDeltaRect, IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
 
-
+/**
+ * Container Decorator providing the resizing functionality
+ */
 export class ResizableContainer implements IDockContainer {
 
     private resizeHandles: ResizeHandle[] = [];
@@ -26,7 +28,7 @@ export class ResizableContainer implements IDockContainer {
     }
 
     updateLayoutState(): void {
-        this.updateLayoutState();
+        this.delegate.updateLayoutState();
     }
 
     handleContextMenuAction(actionName: string): void {
@@ -46,22 +48,26 @@ export class ResizableContainer implements IDockContainer {
     }
     
     queryLoadedSize(): ISize {
-        throw new Error("Method not implemented.");
+        return this.delegate.queryLoadedSize();
     }
+
     onQueryContextMenu(config: IContextMenuAPI): void {
-        throw new Error("Method not implemented.");
+        this.delegate.onQueryContextMenu(config);
     }
+
     getMinimumChildNodeCount(): number {
-        throw new Error("Method not implemented.");
+        return this.delegate.getMinimumChildNodeCount();
     }
+
     setActiveChild(container: IDockContainer): void {
-        throw new Error("Method not implemented.");
+        this.delegate.setActiveChild(container);
     }
     saveState(state: IState): void {
-        throw new Error("Method not implemented.");
+        this.delegate.saveState(state);
     }
+
     loadState(state: IState): void {
-        throw new Error("Method not implemented.");
+        this.delegate.loadState(state);
     }
 
     private buildResizeHandles() {
@@ -152,22 +158,18 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private resizeNorth(delta: number, bounds: IRect) {
-        console.log("RESIZE NORTH");
         this.resizeContainer(bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
     }
 
     private resizeSouth(delta: number, bounds: IRect) {
-        console.log("RESIZE SOUTH");
         this.resizeContainer(bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
     }
 
     private resizeEast(delta: number, bounds: IRect) {
-        console.log("RESIZE EAST");
         this.resizeContainer(bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
     }
 
     private resizeWest(delta: number, bounds: IRect) {
-        console.log("RESIZE WEST");
         this.resizeContainer(bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
     }
 
@@ -177,11 +179,30 @@ export class ResizableContainer implements IDockContainer {
         bounds.w += delta.dw;
         bounds.h += delta.dh;
 
+        this.constrainContainerRect(bounds, delta);
+
         this.eventManager.triggerEvent("onDialogResized", bounds);
     }
 
+    private constrainContainerRect(bounds: IRect, delta: IDeltaRect) {
+        const minWidth = this.delegate.getMinWidth();
+        const minHeight = this.delegate.getMinHeight();
+        if(bounds.w < minWidth) {
+            if(delta.dx !== 0) {
+                bounds.x -= minWidth - bounds.w;
+            }
+            bounds.w = minWidth;
+        }
+        if(bounds.h < minHeight) {
+            if(delta.dy !== 0) {
+                bounds.y -= minHeight - bounds.h;
+            }
+            bounds.h = minHeight;
+        }
+    }
+
     /**
-     *  PURE DECORATOR OVERRIDES
+     *  Pure Decorator Overrides passing control to the delegated container
      */
 
     getDOM(): HTMLElement {
@@ -219,6 +240,10 @@ export class ResizableContainer implements IDockContainer {
     getContainerType(): ContainerType {
         return this.delegate.getContainerType();
     }
+
+    /**
+     * Event Emitter Overrides - differentiate between delegated and internal events for the decorator
+     */
 
     on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
         if(this.isInternalEvent(eventName) === false) {
