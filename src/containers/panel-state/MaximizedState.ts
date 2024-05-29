@@ -26,6 +26,7 @@ export class MaximizedState extends PanelStateBase {
         const previousState = this.config.get("restoreState", PanelContainerState.Docked);
         const wasHeaderVisible = this.config.get("wasHeaderVisible", true);
         const originalRect = this.config.get("originalRect");
+        console.dir(originalRect);
 
         const domContentFrame = this.panel.getContentFrameDOM();
 

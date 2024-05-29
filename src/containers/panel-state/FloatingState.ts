@@ -68,16 +68,8 @@ export class FloatingState extends PanelStateBase {
         this.config.set("panelDialog", this.dialog);
         this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
         
-        // TODO: SAVE PREVIOUS POSITION
-        const cssStyle = window.getComputedStyle(this.dialog.getDialogFrameDOM())
-        const rect: IRect = {
-            x: parseFloat(cssStyle.left),
-            y: parseFloat(cssStyle.top),
-            w: parseFloat(cssStyle.width),
-            h: parseFloat(cssStyle.height)
-        };
+        const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
         this.config.set("originalRect", rect);
-
 
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
@@ -88,11 +80,9 @@ export class FloatingState extends PanelStateBase {
             domContent.css("opacity", "1");
         }
 
-
-        await AnimationHelper.animateMaximize(this.dialog.getDialogFrameDOM(), {
+        await AnimationHelper.animateMaximize(domContentFrame.get(), {
             x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
         });
-
 
         return true;
     }
