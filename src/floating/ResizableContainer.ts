@@ -7,6 +7,7 @@ import { IState } from "../common/serialization";
 import { IContextMenuAPI } from "../common/panel-api";
 import { IDeltaRect, IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
+import { DockManager } from "../facade/DockManager";
 
 
 export class ResizableContainer implements IDockContainer {
@@ -14,7 +15,12 @@ export class ResizableContainer implements IDockContainer {
     private resizeHandles: ResizeHandle[] = [];
     private eventManager = new ComponentEventManager();
 
-    constructor(private delegate: IDockContainer, private topElement: HTMLElement, private disableResize: boolean = false) {
+    constructor(
+        private dockManager: DockManager,
+        private delegate: IDockContainer, 
+        private topElement: HTMLElement, 
+        private disableResize: boolean = false
+    ) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
     }
@@ -59,6 +65,11 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private buildResizeHandles() {
+        const handleSize = this.dockManager.config.dialogResizeHandleThickness;
+        const cornerSize = this.dockManager.config.dialogResizeHandleCornerSize;
+        DOM.from(this.topElement).css("--docker-ts-resize-handle-size", `${handleSize}px`)
+            .css("--docker-ts-corner-handle-size", `${cornerSize}px`);
+
         if(! this.disableResize) {
             this.buildResizeHandle({north: true, south: false, west: false, east: false});
             this.buildResizeHandle({north: false, south: true, west: false, east: false});

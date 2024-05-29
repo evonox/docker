@@ -13,9 +13,6 @@
     --docker-ts-context-menu-border-color: #999;
 
     --docker-ts-tabstrip-background: #727272;
-
-    --rh-handle-size: 8px;
-    --rh-corner-size: 10px;
 }
 
 .DockerTS--DisableSelection {

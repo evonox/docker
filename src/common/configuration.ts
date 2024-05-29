@@ -4,6 +4,8 @@
  */
 
 export interface IDockConfig {
+    dialogResizeHandleThickness?: number;
+    dialogResizeHandleCornerSize?: number;
     sideWheelMargin?: number;
     tabStripScrollOffset?: number;
     defaultPanelLabel?: string;
@@ -25,6 +27,8 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    dialogResizeHandleThickness: 10,    
+    dialogResizeHandleCornerSize: 10,
     sideWheelMargin: 40,
     tabStripScrollOffset: 85,
     defaultPanelLabel: "Untitled",
