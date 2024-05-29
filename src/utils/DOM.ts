@@ -113,7 +113,12 @@ export class DOM<T extends HTMLElement> {
         if(this.styleMap.has(propertyName) && this.styleMap.get(propertyName) === propertyValue)
             return this;
 
-        this.styleMap.set(propertyName, propertyValue);
+        if(propertyValue.trim() === "") {
+            this.styleMap.delete(propertyName);
+        } else {
+            this.styleMap.set(propertyName, propertyValue);
+        }
+
         DOMUpdateInitiator.requestDOMUpdate(() => {
             this.element.style.setProperty(propertyName, propertyValue);
         });

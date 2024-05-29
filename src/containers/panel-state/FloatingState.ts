@@ -115,7 +115,7 @@ export class FloatingState extends PanelStateBase {
         await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
                 this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
         DOM.from(domDialogFrame).height(this.lastDialogExpandedHeight);
-        domContentContainer.height(this.lastContentExpandedHeight);
+        domContentContainer.height("").css("opacity", "");
 
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
