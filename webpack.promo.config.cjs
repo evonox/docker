@@ -27,7 +27,7 @@ module.exports = {
     ],
   },
   devServer: {
-    static: './promo',
+    static: './promo-dist',
   }, 
   plugins: [
     new HtmlWebpackPlugin({
@@ -44,7 +44,7 @@ module.exports = {
   },
   output: {
     filename: 'promo-docker-ts.js',
-    path: path.resolve(__dirname, 'promo'),
+    path: path.resolve(__dirname, 'promo-dist'),
     clean: true,
     iife: true
   },
