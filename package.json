@@ -91,6 +91,8 @@
   "scripts": {
     "start": "webpack serve --open --mode development",
     "build": "webpack --mode production",
+    "start:promo": "webpack serve --open --mode development --config ./webpack.promo.config.cjs",
+    "build:promo": "webpack --mode production --config ./webpack.promo.config.cjs",
     "test": "jest"
   },
   "keywords": [],
