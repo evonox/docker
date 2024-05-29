@@ -40,6 +40,8 @@ export class IconButton extends Component {
         this.bind(this.domButton.get(), "mousedown", this.handleButtonPressed.bind(this));
         this.bind(this.domButton.get(), "mouseup", this.handleButtonReleased.bind(this));
         this.bind(this.domButton.get(), "click", this.handleButtonClick.bind(this));
+        
+        // Note: We need to suppress propagation of double click that may trigger in maximization operation, etc.
         this.bind(this.domButton.get(), "dblclick", (event) => {
             event.preventDefault();
             event.stopImmediatePropagation();

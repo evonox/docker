@@ -383,6 +383,9 @@ export class DockManager {
 
     private updateContainerState() {
         this.context.model.rootNode.container.updateContainerState();
+        for(const dialog of this.context.model.dialogs) {
+            dialog.getPanel().updateContainerState();
+        }
     }
     
     private resize(width: number, height: number) {
