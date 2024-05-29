@@ -1,0 +1,96 @@
+
+.dock-wheel-base {
+	position: absolute;
+}
+
+.dock-wheel-item {
+	position: absolute;
+	width: 32px;
+	height: 32px;
+
+    /* Layered shadow to emphasize DockWheel Items */
+    box-shadow: 0 1px 1px rgba(0,0,0,0.12), 
+              0 2px 2px rgba(0,0,0,0.12), 
+              0 4px 4px rgba(0,0,0,0.12), 
+              0 8px 8px rgba(0,0,0,0.12),
+              0 16px 16px rgba(0,0,0,0.12);
+
+    cursor: pointer;
+}
+
+.dock-wheel-fill {
+	margin-left: -16px;
+	margin-top: -16px;
+}
+
+.dock-wheel-left {
+	margin-left: -48px;
+	margin-top: -16px;
+}
+
+.dock-wheel-right {
+	margin-left: 16px;
+	margin-top: -16px;
+}
+
+.dock-wheel-top {
+	margin-left: -16px;
+	margin-top: -48px;
+}
+
+.dock-wheel-down {
+	margin-left: -16px;
+	margin-top: 16px;
+}
+
+.dock-wheel-panel-preview {
+	position: absolute;
+	background-color: rgba(128, 128, 255, 0.5);
+}
+
+.dock-wheel-active {
+    transform: scale(1.05);
+    transition: transform 350ms;
+    opacity: 1;
+    box-shadow: 2px 2px 4px 0 rgba(0,0,0,0.75);
+}
+
+.dock-wheel-fill-icon {
+	background: url(../../public/images/dock_fill.png) 0 0;
+}
+
+.dock-wheel-left-icon {
+	background: url(../../public/images/dock_left.png) 0 0;
+}
+
+.dock-wheel-right-icon {
+	background: url(../../public/images/dock_right.png) 0 0;
+}
+
+.dock-wheel-top-icon {
+	background: url(../../public/images/dock_top.png) 0 0;
+}
+
+.dock-wheel-down-icon {
+	background: url(../../public/images/dock_bottom.png) 0 0;
+}
+
+.dock-wheel-fill-icon-hover {
+	background: url(../../public/images/dock_fill_sel.png) 0 0;
+}
+
+.dock-wheel-left-icon-hover {
+	background: url(../../public/images/dock_left_sel.png) 0 0;
+}
+
+.dock-wheel-right-icon-hover {
+	background: url(../../public/images/dock_right_sel.png) 0 0;
+}
+
+.dock-wheel-top-icon-hover {
+	background: url(../../public/images/dock_top_sel.png) 0 0;
+}
+
+.dock-wheel-down-icon-hover {
+	background: url(../../public/images/dock_bottom_sel.png) 0 0;
+}

@@ -48,6 +48,11 @@
     position: absolute;
     display: grid;
     grid-template-rows: auto 1fr;
+
+}
+
+.DockerTS-ContentFrame--Dragging {
+    opacity: 0.7;
 }
 
 .DockerTS-ContentFrame.DockerTS-ContentFrame--NoHeader {

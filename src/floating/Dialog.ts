@@ -71,9 +71,11 @@ export class Dialog implements IEventEmitter {
 
         // Bind Component Events - Dragging Facilities
         this.draggable.on("onDraggableDragStart", (event) => {
+            this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging");
             this.eventManager.triggerEvent("onDragStart", {sender: this, event});
         });
         this.draggable.on("onDraggableDragStop", (event) => {
+            this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging");
             this.eventManager.triggerEvent("onDragStop", {sender: this, event});
         })
         this.draggable.on("onDraggableDragMove", (payload) => {

@@ -87,9 +87,6 @@ export class DraggableContainer implements IDockContainer {
     }
 
     private startDragging(event: MouseEvent) {
-        // TODO: ADD OPACITY 0.5 ON DRAGGED STUFF WITH TRANSITION
-        DOM.from(this.delegate.getDOM()).addClass("draggable-dragging-active");
-
         if(this.delegate.isHidden())
             return;
 
@@ -101,11 +98,11 @@ export class DraggableContainer implements IDockContainer {
 
     private stopDragging(event: MouseEvent) {
         this.eventManager.triggerEvent("onDraggableDragStop", event);
-        DOM.from(this.delegate.getDOM()).removeClass("draggable-dragging-active");
     }
 
     private handleMouseMove(event: MouseEvent) {
         event.preventDefault();
+
         let dx = event.pageX - this.lastMousePosition.x;
         let dy = event.pageY - this.lastMousePosition.y;
 

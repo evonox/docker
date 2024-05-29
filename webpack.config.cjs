@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 
 module.exports = {
@@ -16,8 +17,12 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      }
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        type: 'asset/resource'        
+      },      
     ],
   },
   devServer: {
@@ -28,6 +33,11 @@ module.exports = {
         title: 'Docker Library',
         template: path.resolve("./public/index.html")
     }),
+    new CopyPlugin({
+      patterns: [
+        { from: "./public/images/", to: "." }
+      ],
+    }),    
   ],  
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

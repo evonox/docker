@@ -79,7 +79,7 @@ export class DockManager {
         // Initialize other internals
         this.eventManager = new ComponentEventManager();
         this.channelManager = new ChannelManager();
-        // this.dockWheel = new DockWheel(this);
+        this.dockWheel = new DockWheel(this);
         this.layoutEngine = new DockLayoutEngine(this);
         this.panelTypeRegistry = new DockPanelTypeRegistry();
 
@@ -138,6 +138,10 @@ export class DockManager {
 
     getChannel(name?: string): IChannel {
         return this.channelManager.getChannel(name);
+    }
+
+    getLayoutEngine(): DockLayoutEngine {
+        return this.layoutEngine;
     }
 
     /**
@@ -262,6 +266,8 @@ export class DockManager {
         const dialog = new Dialog(this, container);
         dialog.setPosition(rect.x, rect.y);
         dialog.resize(rect.w, rect.h);
+        this.bindDialogDragEvents(dialog);
+
         return dialog;
     }
 
@@ -422,7 +428,7 @@ export class DockManager {
     }
 
     private handleDialogDragStarted(sender: Dialog, event: MouseEvent) {
-        const activeNode = this.findNodeOnPoint({x: event.pageX, y: event.pageY});        
+        const activeNode = this.findNodeOnPoint({x: event.pageX, y: event.pageY});      
         this.dockWheel.setActiveDialog(sender);
         this.dockWheel.setActiveNode(activeNode);
 
@@ -462,7 +468,7 @@ export class DockManager {
         const element = node.container.getDOM();
         const rect = element.getBoundingClientRect();
 
-        return rect.x < point.x && rect.y < point.y && point.x < rect.right && point.y < rect.bottom;
+        return rect.x < point.x && rect.y < point.y && point.x < rect.x + rect.width && point.y < rect.y + rect.height;
     }
 
 

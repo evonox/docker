@@ -4,12 +4,14 @@
  */
 
 export interface IDockConfig {
+    sideWheelMargin?: number;
     tabStripScrollOffset?: number;
     defaultPanelLabel?: string;
     defaultMinWidth?: number,
     defaultMinHeight?: number;
     dragAndDropFrameRate?: number;
     zIndexes?: {
+        zIndexWheelItem?: number;
         zIndexCounter?: number;
         zIndexDialogCounter?: number;
         zIndexTabHost?: number;
@@ -23,6 +25,7 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    sideWheelMargin: 40,
     tabStripScrollOffset: 85,
     defaultPanelLabel: "Untitled",
     defaultMinWidth: 150,
@@ -34,6 +37,7 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         zIndexTabHost: 1000,
         zIndexTabHandle: 100,
         zIndexWheel: 1e6 - 1,
+        zIndexWheelItem: 1e6 + 3,
         zIndexMaximizedPanel: 1e6,
         zIndexContextMenu: 1e6 + 1,
         zIndexDragAndDropBlocker: 1e6 + 2,

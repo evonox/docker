@@ -12,6 +12,28 @@ export interface IAnimation {
 
 export class AnimationHelper {
 
+    static animateFadeOut(target: HTMLElement): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(target, {opacity: 0}, {
+                duration: 300,
+                complete: () => resolve()
+            })
+        });
+    }
+
+    static animateDockWheelPlaceholder(target: HTMLElement, rect: IRect): IAnimation {
+        Velocity(target, {left: rect.x, top: rect.y, width: rect.w, height: rect.h, opacity: 1}, {
+            duration: 250,
+        });
+        return {
+            commit: () => {
+                Velocity(target, "finish")
+            },
+            cancel: () => Velocity(target, "stop")
+        }
+    }
+
+
     static animateTabReorderTranslation(target: HTMLElement, targetLeftCoordinate: number): IAnimation {
         let isAnimationRunning = true;
         let sourceLeftCoordinate: number = parseFloat(target.style.left);
