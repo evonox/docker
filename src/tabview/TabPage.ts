@@ -120,7 +120,7 @@ export class TabPage extends Component {
     }
 
     private handleTabDoubleClicked() {
-        this.container.maximizePanel();
+        this.container.toggleMaximizedPanelState();
     }
 
     private handleTabMoved(payload: any) {

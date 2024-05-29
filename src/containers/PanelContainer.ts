@@ -327,6 +327,15 @@ export class PanelContainer extends Component implements IDockContainer {
         })
     }
 
+    toggleMaximizedPanelState() {
+        console.log(this.state.getCurrentState());
+        if(this.state.getCurrentState() === PanelContainerState.Maximized) {
+            this.restorePanel();
+        } else {
+            this.maximizePanel();
+        }
+    }
+
     // TODO: In Future support maximizing from more states.
     maximizePanel() {
         this.activatePanel();
@@ -538,11 +547,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domFrameHeader.appendChild(this.domTitle);
         this.domFrameHeader.appendChild(this.buttonBar.getDOM());
         this.bind(this.domFrameHeader.get(), "dblclick", () => {
-            if(this.containerState === PanelContainerState.Maximized) {
-                this.restorePanel();
-            } else {
-                this.maximizePanel();
-            }
+            this.toggleMaximizedPanelState();
         });
         this.bind(this.domFrameHeader.get(), "contextmenu", this.handleContextMenuClick.bind(this));
 

@@ -16,6 +16,8 @@ export class PanelStateMachine implements IPanelStateAPI {
 
     private currentState: IGenericPanelState;
     private config = new SharedStateConfig();
+    
+    private containerState: PanelContainerState;
 
     private dialog?: Dialog;
 
@@ -24,8 +26,13 @@ export class PanelStateMachine implements IPanelStateAPI {
         private panel: PanelContainer,
         initialState: PanelContainerState
     ) {
+        this.containerState = initialState;
         this.currentState = this.createStateByType(initialState);
         this.currentState.enterState();
+    }
+
+    getCurrentState(): PanelContainerState {
+        return this.containerState;
     }
 
     // Cleanup Method
@@ -103,6 +110,7 @@ export class PanelStateMachine implements IPanelStateAPI {
     // Generic private method to change state
     private changeStateTo(state: PanelContainerState) {
         this.currentState.leaveState();
+        this.containerState = state;
         this.currentState = this.createStateByType(state);
         this.currentState.enterState();
     }
