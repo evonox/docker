@@ -63,7 +63,8 @@ export class DockedState extends PanelStateBase {
         if(this.panel.isHeaderVisible() === false) {
             const domFrameHeader = this.panel.getFrameHeaderDOM().get();
             this.panel.setHeaderVisibility(true);
-            const height = DOM.from(domFrameHeader).getHeight();
+            // const height = DOM.from(domFrameHeader).getHeight();
+            const height = domFrameHeader.offsetHeight;
             DOM.from(domFrameHeader).height(0);
             await AnimationHelper.animateMaximizeNoHeader(domFrame, domFrameHeader, height, {
                 x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height

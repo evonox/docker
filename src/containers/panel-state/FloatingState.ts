@@ -130,7 +130,9 @@ export class FloatingState extends PanelStateBase {
         const domFrameHeader = this.panel.getFrameHeaderDOM();
         const domContentContainer = this.panel.getContentContainerDOM();
 
-        const headerHeight = domFrameHeader.getHeight();
+        // const headerHeight = domFrameHeader.getHeight();
+        const headerHeight = domFrameHeader.get().offsetHeight;
+
 
         this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
         this.lastContentExpandedHeight = domContentContainer.getHeight();

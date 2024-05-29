@@ -123,17 +123,20 @@ export class AnimationHelper {
     static async animateMaximizeNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, headerHeight: number, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             Velocity(headerElement, {height: headerHeight}, {
-                duration: 300                
-            });
-            Velocity(targetElement, 
-                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
-                {
-                    delay: 300,
-                    duration: 500,
-                    easing: "ease-in-out",
-                    complete: () => resolve(),
+                duration: 100,
+                easing: 'linear',
+                complete: () => {
+                    Velocity(targetElement, 
+                        {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                        {
+                            delay: 100,
+                            duration: 350,
+                            easing: "easeInOutCubic",
+                            complete: () => resolve(),
+                        }
+                    );
                 }
-            );
+            });
         });
     }
 
@@ -143,15 +146,18 @@ export class AnimationHelper {
             Velocity(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
-                    duration: 500,
-                    easing: "ease-in-out",
+                    duration: 350,
+                    easing: "easeInOutCubic",
+                    complete: () => {
+                        Velocity(headerElement, {height: 0}, {
+                            delay: 100,
+                            duration: 100,
+                            easing: 'linear',
+                            complete: () => resolve()
+                        })           
+                    }
                 }
             );
-            Velocity(headerElement, {height: 0}, {
-                duration: 300,
-                delay: 500,
-                complete: () => resolve()
-            })
         });       
     }
 }

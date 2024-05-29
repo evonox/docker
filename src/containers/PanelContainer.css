@@ -1,10 +1,14 @@
 
 .DockerTS-FrameHeader {
-
     display: grid;
     grid-template-columns: 1fr auto;
 
+    box-sizing: border-box;
+    height: 1.5rem;
+
     overflow: hidden;
+    align-items: center;
+    align-content: center;
 
     user-select: none;
 
@@ -21,6 +25,7 @@
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
+    align-content: center;
 
     cursor: pointer;
 
