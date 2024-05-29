@@ -2,14 +2,14 @@ import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscriptio
 import { DOMEvent, DOMMouseEvent } from "../framework/dom-events";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
-import { DragAndDrop } from "../utils/DragAndDrop";
+import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { IState } from "../common/serialization";
 import { IContextMenuAPI } from "../common/panel-api";
 import { IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
 import { DragOverflowGuard, DragOverflowState, OverflowDirection } from "../utils/DragOverflowGuard";
-
+import { MOUSE_BTN_LEFT } from "../common/constants";
 
 export class DraggableContainer implements IDockContainer {
 
@@ -74,13 +74,19 @@ export class DraggableContainer implements IDockContainer {
         this.domEventMouseDown.unbind();
     }
 
-    private handleMouseDown(event: MouseEvent) {
-        this.lastMousePosition = {x: event.pageX, y: event.pageY};
-        this.startDragging(event);
-        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this));
-    }
-
     private lastMousePosition: IPoint;
+    private isDragAndDropTriggered: boolean;
+
+    private handleMouseDown(event: MouseEvent) {
+        if(event.button !== MOUSE_BTN_LEFT)
+            return;
+
+        this.isDragAndDropTriggered = false;
+        this.lastMousePosition = {x: event.pageX, y: event.pageY};
+
+        DragAndDrop.start(event, this.handleMouseMove.bind(this), this.handleMouseUp.bind(this), 
+            "pointer", () => {}, DetectionMode.withThreshold);
+    }
 
     private handleMouseUp(event: MouseEvent) {
         this.stopDragging(event);
@@ -102,6 +108,11 @@ export class DraggableContainer implements IDockContainer {
 
     private handleMouseMove(event: MouseEvent) {
         event.preventDefault();
+
+        if(! this.isDragAndDropTriggered) {
+            this.isDragAndDropTriggered = true;
+            this.startDragging(event);
+        }
 
         let dx = event.pageX - this.lastMousePosition.x;
         let dy = event.pageY - this.lastMousePosition.y;
