@@ -258,6 +258,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     expandPanel() {
+        this.activatePanel();
         this.state.expand();
         return;
 
@@ -272,6 +273,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     collapsePanel() {
+        this.activatePanel();
         this.state.collapse();
         return;
         if(this.containerState !== PanelContainerState.Floating)
@@ -286,6 +288,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     restorePanel() {
+        this.activatePanel();
         this.state.restore();
         return;
 
@@ -326,9 +329,8 @@ export class PanelContainer extends Component implements IDockContainer {
 
     // TODO: In Future support maximizing from more states.
     maximizePanel() {
-        this.state.maximize().then(() => {
-            this.updateLayoutState();
-        });
+        this.activatePanel();
+        this.state.maximize();
         // if(this.containerState === PanelContainerState.Maximized)
         //     return;
         // this.previousContainerState = this.containerState;

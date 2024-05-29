@@ -99,12 +99,25 @@ export class AnimationHelper {
             Velocity(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
-                    duration: 500,
-                    easing: "ease-in-out",
+                    duration: 350,
+                    easing: "easeInOutCubic",
                     complete: () => resolve()
                 }
             );
         });
+    }
+
+    static async animateRestore(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
+                {
+                    duration: 350,
+                    easing: "easeInOutCubic",
+                    complete: () => resolve()
+                }
+            );
+        });       
     }
 
     static async animateMaximizeNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, headerHeight: number, targetRect: IRect): Promise<void> {
@@ -141,18 +154,4 @@ export class AnimationHelper {
             })
         });       
     }
-
-    static async animateRestore(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
-                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
-                {
-                    duration: 500,
-                    easing: "ease-in-out",
-                    complete: () => resolve()
-                }
-            );
-        });       
-    }
-
 }
