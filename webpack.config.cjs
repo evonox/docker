@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 
 module.exports = {
@@ -17,11 +18,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: [MiniCssExtractPlugin.loader,'css-loader'],
       },
       {
         test: /\.(png|jpg|gif)$/i,
-        type: 'asset/resource'        
+        type: 'asset/inline'        
       },      
     ],
   },
@@ -33,21 +34,28 @@ module.exports = {
         title: 'Docker Library',
         template: path.resolve("./public/index.html")
     }),
-    new CopyPlugin({
-      patterns: [
-        { from: "./public/images/", to: "." }
-      ],
-    }),    
+    new MiniCssExtractPlugin({
+        filename: "[name].docker.css"
+    })
   ],  
+
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
     filename: '[name].docker.js',
     path: path.resolve(__dirname, 'dist'),
-    clean: true
+    clean: true,
+    iife: true
   },
   optimization: {
-    runtimeChunk: 'single',
+    // runtimeChunk: 'single',
+    minimizer: [
+      `...`,
+      new CssMinimizerPlugin({
+        minify: CssMinimizerPlugin.cssnanoMinify        
+      }),
+    ],
+
   },  
 };
