@@ -35,7 +35,7 @@ module.exports = {
         template: path.resolve("./public/index.html")
     }),
     new MiniCssExtractPlugin({
-        filename: "[name].docker.css"
+        filename: "docker-ts.css"
     })
   ],  
 
@@ -43,7 +43,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: '[name].docker.js',
+    filename: 'docker-ts.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
     iife: true

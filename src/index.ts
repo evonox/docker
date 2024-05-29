@@ -1,4 +1,3 @@
-// import "reflect-metadata"
 import { DockManager } from "./facade/DockManager"
 
 import "./index.css";
