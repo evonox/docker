@@ -209,17 +209,17 @@ export class PanelContainer extends Component implements IDockContainer {
 
     getPosition(): IPoint {
         const bounds = this.domContentFrame.getBounds();
-        return {x: bounds.left, y: bounds.y};
+        return {x: bounds.x, y: bounds.y};
     }
 
     getWidth(): number {
-        const bounds = this.domContentFrame.getBounds();
-        return bounds.width;
+        const bounds = this.domContentFrame.getBoundsRect();
+        return bounds.w;
     }
 
     getHeight(): number {
-        const bounds = this.domContentFrame.getBounds();
-        return bounds.height;
+        const bounds = this.domContentFrame.getBoundsRect();
+        return bounds.h;
     }
 
     getMinWidth(): number {

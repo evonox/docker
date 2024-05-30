@@ -166,8 +166,12 @@ export class DOM<T extends HTMLElement> {
         }
     }
 
-    getBounds(): IRect {
-        return RectHelper.fromDOMRect(this.element.getBoundingClientRect());
+    getBounds(): DOMRect {
+        return this.element.getBoundingClientRect();
+    }
+
+    getBoundsRect(): IRect {
+        return RectHelper.fromDOMRect(this.getBounds());
     }
 
     getComputedRect(): IRect {

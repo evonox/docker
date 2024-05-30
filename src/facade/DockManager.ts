@@ -93,7 +93,7 @@ export class DockManager {
                 this.updateContainerState();
             })
         });
-        this.resizeObserver.observe(this.container);
+        this.resizeObserver.observe(this.container, {box: "border-box"});
 
         // Init other MISC attributes
         this.lastZIndex = this.config.zIndexes.zIndexCounter;

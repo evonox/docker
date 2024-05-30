@@ -99,7 +99,7 @@ export class TabHostStrip extends Component {
         });
 
         this.resizeObserver = new ResizeObserver(() => this.checkTabStripOverflowStatus());
-        this.resizeObserver.observe(this.domTabStrip.get());
+        this.resizeObserver.observe(this.domTabStrip.get(), {box: "border-box"});
 
         return this.domTabStrip.get();
     }

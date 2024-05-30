@@ -134,5 +134,5 @@ export async function initBabylonDemo(canvas) {
             resizeEngine();
         })
     });
-    resizeObserver.observe(canvas);
+    resizeObserver.observe(canvas, {box: "border-box"});
 }

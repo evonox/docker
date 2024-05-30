@@ -18,7 +18,7 @@ export class DockedState extends PanelStateBase {
         });
 
         const domPlaceholder = this.panel.getPlaceholderDOM();
-        this.panelPlaceholderRO.observe(domPlaceholder.get());       
+        this.panelPlaceholderRO.observe(domPlaceholder.get(), {box: "border-box"});
 
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
@@ -88,7 +88,7 @@ export class DockedState extends PanelStateBase {
 
         // Note: The returned coordinates might not be the whole numbers
         // To prevent content flickering we "floor" them
-        let rect = RectHelper.fromDOMRect(this.panel.getPlaceholderDOM().getBounds());
+        let rect = this.panel.getPlaceholderDOM().getBoundsRect();
         rect = RectHelper.floor(rect);
         this.panel.getContentFrameDOM().applyRect(rect);
     }

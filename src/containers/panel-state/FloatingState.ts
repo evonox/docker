@@ -33,7 +33,7 @@ export class FloatingState extends PanelStateBase {
         });
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
-        this.dialogFrameRO.observe(domDialogFrame);       
+        this.dialogFrameRO.observe(domDialogFrame, {box: "border-box"});       
 
         const previousPosition =  this.config.get("originalRect");
         if(previousPosition !== undefined) {
