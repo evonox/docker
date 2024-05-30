@@ -64,6 +64,10 @@ export class FloatingState extends PanelStateBase {
     }
 
     async maximize(): Promise<boolean> {
+        if(this.isCollapsed) {
+            await this.expand(true);
+        }
+
         this.dialog.hide();
 
         this.config.set("restoreState", PanelContainerState.Floating);
@@ -90,6 +94,10 @@ export class FloatingState extends PanelStateBase {
     }
 
     public async minimize(): Promise<boolean> {
+        if(this.isCollapsed) {
+            await this.expand(true);
+        }
+
         this.dialog.hide();
         const domContentFrame = this.panel.getContentFrameDOM();
 
@@ -105,7 +113,10 @@ export class FloatingState extends PanelStateBase {
         return true;
     }
 
-    public async expand(): Promise<boolean> {
+    public async expand(doAnimation?: boolean): Promise<boolean> {
+        if(doAnimation === undefined) {
+            doAnimation = true;
+        }
         if(! this.isCollapsed)
             return false;
         this.isCollapsed = false;
@@ -113,8 +124,11 @@ export class FloatingState extends PanelStateBase {
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         DOM.from(domDialogFrame).css("border", "");
         const domContentContainer = this.panel.getContentContainerDOM();
-        await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
-                this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
+        if(doAnimation === true) {
+            await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
+            this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
+        }
+
         DOM.from(domDialogFrame).height(this.lastDialogExpandedHeight);
         domContentContainer.height("").css("opacity", "");
 
@@ -124,7 +138,10 @@ export class FloatingState extends PanelStateBase {
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
     }
 
-    public async collapse(): Promise<boolean> {
+    public async collapse(doAnimation?: boolean): Promise<boolean> {
+        if(doAnimation === undefined) {
+            doAnimation = true;
+        }
         if(this.isCollapsed)
             return false;
         this.isCollapsed = true;
@@ -141,7 +158,9 @@ export class FloatingState extends PanelStateBase {
 
         this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
         this.lastContentExpandedHeight = domContentContainer.getHeight();
-        await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
+        if(doAnimation === true) {
+            await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
+        }
         DOM.from(domDialogFrame).css("border", "none");
         DOM.from(domDialogFrame).height(headerHeight);
 
