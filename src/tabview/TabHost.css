@@ -16,9 +16,9 @@
 }
 
 .DockerTS-TabStrip__Separator {
-    background: #000;
+    background: var(--docker-ts-selected-color);
     height: 5px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--docker-ts-selected-color);
     box-sizing: border-box;
 }
 

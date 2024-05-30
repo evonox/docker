@@ -1,18 +1,22 @@
 
 :root {
-    --docker-ts-primary-color: #008749;
-    --docker-ts-primary-dark-color: darkgreen;
+    --docker-ts-primary-color: #5E6C85;
+    --docker-ts-primary-dark-color: #556178;
     --docker-ts-primary-on-color: whitesmoke;
-    --docker-ts-inactive-color: gray;
+    --docker-ts-inactive-color: #333A47;
     --docker-ts-inactive-on-color: lightgray;
-    --docker-ts-primary-inactive-color: #444;
+    --docker-ts-primary-inactive-color: #333A47;
     --docker-ts-hover-button-color: orangered;
+    --docker-ts-selected-color: #4A5569;
+    --docker-ts-selected-dark-color: #465063;
 
-    --docker-ts-context-menu-background: lightgray;
-    --docker-ts-context-menu-color: #444;
-    --docker-ts-context-menu-border-color: #999;
+    --docker-ts-context-menu-background: #3D4657;
+    --docker-ts-context-menu-color: whitesmoke;
+    --docker-ts-context-menu-border-color: #57637A;
 
-    --docker-ts-tabstrip-background: #727272;
+    --docker-ts-resize-handle-hover-color: #4F5B70;
+
+    --docker-ts-tabstrip-background: #B2C1D6;
 }
 
 .DockerTS--DisableSelection {

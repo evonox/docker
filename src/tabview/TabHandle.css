@@ -31,7 +31,7 @@
 
 .DockerTS-TabHandle--Selected {
     color: white;
-    background: linear-gradient(to bottom, #444, #000);
+    background: linear-gradient(to bottom, var(--docker-ts-selected-color), var(--docker-ts-selected-dark-color));
 }
 
 

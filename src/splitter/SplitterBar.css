@@ -5,7 +5,7 @@
 }
 
 .DockerTS-SplitterBar:hover {
-    background: var(--docker-ts-primary-dark-color);
+    background: var(--docker-ts-resize-handle-hover-color);
 }
 
 .DockerTS-SplitterBar--Row {
@@ -24,7 +24,7 @@
     transform: translate(-50%, 0);
     cursor: col-resize;
     width: 14px;
-    background: black;
+    background: var(--docker-ts-resize-handle-hover-color);
     opacity: 0;
 }
 
@@ -56,7 +56,7 @@
     top: 50%;
     height: 14px;
     transform: translate(0, -50%);
-    background: black;
+    background: var(--docker-ts-resize-handle-hover-color);
     opacity: 0;
 }
 
