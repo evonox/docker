@@ -26,6 +26,8 @@ export class PanelContainer extends Component implements IDockContainer {
     private domContentFrame: DOM<HTMLElement>;
     // Container Element for panel content provided by the client code
     private domContentContainer: DOM<HTMLElement>;
+    // Content Host holding the clinet content out of document flow
+    private domContentHost: DOM<HTMLElement>;
     
     // Wrapper element for panel header
     private domFrameHeader: DOM<HTMLElement>;
@@ -463,7 +465,7 @@ export class PanelContainer extends Component implements IDockContainer {
         // DOM.from(this.domContent).css("position", "absolute")
         //     .css("left", "0").css("top", "0")
         //     .css("width", "100%").css("height", "100%");
-        this.domContentContainer?.appendChild(this.domContent);
+        this.domContentHost?.appendChild(this.domContent);
 
         this.contentPanelMouseDown?.unbind();
         this.contentPanelMouseDown = new DOMEvent(content);
@@ -554,6 +556,8 @@ export class PanelContainer extends Component implements IDockContainer {
         // Create the content container
         this.domContentContainer = DOM.create("div").addClass("DockerTS-ContentContainer")
                 .appendTo(this.domContentFrame);
+        this.domContentHost = DOM.create("div").addClass("DockerTS-ContentHost")
+                .appendTo(this.domContentContainer);
                 
         this.bind(this.domContentContainer.get(), "mousedown", this.handleMouseFocusEvent.bind(this));
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
@@ -572,6 +576,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.updateTitle();
         this.updateContainerState();
 
+        // TODO: WHAT IS THIS?
         setTimeout(() => {
             this.updateLayoutState();
         }, 1000);

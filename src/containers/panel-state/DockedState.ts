@@ -4,6 +4,7 @@ import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANE
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
 import { AnimationHelper } from "../../utils/animation-helper";
+import { RectHelper } from "../../utils/rect-helper";
 import { PanelStateBase } from "./PanelStateBase";
 
 
@@ -85,7 +86,10 @@ export class DockedState extends PanelStateBase {
             return;
         super.updateLayoutState();
 
-        const rect = this.panel.getPlaceholderDOM().getBounds();
+        // Note: The returned coordinates might not be the whole numbers
+        // To prevent content flickering we "floor" them
+        let rect = RectHelper.fromDOMRect(this.panel.getPlaceholderDOM().getBounds());
+        rect = RectHelper.floor(rect);
         this.panel.getContentFrameDOM().applyRect(rect);
     }
 

@@ -75,7 +75,18 @@
     visibility: collapse;
 }
 
+/* Note: We need to remove the client content out of document flow. */
+/* In case it overflows we do not want to interfere the layout of the whole DockerTS library */
 .DockerTS-ContentContainer {
+    position: relative;
+}
+
+.DockerTS-ContentHost {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     background: whitesmoke;
 }

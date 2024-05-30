@@ -18,11 +18,14 @@
 .DockerTS-TabStrip__Separator {
     background: #000;
     height: 5px;
+    border-bottom: 1px solid #000;
+    box-sizing: border-box;
 }
 
 .DockerTS-TabStrip__Separator--Focused {
+    box-sizing: border-box;
     background: var(--docker-ts-primary-color);
-    border-bottom: 1px solid var(--docker-ts-primary-dark-color);;
+    border-bottom: 1px solid var(--docker-ts-primary-dark-color);
 }
 
 .DockerTS-TabPage--ContentWrapper {

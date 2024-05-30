@@ -19,7 +19,6 @@ import "./TabHandle.css";
  * 
  * TO-DOs:
  *      - bind drag-and-drop to initiate the panel undock operation
- *      - implement drag-and-drop tab reorder feature
  */
 
 export class TabHandle extends Component {
