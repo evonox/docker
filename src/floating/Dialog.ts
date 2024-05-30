@@ -60,7 +60,7 @@ export class Dialog implements IEventEmitter {
         this.domDialog = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-Dialog");
             //.appendChild(this.panel.getDOM())
         this.draggable = new DraggableContainer(this.dockManager, this.panel, this.domDialog.get(), this.panel.getHeaderElement());
-        this.resizable = new ResizableContainer(this.dockManager, this.draggable, this.domDialog.get(), this.disableResize);        
+        this.resizable = new ResizableContainer(this.dockManager, this.draggable, this.domDialog.get());        
         this.domDialog.appendTo(this.dockManager.getDialogRootElement());
 
         // Bind the DOM events

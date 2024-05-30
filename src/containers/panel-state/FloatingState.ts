@@ -117,6 +117,8 @@ export class FloatingState extends PanelStateBase {
         DOM.from(domDialogFrame).height(this.lastDialogExpandedHeight);
         domContentContainer.height("").css("opacity", "");
 
+        this.panel.triggerEvent("onEnableResize", true);
+
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
     }
@@ -125,6 +127,8 @@ export class FloatingState extends PanelStateBase {
         if(this.isCollapsed)
             return false;
         this.isCollapsed = true;
+
+        this.panel.triggerEvent("onEnableResize", false);
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         const domFrameHeader = this.panel.getFrameHeaderDOM();

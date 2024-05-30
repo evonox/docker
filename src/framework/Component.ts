@@ -57,7 +57,7 @@ export abstract class Component {
         return this.componentEventManager.subscribeOnce(eventName, handler);
     }
 
-    protected triggerEvent(eventName: string, payload?: any) {
+    public triggerEvent(eventName: string, payload?: any) {
         this.componentEventManager.triggerEvent(eventName, payload);
     }
 

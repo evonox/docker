@@ -16,15 +16,20 @@ export class ResizableContainer implements IDockContainer {
 
     private resizeHandles: ResizeHandle[] = [];
     private eventManager = new ComponentEventManager();
+    private subscriptionResizeEnable: ComponentEventSubscription;
+
+    private isResizeEnabled: boolean = true;
 
     constructor(
         private dockManager: DockManager,
         private delegate: IDockContainer, 
-        private topElement: HTMLElement, 
-        private disableResize: boolean = false
+        private topElement: HTMLElement,
     ) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.buildResizeHandles();
+        this.subscriptionResizeEnable = this.delegate.on("onEnableResize", isEnabled => {
+            this.toggleResizeHandles(isEnabled);
+        });
     }
 
     updateLayoutState(): void {
@@ -70,22 +75,31 @@ export class ResizableContainer implements IDockContainer {
         this.delegate.loadState(state);
     }
 
+    private toggleResizeHandles(isEnabled: boolean) {
+        if(this.isResizeEnabled !== isEnabled) {
+            this.isResizeEnabled = isEnabled;
+            if(isEnabled) {
+                this.buildResizeHandles();
+            } else {
+                this.destroyResizeHandles();
+            }
+        }
+    }
+
     private buildResizeHandles() {
         const handleSize = this.dockManager.config.dialogResizeHandleThickness;
         const cornerSize = this.dockManager.config.dialogResizeHandleCornerSize;
         DOM.from(this.topElement).css("--docker-ts-resize-handle-size", `${handleSize}px`)
             .css("--docker-ts-corner-handle-size", `${cornerSize}px`);
 
-        if(! this.disableResize) {
-            this.buildResizeHandle({north: true, south: false, west: false, east: false});
-            this.buildResizeHandle({north: false, south: true, west: false, east: false});
-            this.buildResizeHandle({north: false, south: false, west: true, east: false});
-            this.buildResizeHandle({north: false, south: false, west: false, east: true});
+        this.buildResizeHandle({north: true, south: false, west: false, east: false});
+        this.buildResizeHandle({north: false, south: true, west: false, east: false});
+        this.buildResizeHandle({north: false, south: false, west: true, east: false});
+        this.buildResizeHandle({north: false, south: false, west: false, east: true});
 
-            this.buildResizeHandle({north: true, south: false, west: true, east: false});
-            this.buildResizeHandle({north: false, south: true, west: true, east: false});
-            this.buildResizeHandle({north: false, south: true, west: false, east: true});
-        }
+        this.buildResizeHandle({north: true, south: false, west: true, east: false});
+        this.buildResizeHandle({north: false, south: true, west: true, east: false});
+        this.buildResizeHandle({north: false, south: true, west: false, east: true});
     }
 
     private buildResizeHandle(kind: ResizeHandleType) {
@@ -94,6 +108,13 @@ export class ResizableContainer implements IDockContainer {
         this.resizeHandles.push(resizeHandle);
 
         resizeHandle.on("onMouseDown", this.handleMouseDown);
+    }
+
+    private destroyResizeHandles() {
+        for(const resizeHandle of this.resizeHandles) {
+            resizeHandle.dispose();
+        }
+        this.resizeHandles = [];
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
@@ -106,10 +127,8 @@ export class ResizableContainer implements IDockContainer {
     }
 
     removeDecorator() {
-        for(const resizeHandle of this.resizeHandles) {
-            resizeHandle.dispose();
-        }
-        this.resizeHandles = [];
+        this.subscriptionResizeEnable.unsubscribe();
+        this.destroyResizeHandles();
     }
 
     /**
@@ -121,6 +140,13 @@ export class ResizableContainer implements IDockContainer {
 
     private handleMouseDown(payload: any) {
         const { handle, event } = payload;
+        if(this.isResizeEnabled === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            return;
+        }
+
         this.draggedHandle = handle;
         this.lastMousePos = {x: event.pageX, y: event.pageY};
 
