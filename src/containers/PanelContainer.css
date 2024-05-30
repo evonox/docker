@@ -67,7 +67,7 @@
 .DockerTS-ContentFrame.DockerTS-ContentFrame--Minimized {
     right: 0;
     bottom: 0;
-    max-width: var(--docker-ts-minimized-width);
+    width: var(--docker-ts-minimized-width);
     height: auto;
 }
 

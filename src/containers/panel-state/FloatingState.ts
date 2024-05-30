@@ -111,6 +111,7 @@ export class FloatingState extends PanelStateBase {
         this.isCollapsed = false;
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
+        DOM.from(domDialogFrame).css("border", "");
         const domContentContainer = this.panel.getContentContainerDOM();
         await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
                 this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
@@ -141,6 +142,7 @@ export class FloatingState extends PanelStateBase {
         this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
         this.lastContentExpandedHeight = domContentContainer.getHeight();
         await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
+        DOM.from(domDialogFrame).css("border", "none");
         DOM.from(domDialogFrame).height(headerHeight);
 
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, true);
