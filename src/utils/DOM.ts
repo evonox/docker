@@ -1,7 +1,8 @@
-import { IRect } from "../common/dimensions";
+import { IRect, ISize } from "../common/dimensions";
 import { ArrayUtils } from "./ArrayUtils";
 import { DOMRegistry } from "./DOMRegistry";
 import { DOMUpdateInitiator } from "./DOMUpdateInitiator";
+import { RectHelper } from "./rect-helper";
 
 const COORDINATE_PRECISION = 3;
 
@@ -165,9 +166,36 @@ export class DOM<T extends HTMLElement> {
         }
     }
 
-    // TODO: ???
-    getBounds(): DOMRect {
-        return this.element.getBoundingClientRect();
+    getBounds(): IRect {
+        return RectHelper.fromDOMRect(this.element.getBoundingClientRect());
+    }
+
+    getComputedRect(): IRect {
+        const computedStyle = window.getComputedStyle(this.element);
+        return {
+            x: parseFloat(computedStyle.left),
+            y: parseFloat(computedStyle.top),
+            w: parseFloat(computedStyle.width),
+            h: parseFloat(computedStyle.height)
+        };
+    }
+
+    getClientRect(): IRect {
+        return {
+            x: this.element.clientLeft,
+            y: this.element.clientTop,
+            w: this.element.clientWidth,
+            h: this.element.clientHeight
+        }
+    }
+
+    getOffsetRect(): IRect {
+        return {
+            x: this.element.offsetLeft,
+            y: this.element.offsetTop,
+            w: this.element.offsetWidth,
+            h: this.element.offsetHeight
+        }
     }
 
     left(value: number | string) {
@@ -215,15 +243,6 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
-    getComputedRect(): IRect {
-        const computedStyle = window.getComputedStyle(this.element);
-        return {
-            x: parseFloat(computedStyle.left),
-            y: parseFloat(computedStyle.top),
-            w: parseFloat(computedStyle.width),
-            h: parseFloat(computedStyle.height)
-        };
-    }
 
     /**
      * Misc Methods
