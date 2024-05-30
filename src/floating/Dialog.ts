@@ -10,7 +10,6 @@ import { IPoint, IRect } from "../common/dimensions";
 import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 import "./Dialog.css";
-import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class Dialog implements IEventEmitter {
 
@@ -37,7 +36,12 @@ export class Dialog implements IEventEmitter {
         private grayOutParent?: PanelContainer,
         private disableResize?: boolean
     ) {
+        this.handleDragStartEvent = this.handleDragStartEvent.bind(this);
+        this.handleDragMoveEvent = this.handleDragMoveEvent.bind(this);
+        this.handleDragEndEvent = this.handleDragEndEvent.bind(this);
+
         this.initialize();
+
         this.dockManager.getModelContext().appendDialog(this);
         this.panel.setHeaderVisibility(true);
 
@@ -71,32 +75,15 @@ export class Dialog implements IEventEmitter {
         this.mouseDownEvent.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
         this.focusEvent = new DOMEvent<FocusEvent>(this.domDialog.get());
         this.focusEvent.bind("focus", this.handleOnFocus.bind(this), {capture: false});
+        this.panel.on("onFocused", this.handleOnFocus.bind(this));
 
 
-        const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
 
         // Bind Component Events - Dragging Facilities
-        this.draggable.on("onDraggableDragStart", (event) => {
-            this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
-            this.lastContextZIndex = this.panel.getContentFrameDOM().getZIndex();
-            DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
-            this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
-            
-            this.eventManager.triggerEvent("onDragStart", {sender: this, event});
-        });
-
-        this.draggable.on("onDraggableDragStop", (event) => {
-            DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
-            this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging").zIndex(this.lastContextZIndex);
-
-            this.eventManager.triggerEvent("onDragStop", {sender: this, event});
-        })
-
-        this.draggable.on("onDraggableDragMove", (payload) => {
-            this.setPosition(payload.x, payload.y);
-            this.eventManager.triggerEvent("onDragMove", {sender: this, event: payload.event});
-        });
-        
+        this.draggable.on("onDraggableDragStart", this.handleDragStartEvent);
+        this.draggable.on("onDraggableDragMove", this.handleDragMoveEvent);
+        this.draggable.on("onDraggableDragStop", this.handleDragEndEvent);
+       
         this.panel.on("onExpanded", this.handleOnExpand.bind(this));
         this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
 
@@ -113,6 +100,32 @@ export class Dialog implements IEventEmitter {
         this.bringToFront();
     }
 
+    private handleDragStartEvent(event: MouseEvent) {
+        this.bringToFront();
+
+        this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
+        this.lastContextZIndex = this.panel.getContentFrameDOM().getZIndex();
+
+        const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
+        DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
+        this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
+        
+        this.eventManager.triggerEvent("onDragStart", {sender: this, event});
+    }
+
+    private handleDragMoveEvent(payload: any) {
+        this.setPosition(payload.x, payload.y);
+        this.eventManager.triggerEvent("onDragMove", {sender: this, event: payload.event});
+    }
+
+    private handleDragEndEvent(event: MouseEvent) {
+        DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
+        this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging").zIndex(this.lastContextZIndex);
+
+        this.eventManager.triggerEvent("onDragStop", {sender: this, event});
+        this.bringToFront();
+    }
+
     getZIndex(): number {
         return parseInt(this.domDialog.getCss("zIndex"));
     }
@@ -125,11 +138,8 @@ export class Dialog implements IEventEmitter {
         const outerRect = this.dockManager.getDialogRootElement().getBoundingClientRect();
         this.position = {x: x - outerRect.left, y: y - outerRect.top};
         this.domDialog.left(this.position.x).top(this.position.y);
-
-        // this.panel.setDialogPosition(this.position.x, this.position.y);
         
         this.panel.updateLayoutState();
-
 
         this.dockManager.notifyOnChangeDialogPosition(this, x, y);
     }
@@ -191,9 +201,10 @@ export class Dialog implements IEventEmitter {
     bringToFront() {
         // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
         const nextZIndex = this.dockManager.genNextDialogZIndex();
-        this.domDialog.css("z-index", String(nextZIndex));
+        this.domDialog.zIndex(nextZIndex);
         //this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
+        this.panel.updateLayoutState();
         this.panel.updateContainerState();
     }
 
@@ -203,6 +214,7 @@ export class Dialog implements IEventEmitter {
     }
 
     private handleOnFocus() {
+        this.bringToFront();
         this.dockManager.setActivePanel(this.panel);
     }
 

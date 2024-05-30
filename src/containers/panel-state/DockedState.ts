@@ -38,6 +38,8 @@ export class DockedState extends PanelStateBase {
     }
 
     async floatPanel(dialog: Dialog): Promise<boolean> {
+        DOM.from(dialog.getDialogFrameDOM()).width(500).height(200);
+        this.updateLayoutState();
         return true;
     }
 

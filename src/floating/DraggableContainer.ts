@@ -24,6 +24,16 @@ export class DraggableContainer implements IDockContainer {
 
         this.domEventMouseDown = new DOMEvent<MouseEvent>(this.dragHandle);
         this.domEventMouseDown.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
+
+        // TODO: DISPOSE IT
+        this.delegate.on("onDockingDragStart", event => {
+            this.isDragAndDropTriggered = true;
+            this.lastMousePosition = {x: event.pageX, y: event.pageY};
+            this.startDragging(event);
+        });
+        this.delegate.on("onDockingDragMove", event => this.handleMouseMove(event));
+        this.delegate.on("onDockingDragStop", event => this.handleMouseUp(event));
+
     }
 
     updateLayoutState(): void {
@@ -109,6 +119,8 @@ export class DraggableContainer implements IDockContainer {
     private handleMouseMove(event: MouseEvent) {
         event.preventDefault();
 
+        console.dir(event);
+
         if(! this.isDragAndDropTriggered) {
             this.isDragAndDropTriggered = true;
             this.startDragging(event);
@@ -116,6 +128,8 @@ export class DraggableContainer implements IDockContainer {
 
         let dx = event.pageX - this.lastMousePosition.x;
         let dy = event.pageY - this.lastMousePosition.y;
+
+        console.dir([dx, dy]);
 
         [dx, dy] = this.constrainDialogInsideViewport(dx, dy, event);
 

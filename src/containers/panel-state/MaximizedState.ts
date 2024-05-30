@@ -16,6 +16,8 @@ export class MaximizedState extends PanelStateBase {
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, true);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+
+        this.updateLayoutState();
     }
 
     public leaveState(): void {

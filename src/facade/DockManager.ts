@@ -288,6 +288,7 @@ export class DockManager {
         if(index >= 0) {
             this.minimizedSlots.splice(index, 1);
             this.recomputeMinimizedSlotsCSS();
+            this.updateLayoutState();
         }
     }
 
@@ -437,6 +438,13 @@ export class DockManager {
             dialog.getPanel().updateContainerState();
         }
     }
+
+    private updateLayoutState() {
+        this.context.model.rootNode.container.updateLayoutState();
+        for(const dialog of this.context.model.dialogs) {
+            dialog.getPanel().updateLayoutState();
+        }
+    }
     
     private resize(width: number, height: number) {
         this.context.model.rootNode.container.resize(width, height);
@@ -538,13 +546,10 @@ export class DockManager {
         const node = this.findNodeFromContainer(container);
         this.layoutEngine.undock(node);
 
-        // TODO: FIND A BETTER WAY TO DO THIS - IS IT NECESSARY?
-        node.container.getDOM().style.display = "block";
-
         // TODO: CHECK CONTAINER IS PANEL CONTAINER
         const panelContainer: PanelContainer = node.container as PanelContainer;;
 
-        // Construt the dialog
+        // Construct the dialog
         const dialog = new Dialog(this, panelContainer, null, false);
         this.bindDialogDragEvents(dialog);
 
@@ -557,9 +562,9 @@ export class DockManager {
         // TODO: REFACTOR TO A SPECIAL METHOD, USED TWICE AT LEAST
         if(event != null) {
             const dialogWidth = dialog.getPanel().getWidth();
-            if(dragOffset.x > dialogWidth) {
-                dragOffset.x = 0.75 * dialogWidth;
-            }
+            // if(dragOffset.x > dialogWidth) {
+            //     dragOffset.x = 0.75 * dialogWidth;
+            // }
             dialog.setPosition(event.pageX - dragOffset.x, event.pageY - dragOffset.y);
             // TODO: INVOKE onMouseMove on Draggable - FIND BETTER WAY THEN INVOKE MOUSE MOVE HANDLER
         }

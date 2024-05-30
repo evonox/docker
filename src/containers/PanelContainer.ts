@@ -17,6 +17,7 @@ import { ContextMenu } from "../core/ContextMenu";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
+import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -234,7 +235,6 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     toggleMaximizedPanelState() {
-        console.log(this.state.getCurrentState());
         if(this.state.getCurrentState() === PanelContainerState.Maximized) {
             this.restorePanel();
         } else {
@@ -355,6 +355,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.bind(this.domFrameHeader.get(), "dblclick", () => {
             this.toggleMaximizedPanelState();
         });
+        this.bind(this.domFrameHeader.get(), "mousedown", this.handleMouseDownOnHeader.bind(this));
         this.bind(this.domFrameHeader.get(), "contextmenu", this.handleContextMenuClick.bind(this));
 
         // Create the content container
@@ -426,10 +427,10 @@ export class PanelContainer extends Component implements IDockContainer {
         return true;
     }
 
-    performUndockToDialog(event: MouseEvent, dragOffset: IPoint) {
-        //this.domContentWrapper.css("display", "block");
-        //this.domPanel.css("position", "");
-        this.dockManager.requestUndockToDialog(this, event, dragOffset);
+    async requestUndockToDialog(event: MouseEvent, dragOffset: IPoint): Promise<Dialog> {
+        const dialog = this.dockManager.requestUndockToDialog(this, event, dragOffset);
+        await this.state.floatPanel(dialog);
+        return dialog;
     }
 
     performUndock() {
@@ -501,7 +502,46 @@ export class PanelContainer extends Component implements IDockContainer {
      * Event Handlers
      */
 
+    private handleMouseDownOnHeader(event: MouseEvent) {
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.preventDefault();
+
+        this.triggerEvent("onFocused");
+
+        const initialPosition: IPoint = {
+            x: event.pageX,
+            y: event.pageY
+        };
+        let dialog: Dialog;
+
+        if(this.state.getCurrentState() === PanelContainerState.Docked) {
+            let isUndockStarted = false;
+            DragAndDrop.start(event, async (event) => {
+                if(isUndockStarted === false) {
+                    isUndockStarted = true;
+                    const headerBounds = this.domFrameHeader.getBoundsRect();
+                    const dragOffset: IPoint = {
+                        x: initialPosition.x - headerBounds.x,
+                        y: initialPosition.y - headerBounds.y
+                    };
+                    dialog = await this.requestUndockToDialog(event, dragOffset);
+                    this.triggerEvent("onDockingDragStart", event);
+                } else {
+                    this.triggerEvent("onDockingDragMove", event);
+                }
+            }, (event) => {
+                this.triggerEvent("onDockingDragStop", event);
+            }, "pointer", () => {}, DetectionMode.withThreshold);
+        }
+    }
+
     private handleMouseDownOnPanel(event: MouseEvent) {
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.preventDefault();
+
+        this.triggerEvent("onFocused");
         this.activatePanel();
     }
 
@@ -522,6 +562,6 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     private handleMouseFocusEvent(event: MouseEvent) {
-        this.triggerEvent("onFocused");
+        // this.triggerEvent("onFocused");
     }
 }
