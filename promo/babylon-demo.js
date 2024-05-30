@@ -7,13 +7,18 @@ export async function initBabylonDemo(canvas) {
     let leftBtn;
     let rightBtn;
 
-    
+
+    var renderScene = function() {
+        if (sceneToRender && sceneToRender.activeCamera) {
+            sceneToRender.render();
+        }
+    }
+
+    var renderSceneDebounced = _.throttle(renderScene, 1000 / 1000);
 
     var startRenderLoop = function (engine, canvas) {
         engine.runRenderLoop(function () {
-            if (sceneToRender && sceneToRender.activeCamera) {
-                sceneToRender.render();
-            }
+            renderSceneDebounced();
         });
     }
 

@@ -2,7 +2,10 @@ import { IPanelStateAPI } from "../src/common/panel-api";
 import { DockManager } from "../src/facade/DockManager"
 import "../src/index.css";
 
-import { initBabylonDemo } from "./babylon-demo";
+// import { initBabylonDemo } from "./babylon-demo";
+import { startBabylonDemo } from "./babylon-engine";
+import { createDemoScene } from "./demo-scene";
+import { createVillageScene } from "./village-demo";
 
 declare var ace: any;
 
@@ -23,7 +26,7 @@ dockManager.registerPanelType("babylonJS", "panel", "singleton", (dockManager) =
             domRootElement.classList.add("renderCanvas")
             domCanvas.classList.add("canvasZone");
 
-            initBabylonDemo(domCanvas);
+            startBabylonDemo(domCanvas, createVillageScene)
             return domRootElement;
         }
     }
@@ -89,11 +92,11 @@ async function performDocking() {
         dockManager.dockFill(documentNode, javascriptEditor);
         dockManager.dockFill(documentNode, typescriptEditor);
         dockManager.dockFill(documentNode, javaEditor);
-        // dockManager.dockLeft(documentNode, babylonJSPanel, 0.4);
+        dockManager.dockLeft(documentNode, babylonJSPanel, 0.4);
 
-        dockManager.floatDialog(babylonJSPanel, {
-            x: 200, y: 50, w: 500, h: 300
-        });
+        // dockManager.floatDialog(babylonJSPanel, {
+        //     x: 200, y: 50, w: 500, h: 300
+        // });
     }
     catch(err) {
         console.dir(err);
