@@ -57,7 +57,7 @@
 }
 
 .DockerTS-ContentFrame--Dragging {
-    opacity: 0.7;
+    opacity: 0.85;
 }
 
 .DockerTS-ContentFrame.DockerTS-ContentFrame--NoHeader {

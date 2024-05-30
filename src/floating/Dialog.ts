@@ -28,6 +28,9 @@ export class Dialog implements IEventEmitter {
 
     private eventManager = new ComponentEventManager();
 
+    private lastDialogZIndex: number;
+    private lastContextZIndex: number;
+
     constructor(
         private dockManager: DockManager,
         private panel: PanelContainer,
@@ -69,15 +72,26 @@ export class Dialog implements IEventEmitter {
         this.focusEvent = new DOMEvent<FocusEvent>(this.domDialog.get());
         this.focusEvent.bind("focus", this.handleOnFocus.bind(this), {capture: false});
 
+
+        const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
+
         // Bind Component Events - Dragging Facilities
         this.draggable.on("onDraggableDragStart", (event) => {
-            this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging");
+            this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
+            this.lastContextZIndex = this.panel.getContentFrameDOM().getZIndex();
+            DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
+            this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
+            
             this.eventManager.triggerEvent("onDragStart", {sender: this, event});
         });
+
         this.draggable.on("onDraggableDragStop", (event) => {
-            this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging");
+            DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
+            this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging").zIndex(this.lastContextZIndex);
+
             this.eventManager.triggerEvent("onDragStop", {sender: this, event});
         })
+
         this.draggable.on("onDraggableDragMove", (payload) => {
             this.setPosition(payload.x, payload.y);
             this.eventManager.triggerEvent("onDragMove", {sender: this, event: payload.event});
