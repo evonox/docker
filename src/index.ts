@@ -7,7 +7,7 @@ import { DOM } from "./utils/DOM";
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
 
-dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("panel1", "singleton", (dockManager) => {
 
     let panelApi: IPanelStateAPI;
 
@@ -44,7 +44,7 @@ dockManager.registerPanelType("panel1", "panel", "singleton", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel2", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("panel2", "singleton", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
@@ -73,7 +73,7 @@ dockManager.registerPanelType("panel2", "panel", "singleton", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel3", "panel", "transient", (dockManager) => {
+dockManager.registerPanelType("panel3", "transient", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
@@ -85,7 +85,7 @@ dockManager.registerPanelType("panel3", "panel", "transient", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel4", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("panel4", "singleton", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
@@ -114,7 +114,7 @@ dockManager.registerPanelType("panel4", "panel", "singleton", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel5", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("panel5", "singleton", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");
@@ -141,7 +141,7 @@ dockManager.registerPanelType("panel5", "panel", "singleton", (dockManager) => {
     }
 });
 
-dockManager.registerPanelType("panel6", "panel", "transient", (dockManager) => {
+dockManager.registerPanelType("panel6", "transient", (dockManager) => {
     return {
         initialize: async (api, options) => {
             const domElement = document.createElement("h1");

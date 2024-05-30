@@ -1,10 +1,9 @@
-import type { PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
+import type { PanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
 import type { PanelContainer } from "../containers/PanelContainer";
 
 
 export interface PanelTypeMetadata {
     name: string;
-    viewKind: ViewKind;
     instanceType: ViewInstanceType;
     factoryFn: PanelFactoryFunction;
 }

@@ -1,7 +1,7 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
 import {  IDeltaPoint, IDeltaRect, IPoint, IRect } from "../common/dimensions";
 import { EventKind, EventPayload } from "../common/events-api";
-import { IChannel, IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType, ViewKind } from "../common/panel-api";
+import { IChannel, IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
 import { DockWheel } from "../docking-wheel/DockWheel";
 import { Dialog } from "../floating/Dialog";
@@ -162,14 +162,13 @@ export class DockManager {
     }
 
     registerPanelType(
-        panelTypeName: string, viewKind: ViewKind, 
-        instanceType: ViewInstanceType, factoryFn: PanelFactoryFunction
+        panelTypeName: string,instanceType: ViewInstanceType, factoryFn: PanelFactoryFunction
     ): void {
         if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === true)
             throw new Error(`ERROR: Panel Type with name ${panelTypeName} is ALREADY not registered.`);
 
         this.panelTypeRegistry.registerPanelType({
-            name: panelTypeName, viewKind: viewKind, instanceType: instanceType, factoryFn: factoryFn
+            name: panelTypeName, instanceType: instanceType, factoryFn: factoryFn
         });
     }
 

@@ -12,7 +12,7 @@ declare var ace: any;
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
 
-dockManager.registerPanelType("babylonJS", "panel", "singleton", (dockManager) => {
+dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
 
     return {
         initialize: async (api, options) => {
@@ -32,7 +32,7 @@ dockManager.registerPanelType("babylonJS", "panel", "singleton", (dockManager) =
     }
 });
 
-dockManager.registerPanelType("aceEditor", "panel", "transient", (dockManager) => {
+dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
 
     return {
         initialize: async (api, options) => {

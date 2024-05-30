@@ -6,7 +6,7 @@ import type { DockManager } from "../facade/DockManager";
 
 export type ViewInstanceType = "singleton" | "transient";
 
-export type ViewKind = "document" | "panel" ;
+// export type ViewKind = "document" | "panel" ;
 
 export interface PanelFactoryFunction {
     (dockManager: DockManager): IPanelAPI;
