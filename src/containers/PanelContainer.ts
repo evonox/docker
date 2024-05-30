@@ -6,8 +6,8 @@ import { IContextMenuAPI, IHeaderButton, IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
-import { ContainerType, PanelContainerState, PanelType } from "../common/enumerations";
-import { IPoint, IRect, ISize } from "../common/dimensions";
+import { ContainerType, PanelContainerState } from "../common/enumerations";
+import { IPoint, ISize } from "../common/dimensions";
 import { PanelButtonBar } from "../core/PanelButtonBar";
 
 import "./PanelContainer.css";
@@ -38,29 +38,15 @@ export class PanelContainer extends Component implements IDockContainer {
     
     // Placeholder element for measuring size in Docked State
     private domPanelPlaceholder: DOM<HTMLElement>;
-    // private panelPlaceholderRO: ResizeObserver;
-    
-
-
-    private domDialogFrame: HTMLElement;
 
     private buttonBar: PanelButtonBar;
 
-    // Panel Container State
-    private containerState: PanelContainerState;
-    private isCollapsed: boolean = false;
-
-    private wasVisibleHeaderBeforeMaximization: boolean;
-    private previousContainerState: PanelContainerState;
 
     // Icon & Title State
     private _iconHtml: string = "";
     private _title: string = "";
     private _hasChanges: boolean = false;
 
-    // Dimensions & Resizing State
-    private _lastDialogSize: ISize;
-    private _lastExpandedHeight: number;
 
     private _isVisible: boolean = false;
 
@@ -68,17 +54,15 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private state: PanelStateMachine;
 
+    private _loadedSize: ISize;
+
     constructor(
         private dockManager: DockManager, 
         private panelTypeName: string,
-        private api: IPanelAPI,
-        private panelType: PanelType
+        private api: IPanelAPI
     ) {
         super();
         this.initializeComponent();
-    }
-    queryLoadedSize(): ISize {
-        throw new Error("Method not implemented.");
     }
 
     /**
@@ -116,8 +100,6 @@ export class PanelContainer extends Component implements IDockContainer {
         this.updateTitle();
     }
 
-    // TODO: MOVE TO UPDATE PROCEDURE
-    // TODO: MAKE THE ITEMS REACTIVE STATE 
     private updateTitle() {
         this.domTitle.html(this._iconHtml);
         this.domTitleText.addClass("DockerTS-HeaderTitleText").text(this._title).appendTo(this.domTitle);
@@ -128,6 +110,10 @@ export class PanelContainer extends Component implements IDockContainer {
     /**
      * Misc Query and Helper Methods
      */
+
+    queryLoadedSize(): ISize {
+        return {...this._loadedSize};
+    }
 
     getDockManager(): DockManager {
         return this.dockManager;
@@ -153,7 +139,6 @@ export class PanelContainer extends Component implements IDockContainer {
         return ! this._isVisible;
     }
 
-    // TODO: MOVE TO REACTIVE STATE
     setVisible(visible: boolean): void {
         this._isVisible = visible;
         if(visible) {
@@ -164,7 +149,6 @@ export class PanelContainer extends Component implements IDockContainer {
         }
     }
 
-    // TODO: INTERNAL FLAG?? REACTIVE???
     isHeaderVisible() {
         return this.domContentFrame.hasClass("DockerTS-ContentFrame--NoHeader") === false;
     }
@@ -230,103 +214,23 @@ export class PanelContainer extends Component implements IDockContainer {
         return this.api.getMinHeight?.() ?? this.dockManager.config.defaultMinHeight;
     }
 
-    // TODO: UPDATE USING STATE
-    setDialogPosition(x: number, y: number) {
-        //this.domPanel.left(x).top(y);
-        // this.domContentContainer.left(x).top(y + this.domFrameHeader.getHeight());
-        const bounds = this.domDialogFrame.getBoundingClientRect();
-        this.domContentFrame.left(x).top(y).width(bounds.width).height(bounds.height);
-    }
-
-    // TODO: UPDATE USING STATE
-    setPanelDimensions(width: number, height: number) {
-        this.domContentFrame.width(width).height(height);
-        //this.domPanelPlaceholder.width(width).height(heigth);
-    }
-
-    // TODO: UPDATE USING STATE
-    setPanelZIndex(zIndex: number) {
-        this.domContentContainer.css("z-index", String(zIndex));
-    }
-
-    // TODO: UPDATE USING STATE
-    getLastDialogSize(): ISize {
-        return {...this._lastDialogSize};
-    }
-
-    // TODO: UPDATE USING STATE
-    saveLastDialogSize(size: ISize) {
-        this._lastDialogSize = {...size};
-    }
-
     expandPanel() {
         this.activatePanel();
         this.state.expand();
-        return;
-
-        if(this.containerState !== PanelContainerState.Floating)
-            return;
-        if(! this.isCollapsed)
-            return;
-        this.isCollapsed = false;
-        this.domContentContainer.height(this._lastExpandedHeight);
-
-        this.triggerEvent("onExpanded");
     }
 
     collapsePanel() {
         this.activatePanel();
         this.state.collapse();
-        return;
-        if(this.containerState !== PanelContainerState.Floating)
-            return;
-        if(this.isCollapsed)
-            return;
-        this._lastExpandedHeight = this.domContentContainer.getHeight();
-        this.isCollapsed = true;
-
-        this.domContentContainer.height(0);
-        this.triggerEvent("onCollapsed");
     }
 
     restorePanel() {
         this.activatePanel();
         this.state.restore();
-        return;
-
-        if(this.containerState !== PanelContainerState.Maximized)
-            return;
-        // Note: can be floating, minimized or docked
-
-        if(this.previousContainerState === PanelContainerState.Docked 
-            || this.previousContainerState === PanelContainerState.Minimized) {
-            this.containerState = PanelContainerState.Docked;
-            this.domContentFrame.zIndex("");
-
-            const originalBounds = this.domPanelPlaceholder.getBounds();
-
-            // AnimationHelper.animatePosition(this.domContentFrame.get(), {
-            //     x: originalBounds.left, y: originalBounds.y, w: originalBounds.width, h: originalBounds.height
-            // }).then(() => {
-            //     this.domContentFrame.zIndex("");
-            // });
-    
-
-        } else if(this.previousContainerState === PanelContainerState.Floating) {
-            // TODO: TO BE DONE
-        }
-        this.setHeaderVisibility(this.wasVisibleHeaderBeforeMaximization);
-        this.updateLayoutState();
-        
-        // this.domPanelPlaceholder.css("z-index", String(this._lastZIndex))
-        //     .left(this._lastFloatingRect.x).top(this._lastFloatingRect.y)
-        //     .width(this._lastFloatingRect.w).height(this._lastFloatingRect.h);
     }
 
     minimizePanel() {
-        this.state.minimize().then(() => {
-            this.updateLayoutState();
-        })
+        this.state.minimize();
     }
 
     toggleMaximizedPanelState() {
@@ -338,52 +242,9 @@ export class PanelContainer extends Component implements IDockContainer {
         }
     }
 
-    // TODO: In Future support maximizing from more states.
     maximizePanel() {
         this.activatePanel();
         this.state.maximize();
-        // if(this.containerState === PanelContainerState.Maximized)
-        //     return;
-        // this.previousContainerState = this.containerState;
-        // this.wasVisibleHeaderBeforeMaximization = this.isHeaderVisible();
-
-        //this.domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
-        // this.containerState = PanelContainerState.Maximized;
-
-        // const containerBounds = this.dockManager.getContainerBoundingRect();
-        // this.setHeaderVisibility(true);
-        // this.updateLayoutState();
-        // AnimationHelper.animateMaximize(this, {
-        //     x: containerBounds.left, y: containerBounds.y, w: containerBounds.width, h: containerBounds.height
-        // }).then(() => {
-        //     this.setHeaderVisibility(true);   
-        // });
-
-
-
-        // const panelBounds = this.domPanel.getBounds();
-        // this._lastFloatingRect = {
-        //     x: panelBounds.left, y: panelBounds.y, w: panelBounds.width, h: panelBounds.height
-        // };
-        // this._lastZIndex = parseInt(this.domPanel.getCss("z-index"));
-
-        // const containerBounds = this.dockManager.getContainerBoundingRect();
-        // const zIndexMaximizedPanel = this.dockManager.config.zIndexes.zIndexMaximizedPanel;
-        // this.domMaximizeRegionHost.applyRect(containerBounds).zIndex(zIndexMaximizedPanel)
-        //     .appendChild(this.domFrameHeader).appendChild(this.domContentContainer)
-        //     .appendTo(document.body);
-
-        // TODO: TEMP JS RESIZING
-        // this.domFrameHeader.width(containerBounds.width);
-        // this.domContentContainer.width(containerBounds.width).height(containerBounds.height - this.domFrameHeader.getHeight())
-        //     .left(containerBounds.left).top(this.domFrameHeader.getHeight());
-
-        // const containerBounds = this.dockManager.getContainerBoundingRect();
-        // this.setDialogPosition(containerBounds.x, containerBounds.y);
-        // this.resize(containerBounds.width, containerBounds.height);
-        // this.domPanel.left(containerBounds.left).top(containerBounds.top)
-        //     .width(containerBounds.width).height(containerBounds.height)
-        //     .css("z-index", String(zIndexMaximizedPanel));
     }
 
     /**
@@ -392,30 +253,6 @@ export class PanelContainer extends Component implements IDockContainer {
      */
     resize(width: number, height: number): void {
         this.state.updateLayoutState();
-        // this.domContentFrame.width(width).height(height);
-        // TEMP SOLUTION
-        // this.domPanelPlaceholder.width(width).height(height);
-
-        // TODO: COULD BE LAYOUT BY CSS GRID / FLEX???
-        // this.domPanelPlaceholder.width(width);
-        //this.domFrameHeader.width(width); // Note: Add Place for Buttons, or layout by CSS
-        // this.domContentHost.width(width);
-        // this.domContentFrame.width(width);
-
-        // const titleBarHeight = this.domTitle.getHeight();
-        // const contentHeight = height - titleBarHeight;
-        // this.domContentHost.height(contentHeight);
-        // this.domContentContainer.height(contentHeight);
-        // this.domContentWrapper.height(contentHeight);
-        // this.domPanelPlaceholder.height(height);
-        // this.domContentFrame.height(height);
-
-        // const boundsDockingContainer = this.dockManager.getContainerBoundingRect();
-        // const boundsContentWrapper = this.domPanelPlaceholder.getBounds();
-        // this.domContentFrame.applyRect(boundsContentWrapper);
-        // this.domContentContainer.left(boundsContentWrapper.left - boundsDockingContainer.left)
-        //     .top(boundsContentWrapper.top - boundsDockingContainer.top)
-        //     .width(boundsContentWrapper.width).height(boundsContentWrapper.height);
     }
 
     // PanelContainer is leaf node => no layouting logic
@@ -426,33 +263,9 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     updateContainerState() {
-        // TODO: STATE BASE
-        // if(this.dockManager.getActivePanel() === this) {
-        //     this.domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
-        // } else {
-        //     this.domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
-        // }
-
         this.state.updatePanelState();
-        this.updateHeaderButtonVisibility();
-
-        // if(this.containerState === PanelContainerState.Floating) {
-        //     const zIndex = DOM.from(this.domDialogFrame).getZIndex();
-        //     this.domContentFrame.zIndex(zIndex);
-        // }
     }
 
-    private updateHeaderButtonVisibility() {
-        // if(this.containerState === PanelContainerState.Floating) {
-        //     this.showHeaderButton(PANEL_ACTION_EXPAND, this.isCollapsed);
-        //     this.showHeaderButton(PANEL_ACTION_COLLAPSE, ! this.isCollapsed);
-            
-        // } else {
-        //     this.showHeaderButton(PANEL_ACTION_EXPAND, false);
-        //     this.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
-        // }
-
-    }
 
     /**
      * Misc Methods
@@ -462,9 +275,6 @@ export class PanelContainer extends Component implements IDockContainer {
     public setContentElement(content: HTMLElement) {
         this.domContent?.remove();
         this.domContent = content;
-        // DOM.from(this.domContent).css("position", "absolute")
-        //     .css("left", "0").css("top", "0")
-        //     .css("width", "100%").css("height", "100%");
         this.domContentHost?.appendChild(this.domContent);
 
         this.contentPanelMouseDown?.unbind();
@@ -508,8 +318,6 @@ export class PanelContainer extends Component implements IDockContainer {
         } else if(actionName === PANEL_ACTION_MINIMIZE) {
             this.minimizePanel();
         }
-
-        this.updateHeaderButtonVisibility();
     }
 
     /**
@@ -523,13 +331,9 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     protected onDisposed(): void {
+        this.contentPanelMouseDown.unbind();
+
         this.state.dispose();
-
-        // TODO: MOVE TO STATE
-        // this.panelPlaceholderRO.unobserve(this.domPanelPlaceholder.get());
-        // this.panelPlaceholderRO.disconnect();
-        // this.panelPlaceholderRO = undefined;
-
         this.buttonBar.dispose();
     }
 
@@ -563,11 +367,6 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
 
         this.domPanelPlaceholder = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-PanelPlaceholder");
-        // this.panelPlaceholderRO = new ResizeObserver((entries) => {
-        //     this.updateContainerState();
-        //     this.updateLayoutState();
-        // });
-        // this.panelPlaceholderRO.observe(this.domPanelPlaceholder.get());
 
         this.bind(this.domContentFrame.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
 
@@ -576,18 +375,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this.updateTitle();
         this.updateContainerState();
 
-        // TODO: WHAT IS THIS?
-        setTimeout(() => {
-            this.updateLayoutState();
-        }, 1000);
-
-
         return this.domPanelPlaceholder.get();
     }
     
-    protected onUpdate(element: HTMLElement): void {
-        // TODO: TO BE DONE
-    }
+    protected onUpdate(element: HTMLElement): void {}
 
     /**
      * Persistence Management
@@ -595,10 +386,9 @@ export class PanelContainer extends Component implements IDockContainer {
 
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
         const api = dockManager.gainPanelApiContract(state.panelName);
-        const container = new PanelContainer(dockManager, state.panelName, api, state.panelType);
+        const container = new PanelContainer(dockManager, state.panelName, api);
         const contentElement = await api.initialize(new PanelStateAdapter(container), null);
         container.setContentElement(contentElement);
-        // TODO: QUERY PANEL TITLE - RESPONSIBILITY OF THE FACTORY METHOD
         container.loadState(state);
         return container;
     }
@@ -608,10 +398,6 @@ export class PanelContainer extends Component implements IDockContainer {
         state.panelName = this.panelTypeName;
         state.width = this.getWidth();
         state.height = this.getHeight();
-        state.canUndock = this.canUndock();
-        // MORE COMPLEX BUTTON CONFIGURATION
-        // state.hideCloseButton = this.hideCloseButton;
-        state.panelType = this.panelType;
 
         // Save the client state of the panel itself
         const panelClientState = new PanelState();
@@ -619,45 +405,21 @@ export class PanelContainer extends Component implements IDockContainer {
         state.panelClientState = panelClientState.getState();
     }
 
-    // LOAD PANEL API STATE
     loadState(state: IState) {
-        // TODO: QUERIED BY THE LOAD RESIZE IN THE DOCK MANAGER
-        const width = state.width;
-        const height = state.height;
-        // TODO: IF NOT SAVED, FORCE RESIZE SOMEHOW
+        // Load Panel State 
+        this._loadedSize = {
+            w: state.width,
+            h: state.height
+        };
         this.panelTypeName = state.panelName;
-        this.canUndock(state.canUndock);
-        // TODO: MORE COMPLEX BUTTON CONFIGURATION
-        // this.hideCloseButton = state.hideCloseButton;
-        this.panelType = state.panelType;
 
+        // Load the client panel state        
         const panelClientState = new PanelState(state.panelClientState ?? {});
         this.api.loadState?.(panelClientState);
     }
 
     /**
-     * TODO: WHAT IS THIS GOOD FOR?
-     */
-    grayOut(show: boolean) {
-        // if(show && !this.domGrayingPlaceholder) {
-        //     this.domGrayingPlaceholder.remove();
-        //     this.domGrayingPlaceholder = undefined;
-        //     // if(! this.hideCloseButton) {
-        //     //     // TODO: Notify Close Button Visbility Changed
-        //     //     // TODO: SHOW CLOSE BUTTON IF ALLOWED - ALL BUTTONS
-        //     // }
-        // } else if(! show && this.domGrayingPlaceholder) {
-        //     // TODO: HIDE CLOSE BUTTON - ALL BUTTONS
-        //     this.domGrayingPlaceholder = DOM.create("div").addClass("panel-grayout")
-        //         .appendTo(this.domContentWrapper).get();
-
-        //     // TODO: Notify Close Button Visbility Changed
-        // }
-    }
-
-
-    /**
-     * Dock & Undock Facilities
+     * Dock & Undock Facilities - TO BE DONE
      */
 
     canUndock(flag?: boolean): boolean {
@@ -680,26 +442,26 @@ export class PanelContainer extends Component implements IDockContainer {
         // }
 
         this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
-        this.containerState = PanelContainerState.Docked;
+        // this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }
 
     async prepareForFloating(dialog: Dialog) {
-        this.domDialogFrame = dialog.getDialogFrameDOM();
+        // this.domDialogFrame = dialog.getDialogFrameDOM();
         this.setVisible(true);
         await this.state.floatPanel(dialog);
         // this.panelPlaceholderRO.observe(this.domDialogFrame);
 
         // this.containerState = PanelContainerState.Floating;
-        setTimeout(() => {
-            this.updateContainerState();
-            this.updateLayoutState();   
-        }, 1000);
+        // setTimeout(() => {
+        //     this.updateContainerState();
+        //     this.updateLayoutState();   
+        // }, 1000);
     }
 
 
     /**
-     * Closing Facilities
+     * Closing Facilities - TODO: TO BE DONE
      */
 
     async close(): Promise<boolean> {
@@ -759,10 +521,6 @@ export class PanelContainer extends Component implements IDockContainer {
         domContextMenu.show(event, zIndexContextMenu);
     }
 
-    /**
-     * 1) HANDLED BY TABPAGE TO SET ACTIVE ELEMENT
-     * 2) HANDLED BY FLOATING DIALOG TO BRING TO FRONT
-     */
     private handleMouseFocusEvent(event: MouseEvent) {
         this.triggerEvent("onFocused");
     }

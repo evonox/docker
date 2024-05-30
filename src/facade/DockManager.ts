@@ -186,9 +186,7 @@ export class DockManager {
         // Invoke the factory function to get the panel contract
         const panelTypeContract = metadata.factoryFn(this);        
         // Create the panel container
-        const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract, 
-                metadata.viewKind === "panel" ? PanelType.Panel : PanelType.Document
-        );        
+        const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract);        
         // Invoke the constructor function
         const initOptions = new PanelInitConfig(options);
         const apiAdapter = new PanelStateAdapter(panelContainer);
@@ -551,10 +549,10 @@ export class DockManager {
         const dialog = new Dialog(this, panelContainer, null, false);
         this.bindDialogDragEvents(dialog);
 
-        const lastDialogSize = panelContainer.getLastDialogSize();
-        if(lastDialogSize) {
-            dialog.resize(lastDialogSize.w, lastDialogSize.h);
-        }
+        // const lastDialogSize = panelContainer.getLastDialogSize();
+        // if(lastDialogSize) {
+        //     dialog.resize(lastDialogSize.w, lastDialogSize.h);
+        // }
 
         // TODO: WHAT IS THE REASON FOR THIS DIALOG PLACING??? 
         // TODO: REFACTOR TO A SPECIAL METHOD, USED TWICE AT LEAST

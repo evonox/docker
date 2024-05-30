@@ -91,10 +91,6 @@ export class Dialog implements IEventEmitter {
         // Resize the dialog
         this.resize(this.panel.getWidth(), this.panel.getHeight());
 
-        if(this.grayOutParent) {
-            this.grayOutParent.grayOut(true);
-        }
-
         this.panel.prepareForFloating(this);
 
         this.panel.updateLayoutState();
@@ -116,7 +112,7 @@ export class Dialog implements IEventEmitter {
         this.position = {x: x - outerRect.left, y: y - outerRect.top};
         this.domDialog.left(this.position.x).top(this.position.y);
 
-        this.panel.setDialogPosition(this.position.x, this.position.y);
+        // this.panel.setDialogPosition(this.position.x, this.position.y);
         
         this.panel.updateLayoutState();
 
@@ -143,10 +139,6 @@ export class Dialog implements IEventEmitter {
             this.isHidden = true;
             // TODO: NOTIFY DOCKER MANAGER
         }
-        if(this.grayOutParent) {
-            this.grayOutParent.grayOut(false);
-        }
-
     }
 
     close() {
@@ -161,7 +153,7 @@ export class Dialog implements IEventEmitter {
     }
 
     destroy() {
-        this.panel.saveLastDialogSize({w: this.resizable.getWidth(), h: this.resizable.getHeight()});
+        // this.panel.saveLastDialogSize({w: this.resizable.getWidth(), h: this.resizable.getHeight()});
 
         this.mouseDownEvent.unbind();
         this.focusEvent.unbind();
@@ -173,10 +165,6 @@ export class Dialog implements IEventEmitter {
         this.draggable.removeDecorator();
         this.resizable.removeDecorator();
         // TODO: INJECT BACK TO THE DOCKING CONTAINER
-
-        if(this.grayOutParent) {
-            this.grayOutParent.grayOut(false);
-        }
     }
 
     resize(width: number, height: number) {
@@ -190,7 +178,7 @@ export class Dialog implements IEventEmitter {
         // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
         const nextZIndex = this.dockManager.genNextDialogZIndex();
         this.domDialog.css("z-index", String(nextZIndex));
-        this.panel.setPanelZIndex(nextZIndex);
+        //this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
         this.panel.updateContainerState();
     }
