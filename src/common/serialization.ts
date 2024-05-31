@@ -1,5 +1,5 @@
 import { IPoint } from "./dimensions";
-import { ContainerType,PanelType } from "./enumerations";
+import { ContainerType } from "./enumerations";
 
 /**
  * Serialization Data Interfaces
@@ -26,6 +26,5 @@ export interface IState {
     element?: string; // NOTE: WILL THIS BE NEEDED????
     canUndock?: boolean;
     hideCloseButton?: boolean;
-    panelType?: PanelType;
     panelClientState?: any;
 }

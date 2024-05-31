@@ -1,11 +1,11 @@
-import type { PanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
+import type { PanelFactoryFunction, TabbedPanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
 import type { PanelContainer } from "../containers/PanelContainer";
 
 
 export interface PanelTypeMetadata {
     name: string;
     instanceType: ViewInstanceType;
-    factoryFn: PanelFactoryFunction;
+    factoryFn: PanelFactoryFunction | TabbedPanelFactoryFunction;
 }
 
 class InstanceRegistry {

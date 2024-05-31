@@ -302,9 +302,9 @@ export class DOM<T extends HTMLElement> {
 
     zIndex(value: number | string): DOM<T> {
         if(value === "") {
-            this.element.style.setProperty("z-index", "");
+            this.css("z-index", "");
         } else {
-            this.element.style.setProperty("z-index", String(value));
+            this.css("z-index",  String(value));
         }
         return this;
     }

@@ -7,14 +7,16 @@ import { AnimationHelper } from "../../utils/animation-helper";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelStateBase } from "./PanelStateBase";
 
-
 export class DockedState extends PanelStateBase {
 
     private panelPlaceholderRO: ResizeObserver;
 
     public enterState(): void {
         this.panelPlaceholderRO = new ResizeObserver((entries) => {
-            this.updateLayoutState();
+            // TODO: DEBUG WORKAROUND - There is infinite resizing loop. Not sure why?
+            window.requestAnimationFrame(() => {
+                this.updateLayoutState();
+            });
         });
 
         const domPlaceholder = this.panel.getPlaceholderDOM();

@@ -1,7 +1,7 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
 import {  IDeltaPoint, IDeltaRect, IPoint, IRect } from "../common/dimensions";
 import { EventKind, EventPayload } from "../common/events-api";
-import { IChannel, IPanelAPI, ISubscriptionAPI, PanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
+import { IChannel, IPanelAPI, ISubscriptionAPI, ITabbedPanelAPI, PanelFactoryFunction, TabbedPanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
 import { DockWheel } from "../docking-wheel/DockWheel";
 import { Dialog } from "../floating/Dialog";
@@ -16,11 +16,12 @@ import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
-import { ContainerType, PanelType } from "../common/enumerations";
+import { ContainerType } from "../common/enumerations";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ChannelManager } from "./ChannelManager";
+import { TabbedPanelContainer } from "../containers/TabbedPanelContainer";
 
 
 /**
@@ -158,11 +159,22 @@ export class DockManager {
         // We get metadata about the panel type
         const metadata = this.panelTypeRegistry.getPanelTypeMetadata(panelTypeName);      
         // Fetch the panel API contract
-        return metadata.factoryFn(this);
+        return metadata.factoryFn(this) as IPanelAPI;
     }
 
     registerPanelType(
         panelTypeName: string,instanceType: ViewInstanceType, factoryFn: PanelFactoryFunction
+    ): void {
+        if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === true)
+            throw new Error(`ERROR: Panel Type with name ${panelTypeName} is ALREADY not registered.`);
+
+        this.panelTypeRegistry.registerPanelType({
+            name: panelTypeName, instanceType: instanceType, factoryFn: factoryFn
+        });
+    }
+
+    registerTabbedPanelType(
+        panelTypeName: string,instanceType: ViewInstanceType, factoryFn: TabbedPanelFactoryFunction
     ): void {
         if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === true)
             throw new Error(`ERROR: Panel Type with name ${panelTypeName} is ALREADY not registered.`);
@@ -183,7 +195,7 @@ export class DockManager {
             return this.panelTypeRegistry.getViewInstances(panelTypeName)[0];
         }
         // Invoke the factory function to get the panel contract
-        const panelTypeContract = metadata.factoryFn(this);        
+        const panelTypeContract = metadata.factoryFn(this) as IPanelAPI;
         // Create the panel container
         const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract);        
         // Invoke the constructor function
@@ -195,6 +207,30 @@ export class DockManager {
         // Return finally the panel container
         return panelContainer;
     }
+
+    async createTabbedPanel(panelTypeName: string, options: any = {}): Promise<TabbedPanelContainer> {
+        if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
+            throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
+        
+        // We get metadata about the panel type
+        const metadata = this.panelTypeRegistry.getPanelTypeMetadata(panelTypeName);      
+        // If it is singleton and has already an instance, we return it
+        if(metadata.instanceType === "singleton" && this.panelTypeRegistry.hasPanelTypeAnyInstances(panelTypeName)) {
+            return this.panelTypeRegistry.getViewInstances(panelTypeName)[0] as TabbedPanelContainer;
+        }
+        // Invoke the factory function to get the panel contract
+        const panelTypeContract = metadata.factoryFn(this) as ITabbedPanelAPI;
+        // Create the panel container
+        const panelContainer = new TabbedPanelContainer(this, panelTypeName, panelTypeContract);        
+        // Invoke the constructor function
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new PanelStateAdapter(panelContainer);
+        await panelTypeContract.initialize(apiAdapter, initOptions);
+        
+        // Return finally the panel container
+        return panelContainer;
+    }
+
 
     /**
      * Docking Facilities & Wrapper Methods

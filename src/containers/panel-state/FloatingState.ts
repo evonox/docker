@@ -86,9 +86,12 @@ export class FloatingState extends PanelStateBase {
             domContent.css("opacity", "1");
         }
 
+        this.panel.updateLayoutState();
+
         await AnimationHelper.animateMaximize(domContentFrame.get(), {
             x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
         });
+        
 
         return true;
     }
@@ -184,6 +187,8 @@ export class FloatingState extends PanelStateBase {
         super.updatePanelState();
         
         const zIndex = DOM.from(this.dialog.getDialogFrameDOM()).getZIndex();
+        console.dir("---UPDATE STATE --- ");
+        console.dir(zIndex);
         this.panel.getContentFrameDOM().zIndex(zIndex);
     }
 }

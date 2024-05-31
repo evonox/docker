@@ -6,10 +6,13 @@ import type { DockManager } from "../facade/DockManager";
 
 export type ViewInstanceType = "singleton" | "transient";
 
-// export type ViewKind = "document" | "panel" ;
 
 export interface PanelFactoryFunction {
     (dockManager: DockManager): IPanelAPI;
+}
+
+export interface TabbedPanelFactoryFunction {
+    (dockManager: DockManager): ITabbedPanelAPI;
 }
 
 /**
@@ -101,8 +104,7 @@ export interface IPanelStateAPI {
  * This is interface implemented by a panel's factory method to query its state
  * The only required method is the factory method "initialize()" to create the panel's content
  */
-export interface IPanelAPI {
-    initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<HTMLElement>;
+export interface IGenericPanelAPI {
 
     canClose?: () => Promise<boolean>;
     onClose?: () => Promise<void>;
@@ -116,4 +118,13 @@ export interface IPanelAPI {
     saveState?: (state: IPanelState) => void;
 
     onActionInvoked?: (actionName: string) => void;
+}
+
+export interface IPanelAPI extends IGenericPanelAPI {
+    initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<HTMLElement>;
+}
+
+export interface ITabbedPanelAPI extends IGenericPanelAPI {
+    initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<void>;
+
 }

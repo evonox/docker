@@ -2,7 +2,7 @@ import { DockManager } from "../facade/DockManager";
 import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import { PanelState } from "../api/PanelState";
 import { IDockContainer } from "../common/declarations";
-import { IContextMenuAPI, IHeaderButton, IPanelAPI } from "../common/panel-api";
+import { IContextMenuAPI, IGenericPanelAPI, IHeaderButton, IPanelAPI } from "../common/panel-api";
 import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
@@ -60,7 +60,7 @@ export class PanelContainer extends Component implements IDockContainer {
     constructor(
         private dockManager: DockManager, 
         private panelTypeName: string,
-        private api: IPanelAPI
+        private api: IGenericPanelAPI
     ) {
         super();
         this.initializeComponent();
@@ -537,10 +537,6 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     private handleMouseDownOnPanel(event: MouseEvent) {
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-        event.preventDefault();
-
         this.triggerEvent("onFocused");
         this.activatePanel();
     }
