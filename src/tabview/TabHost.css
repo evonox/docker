@@ -11,16 +11,32 @@
     grid-template-rows: 1fr auto auto;
 }
 
+.DockerTS-TabHost--Left {
+    grid-template-columns: auto auto 1fr;
+}
+
+.DockerTS-TabHost--Right {
+    grid-template-columns: 1fr auto auto;
+}
+
 .DockerTS-TabContent {
     display: grid;
 }
 
-.DockerTS-TabStrip__Separator {
+.DockerTS-TabStrip__Separator--Vertical {
     background: var(--docker-ts-selected-color);
     height: 5px;
     border-bottom: 1px solid var(--docker-ts-selected-color);
     box-sizing: border-box;
 }
+
+.DockerTS-TabStrip__Separator--Horizontal {
+    background: var(--docker-ts-selected-color);
+    height: 5px;
+    border-bottom: 1px solid var(--docker-ts-selected-color);
+    box-sizing: border-box;
+}
+
 
 .DockerTS-TabStrip__Separator--Focused {
     box-sizing: border-box;

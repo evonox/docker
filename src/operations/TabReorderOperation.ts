@@ -116,7 +116,9 @@ export class TabReorderOperation implements IEventEmitter {
         // Prevent DOM TabHostStrip from loosing its height when the tab handles are removed 
         // from document flow
         const domTabStrip = DOM.from(this.tabStrip.getDOM());
-        domTabStrip.css("min-height", domTabStrip.getHeight()+ "px");
+        const boundsTabStrip = domTabStrip.getBoundsRect();
+        domTabStrip.css("min-width", boundsTabStrip.w + "px");
+        domTabStrip.css("min-height", boundsTabStrip.h + "px");
 
         this.domTabHandles.forEach(dom => {
             const parentBounds = dom.getOffsetParent().getBounds(); 
@@ -144,6 +146,7 @@ export class TabReorderOperation implements IEventEmitter {
         });
 
         const domTabStrip = DOM.from(this.tabStrip.getDOM());
+        domTabStrip.css("min-width", "");
         domTabStrip.css("min-height", "");
 
         this.domTabHandles = [];

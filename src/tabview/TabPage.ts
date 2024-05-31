@@ -29,7 +29,8 @@ export class TabPage extends Component {
     constructor(
         private dockManager: DockManager, 
         private container: PanelContainer,
-        private tabOrientation: TabOrientation
+        private tabOrientation: TabOrientation,
+        private isUndockEnabled: boolean
     ) {
         super();
         this.initializeComponent();
@@ -51,12 +52,16 @@ export class TabPage extends Component {
         return this.selectionState;
     }
 
+    setUndockEnabled(flag: boolean) {
+        this.tabHandle.setUndockEnabled(flag);
+    }
+
     /**
      * Component Life-Cycle Handlers
      */
 
     protected onInitialized(): void {
-        this.tabHandle = new TabHandle();
+        this.tabHandle = new TabHandle(this.isUndockEnabled);
         this.tabHandle.orientation = this.tabOrientation;
 
         this.tabHandle.on("onTabClicked", this.handleTabSelected.bind(this));

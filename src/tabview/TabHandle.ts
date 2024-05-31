@@ -46,13 +46,17 @@ export class TabHandle extends Component {
 
     private closeButton: CloseButton;
 
-    constructor() {
+    constructor(private isUndockEnabled: boolean) {
         super();
         this.initializeComponent();
     }
 
     setSelectionState(state: SelectionState) {
         this.selectionState = state;
+    }
+
+    setUndockEnabled(flag: boolean) {
+        this.isUndockEnabled = flag;
     }
 
     /**

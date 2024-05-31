@@ -16,6 +16,9 @@ export class TabHost extends Component {
     @state()
     private isFocused: boolean;
 
+    // Flag means whether a undock operation is allowed on the TabHandle components
+    private isUndockEnabled: boolean = true;
+
     // Tab Page references
     private tabPages: TabPage[] = [];
     private selectedTab?: TabPage;
@@ -29,6 +32,17 @@ export class TabHost extends Component {
     constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
         super();
         this.initializeComponent();
+    }
+
+    setEnableUndock(flag: boolean) {
+        this.isUndockEnabled = flag;
+        this.tabPages.forEach(page => page.setUndockEnabled(flag));
+    }
+
+    setTabOrientation(tabOrientation: TabOrientation) {
+        this.tabStripDirection = tabOrientation;
+        // TODO: DESTROY INTERNALS
+        // TODO: RE-CONSTRUCT INTERNALS
     }
 
     getSelectedTab(): TabPage | undefined {
@@ -102,10 +116,10 @@ export class TabHost extends Component {
             if(childContainer.getContainerType() !== ContainerType.Panel)
                 throw new Error("ERROR: Only panel containers are allowed to be inserted inside TabHost");
             if(this.isContainerInsideHost(childContainer) === false) {
-                childContainer.setHeaderVisibility(this.tabStripDirection !== TabOrientation.Top);
+                childContainer.setHeaderVisibility(this.tabStripDirection === TabOrientation.Bottom);
 
                 const tabPage = new TabPage(this.dockManager, childContainer as PanelContainer, 
-                    this.tabStripDirection);
+                    this.tabStripDirection, this.isUndockEnabled);
 
                 this.tabPages.push(tabPage);
                 this.tabStrip.attachTabHandle(tabPage.getTabHandle());
@@ -152,7 +166,12 @@ export class TabHost extends Component {
 
     protected onInitialRender(): HTMLElement {
         this.domHost = DOM.create("div").addClass("DockerTS-TabHost");
-        this.domSeparator = DOM.create("div").addClass("DockerTS-TabStrip__Separator");
+        this.domSeparator = DOM.create("div").applyClasses({
+            "DockerTS-TabStrip__Separator--Vertical": 
+                this.tabStripDirection === TabOrientation.Top || this.tabStripDirection === TabOrientation.Bottom,
+            "DockerTS-TabStrip__Separator--Horizontal":
+                this.tabStripDirection === TabOrientation.Left || this.tabStripDirection === TabOrientation.Right
+        });
         this.domContent = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-TabContent");
 
         if(this.tabStripDirection === TabOrientation.Top) {
@@ -161,8 +180,12 @@ export class TabHost extends Component {
         } else if(this.tabStripDirection === TabOrientation.Bottom) {
             this.domHost.appendChildren([this.domContent, this.domSeparator, this.tabStrip.getDOM()])
                 .addClass("DockerTS-TabHost--Bottom");
-        } else {
-            throw new Error("Unsupported TabStripDirection");
+        } else if(this.tabStripDirection === TabOrientation.Left) {
+            this.domHost.appendChildren([this.tabStrip.getDOM(), this.domSeparator, this.domContent])
+                .addClass("DockerTS-TabHost--Left");
+        } else if(this.tabStripDirection === TabOrientation.Right) {
+            this.domHost.appendChildren([this.domContent, this.domSeparator, this.tabStrip.getDOM()])
+                .addClass("DockerTS-TabHost--Right");
         }
 
         return this.domHost.get();

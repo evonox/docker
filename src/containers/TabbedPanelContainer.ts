@@ -1,5 +1,5 @@
 import { IDockContainer } from "../common/declarations";
-import { TabOrientation } from "../common/enumerations";
+import { SelectionState, TabOrientation } from "../common/enumerations";
 import { ITabbedPanelAPI } from "../common/panel-api";
 import { DockManager } from "../facade/DockManager";
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
@@ -24,7 +24,7 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     setTabOrientation(orientation: TabOrientation) {
-        // TODO: REWORK IT
+        this.tabHost.setTabOrientation(orientation);
     }
 
     addContainer(container: PanelContainer) {
@@ -42,7 +42,9 @@ export class TabbedPanelContainer extends PanelContainer {
 
     protected onInitialized(): void {
         super.onInitialized();
-        this.tabHost = new TabHost(this.getDockManager(), TabOrientation.Top);
+        this.tabHost = new TabHost(this.getDockManager(), TabOrientation.Left);
+        // Note: We do not support Undock Behavior of contained Panel Containers for now
+        this.tabHost.setEnableUndock(false);
     }
 
     protected onInitialRender(): HTMLElement {
@@ -60,8 +62,9 @@ export class TabbedPanelContainer extends PanelContainer {
 
     updateContainerState(): void {
         super.updateContainerState();
-        this.updateLayoutState();
         this.tabHost.updateContainerState();
+        this.updateLayoutState();
+        this.overrideFocusedState();
     }
 
     updateLayoutState(): void {
@@ -73,7 +76,19 @@ export class TabbedPanelContainer extends PanelContainer {
         }
         this.childContainers?.forEach(child => {
             child.getContentFrameDOM().zIndex(zIndex + 1)
-    });
+        });
+    }
+
+    private overrideFocusedState() {
+        const isTabHandleFocused = this.tabHost.getSelectedTab()?.getSelectionState() === SelectionState.Focused;
+        const domFrameHeader = this.getFrameHeaderDOM();
+        if(this.dockManager.getActivePanel() === this || isTabHandleFocused) {
+            domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
+            this.tabHost.getSelectedTab()?.setSelectionState(SelectionState.Focused);
+            this.triggerEvent("onFocused");
+        } else {
+            domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
+        }
     }
 
     setActiveChild(container: IDockContainer): void {

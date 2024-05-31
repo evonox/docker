@@ -58,7 +58,7 @@ export class PanelContainer extends Component implements IDockContainer {
     private _loadedSize: ISize;
 
     constructor(
-        private dockManager: DockManager, 
+        protected  dockManager: DockManager, 
         private panelTypeName: string,
         private api: IGenericPanelAPI
     ) {
