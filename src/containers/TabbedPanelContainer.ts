@@ -85,7 +85,8 @@ export class TabbedPanelContainer extends PanelContainer {
         if(this.dockManager.getActivePanel() === this || isTabHandleFocused) {
             domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
             this.tabHost.getSelectedTab()?.setSelectionState(SelectionState.Focused);
-            this.triggerEvent("onFocused");
+            // TODO: Note - causes recursive calls - need to find a different solution
+            // this.triggerEvent("onFocused");
         } else {
             domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
         }
