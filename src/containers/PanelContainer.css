@@ -79,6 +79,7 @@
 /* In case it overflows we do not want to interfere the layout of the whole DockerTS library */
 .DockerTS-ContentContainer {
     position: relative;
+    overflow: hidden;
 }
 
 .DockerTS-ContentHost {

@@ -111,6 +111,7 @@ export interface IGenericPanelAPI {
 
     getMinWidth?: () => number;
     getMinHeight?: () => number;
+    onResize?: (width: number, height: number) => void;
 
     onQueryContextMenu?: (contextMenu: IContextMenuAPI) => void;
 

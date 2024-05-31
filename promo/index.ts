@@ -5,6 +5,8 @@ import "../src/index.css";
 // import { initBabylonDemo } from "./babylon-demo";
 import { startBabylonDemo } from "./babylon-engine";
 import { createDemoScene } from "./demo-scene";
+import { CreditsFactoryFn } from "./panels/CreditsPanel";
+import { BarChartFactoryFn, DoughnutChartFactoryFn, LineChartFactoryFn, PieChartFactoryFn, StackedChartFactoryFn } from "./panels/chart-panels";
 import { createVillageScene } from "./village-demo";
 
 declare var ace: any;
@@ -17,7 +19,7 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
     return {
         initialize: async (api, options) => {
             api.setPanelFAIcon("fa-brands fa-unity");
-            api.setPanelTitle("BabylonJS Demo");
+            api.setPanelTitle("BabylonJS 3D Engine Demo");
 
             const domRootElement = document.createElement("div");
             domRootElement.style.overflow = "hidden";
@@ -31,6 +33,8 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
         }
     }
 });
+
+dockManager.registerPanelType("creditsView", "singleton", CreditsFactoryFn);
 
 dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
 
@@ -60,11 +64,40 @@ dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
     }
 });
 
+dockManager.registerTabbedPanelType("chartView", "singleton", () => {
+    return {
+        initialize: async (api) => {
+            api.setPanelTitle("Chart View");
+            api.setPanelFAIcon("fa-solid fa-chart-simple")
+        }
+    }
+});
+
+dockManager.registerPanelType("barChart", "singleton", BarChartFactoryFn);
+dockManager.registerPanelType("pieChart", "singleton", PieChartFactoryFn);
+dockManager.registerPanelType("doughnutChart", "singleton", DoughnutChartFactoryFn);
+dockManager.registerPanelType("stackedChart", "singleton", StackedChartFactoryFn);
+dockManager.registerPanelType("lineChart", "singleton", LineChartFactoryFn);
+
 
 async function performDocking() {
 
     try {
         const babylonJSPanel = await dockManager.createPanel("babylonJS");
+        const creditsPanel = await dockManager.createPanel("creditsView");
+
+        // Create TabbedPanelContainer for Charts
+        const chartView = await dockManager.createTabbedPanel("chartView");
+        const barChart = await dockManager.createPanel("barChart");
+        const pieChart = await dockManager.createPanel("pieChart");
+        const doughnutChart = await dockManager.createPanel("doughnutChart");
+        const stackedChart = await dockManager.createPanel("stackedChart");
+        const lineChart = await dockManager.createPanel("lineChart");
+        chartView.addContainer(barChart);
+        chartView.addContainer(pieChart);
+        chartView.addContainer(doughnutChart);
+        chartView.addContainer(stackedChart);
+        chartView.addContainer(lineChart);
 
         // Construct Code Editors
         const pythonEditor = await dockManager.createPanel("aceEditor", {
@@ -93,10 +126,8 @@ async function performDocking() {
         dockManager.dockFill(documentNode, typescriptEditor);
         dockManager.dockFill(documentNode, javaEditor);
         dockManager.dockLeft(documentNode, babylonJSPanel, 0.4);
-
-        // dockManager.floatDialog(babylonJSPanel, {
-        //     x: 200, y: 50, w: 500, h: 300
-        // });
+        const nodeCredits = dockManager.dockDown(documentNode, creditsPanel, 0.35);
+        dockManager.dockFill(nodeCredits, chartView);
     }
     catch(err) {
         console.dir(err);

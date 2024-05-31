@@ -1,3 +1,4 @@
+import { ISize } from "../../common/dimensions";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { PanelContainer } from "../PanelContainer";
@@ -8,6 +9,8 @@ import { SharedStateConfig } from "./SharedStateConfig";
  * Class for common logic for all states
  */
 export abstract class PanelStateBase implements IGenericPanelState {
+
+    private _lastSize: ISize = {w: -1, h: -1};
 
     constructor(
         protected dockManager: DockManager, 
@@ -48,6 +51,16 @@ export abstract class PanelStateBase implements IGenericPanelState {
         return false;
     }
 
+    protected notifySizeChanged() {
+        console.log("NOTIFY SIZE CHANGED");
+        const { w, h} = this.panel.getContentContainerDOM().getBoundsRect();
+        if(this._lastSize.w !== w || this._lastSize.h !== h) {
+            this._lastSize = {w: w, h: h};
+            this.panel.getAPI().onResize?.(w, h);
+        }
+    }
+
+
     // Misc update state methods
     updatePanelState(): void {
         const domFrameHeader = this.panel.getFrameHeaderDOM();
@@ -56,10 +69,9 @@ export abstract class PanelStateBase implements IGenericPanelState {
         } else {
             domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
         }
-
     }
 
     updateLayoutState(): void {
-
+        this.notifySizeChanged();
     }
 }

@@ -66,6 +66,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this.initializeComponent();
     }
 
+    getAPI(): IGenericPanelAPI {
+        return this.api;
+    }
+
     /**
      * Panel Icon & Title Management
      */
@@ -278,7 +282,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domContentHost?.appendChild(this.domContent);
 
         this.contentPanelMouseDown?.unbind();
-        this.contentPanelMouseDown = new DOMEvent(content);
+        this.contentPanelMouseDown = new DOMEvent(this.domContentHost.get());
         this.contentPanelMouseDown.bind("mousedown", this.handleMouseDownOnPanel.bind(this), {capture: true});
     }
 
