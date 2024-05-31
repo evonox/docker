@@ -1,4 +1,5 @@
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
+import { IPoint } from "../common/dimensions";
 import { TabOrientation } from "../common/enumerations";
 import { ContextMenu } from "../core/ContextMenu";
 import { TabStripButtonBar } from "../core/TabStripButtonBar";
@@ -166,20 +167,46 @@ export class TabHostStrip extends Component {
      * Starts the tab ordering request
      */
     private handleTabOrderingRequest({event, tabHandle}: any) {
+        let isUndockInitiated = false;
+
         const reorderingOperation = new TabReorderOperation(
-            this.dockManager, this, tabHandle
+            this.dockManager, this, tabHandle, tabHandle.getUndockEnabled()
         );
         reorderingOperation.processMouseDown(event);
 
         reorderingOperation.on("onTabReorder", payload => {
             this.triggerEvent("onTabReordered", payload);
-        })
+        });
+
+        reorderingOperation.on("onUndockRequest", async (event) => {
+            isUndockInitiated = true;
+            const domTabHandle = tabHandle.getDOM().getBoundingClientRect();
+            const dragOffset: IPoint = {
+                x: Math.max(event.pageX - domTabHandle.left, 40),
+                y: domTabHandle.height / 2
+            };
+            this.triggerEvent("onDockingDragStart", {event, dragOffset, tabHandle});  
+        });
 
         DragAndDrop.start(event, 
-            event => reorderingOperation.processMouseMove(event),
-             event => reorderingOperation.processMouseUp(event),
+            event => {
+                if(isUndockInitiated) {
+                    this.triggerEvent("onDockingDragMove", event);
+                } else {
+                    reorderingOperation.processMouseMove(event)
+                }
+            },
+             event => {
+                if(isUndockInitiated) {
+                    this.triggerEvent("onDockingDragStop", event);
+                } else {
+                    reorderingOperation.processMouseUp(event)
+                }
+             },
             "pointer", 
-            () => reorderingOperation.processCancelRequest(), 
+            () => {
+                reorderingOperation.processCancelRequest()
+            }, 
             DetectionMode.withThreshold
         );
     }

@@ -157,7 +157,10 @@ export class TabHost extends Component {
         });
         this.tabStrip.on("onTabReordered", ({from, to}) => {
             this.handleReorderTabs(from, to);
-        })
+        });
+        this.tabStrip.on("onDockingDragStart", this.handleDockingDragStart.bind(this));
+        this.tabStrip.on("onDockingDragMove", this.handleDockingDragMove.bind(this));
+        this.tabStrip.on("onDockingDragStop", this.handleDockingDragEnd.bind(this));
     }
 
     protected onDisposed(): void {
@@ -211,5 +214,23 @@ export class TabHost extends Component {
         this.updateContainerState();
         this.updateLayoutState();
         this.dockManager.setActivePanel(movedContainer);
+    }
+
+    // Dragged Panel Container in Dock / Undock Operation
+    private draggedPanel: PanelContainer;
+
+    private async handleDockingDragStart({event, dragOffset, tabHandle}: any) {
+        const tabPage = this.tabPages.find(page => page.getTabHandle() === tabHandle);
+        this.draggedPanel = tabPage.getContainer();
+        await this.draggedPanel.requestUndockToDialog(event, dragOffset);
+        this.draggedPanel.triggerEvent("onDockingDragStart", event);       
+    }
+
+    private handleDockingDragMove(event: MouseEvent) {
+        this.draggedPanel.triggerEvent("onDockingDragMove", event);
+    }
+
+    private handleDockingDragEnd(event: MouseEvent) {
+        this.draggedPanel.triggerEvent("onDockingDragStop", event);
     }
 }

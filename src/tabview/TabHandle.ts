@@ -55,6 +55,10 @@ export class TabHandle extends Component {
         this.selectionState = state;
     }
 
+    getUndockEnabled(): boolean {
+        return this.isUndockEnabled;
+    }
+
     setUndockEnabled(flag: boolean) {
         this.isUndockEnabled = flag;
     }

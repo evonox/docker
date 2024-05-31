@@ -5,6 +5,7 @@ import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscriptio
 import { TabHandle } from "../tabview/TabHandle";
 import { TabHostStrip } from "../tabview/TabHostStrip";
 import { DOM } from "../utils/DOM";
+import { DOMRegistry } from "../utils/DOMRegistry";
 import { AnimationHelper, IAnimation } from "../utils/animation-helper";
 import { TabReorderIndexMap } from "./TabReorderIndexMap";
 
@@ -49,7 +50,7 @@ export class TabReorderOperation implements IEventEmitter {
 
     processMouseMove(event: MouseEvent) {
         if(this.checkUndock(event)) {
-            this.handleUndockRequested();
+            this.handleUndockRequested(event);
             return;
         }
         
@@ -144,12 +145,13 @@ export class TabReorderOperation implements IEventEmitter {
         this.domTabHandles.forEach(dom => {
             dom.css("position", "").css("left", "").css("top", "").zIndex("");
         });
-
-        const domTabStrip = DOM.from(this.tabStrip.getDOM());
-        domTabStrip.css("min-width", "");
-        domTabStrip.css("min-height", "");
-
         this.domTabHandles = [];
+
+        const domTabStrip = this.tabStrip.getDOM();
+        if(DOMRegistry.existsDOM(domTabStrip)) {
+            DOM.from(domTabStrip).css("min-width", "").css("min-height", "");
+        }
+
         this.eventManager.disposeAll();
     }
 
@@ -188,8 +190,8 @@ export class TabReorderOperation implements IEventEmitter {
         this.clenaUp();
     }
 
-    private handleUndockRequested() {
-        this.eventManager.triggerEvent("onUndockRequest");
+    private handleUndockRequested(event: MouseEvent) {
+        this.eventManager.triggerEvent("onUndockRequest", event);
         this.clenaUp();
     }
 
