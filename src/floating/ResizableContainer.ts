@@ -8,9 +8,13 @@ import { IContextMenuAPI } from "../common/panel-api";
 import { IDeltaRect, IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
+import { EventHelper } from "../utils/event-helper";
 
 /**
  * Container Decorator providing the resizing functionality
+ * 
+ * Events:
+ *      onDialogResized - notification that the dialog has been resized
  */
 export class ResizableContainer implements IDockContainer {
 
@@ -31,6 +35,10 @@ export class ResizableContainer implements IDockContainer {
             this.toggleResizeHandles(isEnabled);
         });
     }
+
+    /**
+     *  Pure Decorator Overrides passing control to the delegated container
+     */
 
     updateLayoutState(): void {
         this.delegate.updateLayoutState();
@@ -67,6 +75,7 @@ export class ResizableContainer implements IDockContainer {
     setActiveChild(container: IDockContainer): void {
         this.delegate.setActiveChild(container);
     }
+
     saveState(state: IState): void {
         this.delegate.saveState(state);
     }
@@ -74,6 +83,25 @@ export class ResizableContainer implements IDockContainer {
     loadState(state: IState): void {
         this.delegate.loadState(state);
     }
+
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
+        this.delegate.performLayout(children, relayoutEvenIfEqual);
+    }
+
+    dispose() {
+        this.removeDecorator();
+        this.eventManager.disposeAll();
+        this.delegate.dispose()
+    }
+
+    removeDecorator() {
+        this.subscriptionResizeEnable.unsubscribe();
+        this.destroyResizeHandles();
+    }
+
+    /**
+     * Construct & Destroy Resizing Handles Logic 
+     */
 
     private toggleResizeHandles(isEnabled: boolean) {
         if(this.isResizeEnabled !== isEnabled) {
@@ -87,16 +115,19 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private buildResizeHandles() {
+        // Apply size of corner and handle size from the configuraton
         const handleSize = this.dockManager.config.dialogResizeHandleThickness;
         const cornerSize = this.dockManager.config.dialogResizeHandleCornerSize;
         DOM.from(this.topElement).css("--docker-ts-resize-handle-size", `${handleSize}px`)
             .css("--docker-ts-corner-handle-size", `${cornerSize}px`);
 
+        // Build the Resize Handles
         this.buildResizeHandle({north: true, south: false, west: false, east: false});
         this.buildResizeHandle({north: false, south: true, west: false, east: false});
         this.buildResizeHandle({north: false, south: false, west: true, east: false});
         this.buildResizeHandle({north: false, south: false, west: false, east: true});
 
+        // Note: we omit the creation of NorthEast Resize Handle - it might interfere with header buttons
         this.buildResizeHandle({north: true, south: false, west: true, east: false});
         this.buildResizeHandle({north: false, south: true, west: true, east: false});
         this.buildResizeHandle({north: false, south: true, west: false, east: true});
@@ -117,20 +148,6 @@ export class ResizableContainer implements IDockContainer {
         this.resizeHandles = [];
     }
 
-    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean) {
-        this.delegate.performLayout(children, relayoutEvenIfEqual);
-    }
-
-    dispose() {
-        this.removeDecorator();
-        this.delegate.dispose()
-    }
-
-    removeDecorator() {
-        this.subscriptionResizeEnable.unsubscribe();
-        this.destroyResizeHandles();
-    }
-
     /**
      * Drag-and-drop Functionality for resizing the dialog
      */
@@ -141,9 +158,7 @@ export class ResizableContainer implements IDockContainer {
     private handleMouseDown(payload: any) {
         const { handle, event } = payload;
         if(this.isResizeEnabled === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            EventHelper.suppressEvent(event);
             return;
         }
 
