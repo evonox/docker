@@ -2,6 +2,7 @@ import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
 
 import "./ResizeHandle.css";
+import { queryResizeMouseCursor } from "./resizing-mouse-cursors";
 
 export interface ResizeHandleType {
     north: boolean;
@@ -9,6 +10,7 @@ export interface ResizeHandleType {
     west: boolean;
     east: boolean;
 }
+
 
 export class ResizeHandle extends Component {
 
@@ -21,8 +23,7 @@ export class ResizeHandle extends Component {
 
     // Note: Mouse Cursor is set in CSS, we must query it using computed style, not element style property
     getCursor() {
-        const computedStyle = window.getComputedStyle(this.domHandle.get());
-        return computedStyle.getPropertyValue("cursor");
+        return queryResizeMouseCursor(this);
     }
 
     north() { return this.handleType.north; }
