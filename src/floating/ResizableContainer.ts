@@ -9,6 +9,8 @@ import { IDeltaRect, IPoint, IRect, ISize } from "../common/dimensions";
 import { ContainerType } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
 import { EventHelper } from "../utils/event-helper";
+import { DragOverflowGuard, DragOverflowState, OverflowDirection } from "../utils/DragOverflowGuard";
+import { RectHelper } from "../utils/rect-helper";
 
 /**
  * Container Decorator providing the resizing functionality
@@ -21,6 +23,9 @@ export class ResizableContainer implements IDockContainer {
     private resizeHandles: ResizeHandle[] = [];
     private eventManager = new ComponentEventManager();
     private subscriptionResizeEnable: ComponentEventSubscription;
+
+    private dragOverflowGuardX: DragOverflowGuard = new DragOverflowGuard();
+    private dragOverflowGuardY: DragOverflowGuard = new DragOverflowGuard();
 
     private isResizeEnabled: boolean = true;
 
@@ -165,6 +170,9 @@ export class ResizableContainer implements IDockContainer {
         this.draggedHandle = handle;
         this.lastMousePos = {x: event.pageX, y: event.pageY};
 
+        this.dragOverflowGuardX.reset();
+        this.dragOverflowGuardY.reset();
+
         DragAndDrop.start(event, 
             this.handleMouseMove.bind(this), 
             this.handleMouseUp.bind(this), 
@@ -176,7 +184,7 @@ export class ResizableContainer implements IDockContainer {
         const dx = event.pageX - this.lastMousePos.x;
         const dy = event.pageY - this.lastMousePos.y;
 
-        this.performDrag(this.draggedHandle, dx, dy);
+        this.performDrag(this.draggedHandle, {x: event.pageX, y: event.pageY}, dx, dy);
 
         this.lastMousePos = {x: event.pageX, y: event.pageY};
     }
@@ -186,53 +194,77 @@ export class ResizableContainer implements IDockContainer {
         delete this.draggedHandle;
     }
 
-    private performDrag(handle: ResizeHandle, dx: number, dy: number) {
+    private performDrag(handle: ResizeHandle, currentPos: IPoint, dx: number, dy: number) {
         const bounds = DOM.from(this.topElement).getBounds();
         const rect: IRect = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
         rect.w = this.delegate.getWidth();
         rect.h = this.delegate.getHeight();
 
-        if(handle.north()) this.resizeNorth(dy, rect);
-        if(handle.south()) this.resizeSouth(dy, rect);
-        if(handle.west()) this.resizeWest(dx, rect);
-        if(handle.east()) this.resizeEast(dx, rect);
+        if(handle.north()) this.resizeNorth(currentPos, dy, rect);
+        if(handle.south()) this.resizeSouth(currentPos, dy, rect);
+        if(handle.west()) this.resizeWest(currentPos, dx, rect);
+        if(handle.east()) this.resizeEast(currentPos, dx, rect);
     }
 
-    private resizeNorth(delta: number, bounds: IRect) {
-        this.resizeContainer(bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
+    private resizeNorth(currentPos: IPoint, delta: number, bounds: IRect) {
+        this.resizeContainer(currentPos, bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
     }
 
-    private resizeSouth(delta: number, bounds: IRect) {
-        this.resizeContainer(bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
+    private resizeSouth(currentPos: IPoint, delta: number, bounds: IRect) {
+        this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
     }
 
-    private resizeEast(delta: number, bounds: IRect) {
-        this.resizeContainer(bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
+    private resizeEast(currentPos: IPoint, delta: number, bounds: IRect) {
+        this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
     }
 
-    private resizeWest(delta: number, bounds: IRect) {
-        this.resizeContainer(bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
+    private resizeWest(currentPos: IPoint, delta: number, bounds: IRect) {
+        this.resizeContainer(currentPos, bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
     }
 
-    private resizeContainer(bounds: IRect, delta: IDeltaRect) {
-        bounds.x += delta.dx;
-        bounds.y += delta.dy;
-        bounds.w += delta.dw;
-        bounds.h += delta.dh;
+    private resizeContainer(currentPos: IPoint, bounds: IRect, delta: IDeltaRect) {
+        this.checkedX = false;
+        this.constrainByDragOverflows(currentPos, bounds, delta);
+        this.constrainContainerRect(currentPos, bounds, delta);
 
-        this.constrainContainerRect(bounds, delta);
-
+        bounds = RectHelper.appendDelta(bounds, delta);
         this.eventManager.triggerEvent("onDialogResized", bounds);
     }
 
-    private constrainContainerRect(bounds: IRect, delta: IDeltaRect) {
+    private checkedX: boolean = false;
+
+    private constrainByDragOverflows(currentPos: IPoint, bounds: IRect, delta: IDeltaRect)  {
+        const overflowStateX = this.dragOverflowGuardX.isInDragOverflow(currentPos.x);
+        if(overflowStateX === DragOverflowState.InOverflowState) {
+            delta.dw = 0;
+            if(delta.dx !== 0) {
+                delta.dx = 0;
+            }
+            this.checkedX = true;
+        } else if(overflowStateX === DragOverflowState.OverflowStateTerminated) {
+            delta.dw = this.dragOverflowGuardX.adjustDeltaAfterOverflow(delta.dx, currentPos.x);
+            if(delta.dx !== 0) {
+                delta.dx = -delta.dw;
+            }
+            this.dragOverflowGuardX.reset();
+            this.checkedX = true;
+        }
+    }
+
+    private constrainContainerRect(currentPos: IPoint, bounds: IRect, delta: IDeltaRect) {
+        const newBounds = RectHelper.appendDelta(bounds, delta);
         const minWidth = this.delegate.getMinWidth();
         const minHeight = this.delegate.getMinHeight();
-        if(bounds.w < minWidth) {
+        if(newBounds.w < minWidth && this.checkedX === false) {
+            delta.dw = minWidth - bounds.w;
             if(delta.dx !== 0) {
-                bounds.x -= minWidth - bounds.w;
+                delta.dx = - delta.dw;
             }
-            bounds.w = minWidth;
+
+            const guardedCoordinate = this.lastMousePos.x + delta.dw;
+            const direction = currentPos.x > this.lastMousePos.x ? OverflowDirection.Incrementing : OverflowDirection.Decrementing;
+            this.dragOverflowGuardX.startDragOverflow(guardedCoordinate, direction);
+
         }
         if(bounds.h < minHeight) {
             if(delta.dy !== 0) {
