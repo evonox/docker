@@ -38,7 +38,7 @@ export class DOM<T extends HTMLElement> {
                 this.element.classList.add(name);
             });
             // TODO: DEBUG            
-            DOMUpdateInitiator.forceAllEnqueuedUpdates();
+            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
         }
         return this;
     }
@@ -51,7 +51,7 @@ export class DOM<T extends HTMLElement> {
                 this.element.classList.remove(name);
             });
             // TODO: DEBUG            
-            DOMUpdateInitiator.forceAllEnqueuedUpdates();
+            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
         }        
         return this;
     }
@@ -124,7 +124,7 @@ export class DOM<T extends HTMLElement> {
             this.element.style.setProperty(propertyName, propertyValue);
         });
         // TODO: DEBUG            
-        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
 
         return this;
     }
