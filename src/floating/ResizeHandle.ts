@@ -1,8 +1,8 @@
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
+import { queryResizeMouseCursor } from "./resizing-mouse-cursors";
 
 import "./ResizeHandle.css";
-import { queryResizeMouseCursor } from "./resizing-mouse-cursors";
 
 export interface ResizeHandleType {
     north: boolean;
@@ -11,7 +11,12 @@ export interface ResizeHandleType {
     east: boolean;
 }
 
-
+/**
+ * Invisible Handle floating over the Dialog Frame to trigger resizing when activated
+ * 
+ * Events:
+ *      onMouseDown - event to trigger the resize operation
+ */
 export class ResizeHandle extends Component {
 
     private domHandle: DOM<HTMLElement>;
@@ -21,7 +26,6 @@ export class ResizeHandle extends Component {
         this.initializeComponent();
     }
 
-    // Note: Mouse Cursor is set in CSS, we must query it using computed style, not element style property
     getCursor() {
         return queryResizeMouseCursor(this);
     }
