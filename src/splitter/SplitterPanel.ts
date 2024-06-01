@@ -180,8 +180,6 @@ export class SplitterPanel extends Component {
      */
 
     private handleResizeEvent(payload: ResizedPayload) {
-        console.dir(this.containerSizes);
-
         const prevIndex = this.childContainers.indexOf(payload.prev);
         const nextIndex = this.childContainers.indexOf(payload.next);
 
