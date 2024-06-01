@@ -13,17 +13,6 @@ export class DockedState extends PanelStateBase {
     private panelPlaceholderRO: ResizeObserver = undefined;
 
     public enterState(): void {
-        this.panelPlaceholderRO = new ResizeObserver((entries) => {
-            // TODO: DEBUG WORKAROUND - There is infinite resizing loop. Not sure why?
-            // window.requestAnimationFrame(() => {
-            //     this.updateLayoutState();
-            // });
-            // this.updateLayoutState();
-        });
-
-        const domPlaceholder = this.panel.getPlaceholderDOM();
-        this.panelPlaceholderRO.observe(domPlaceholder.get(), {box: "border-box"});
-
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
@@ -31,10 +20,7 @@ export class DockedState extends PanelStateBase {
     }
 
     public leaveState(): void {
-        const domPlaceholder = this.panel.getPlaceholderDOM();
-        this.panelPlaceholderRO.unobserve(domPlaceholder.get());       
-        this.panelPlaceholderRO.disconnect();
-        this.panelPlaceholderRO = undefined;
+        this.stopSizeObservation();
     }
 
     public dispose(): void {
@@ -64,7 +50,11 @@ export class DockedState extends PanelStateBase {
 
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+
+        this.panel.updateLayoutState();
         
+
+        this.startSizeObservation();
 
         const viewportRect = this.dockManager.getContainerBoundingRect();
         if(this.panel.isHeaderVisible() === false) {
@@ -83,6 +73,8 @@ export class DockedState extends PanelStateBase {
                 x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
             });    
         }
+        
+        this.stopSizeObservation();
 
         return true;
     }
@@ -90,15 +82,6 @@ export class DockedState extends PanelStateBase {
     public updateLayoutState(): void {
         if(this.panel.isHidden())
             return;
-        // Note: The returned coordinates might not be the whole numbers
-        // To prevent content flickering we "floor" them
-        
-        // DEBUG: DO LAYOUT REFLOW INTENTIONALLY
-
-        // let rect = this.panel.getPlaceholderDOM().getBoundsRect();
-        // rect = RectHelper.floor(rect);
-        // this.panel.getContentFrameDOM().applyRect(rect);
-
         super.updateLayoutState();
     }
 
@@ -107,10 +90,33 @@ export class DockedState extends PanelStateBase {
     }
 
     public resize(rect: IRect) {
+        // Note: Prevent resize observer loop
+        if(this.panelPlaceholderRO !== undefined)
+            return;
+
         if(RectHelper.isSizeOnly(rect)) {
             this.panel.getContentFrameDOM().applySize(rect);
         } else {
             this.panel.getContentFrameDOM().applyRect(rect);       
         }
     }
+
+    private startSizeObservation() {
+        this.panelPlaceholderRO = new ResizeObserver((entries) => {
+            this.panel.invalidate();
+        });
+
+        const domContainerFrame = this.panel.getContentFrameDOM().get();
+        this.panelPlaceholderRO.observe(domContainerFrame, {box: "border-box"});       
+    }
+
+    private stopSizeObservation() {
+        if(this.panelPlaceholderRO !== undefined) {
+            const domContainerFrame = this.panel.getContentFrameDOM().get();
+            this.panelPlaceholderRO.unobserve(domContainerFrame);       
+            this.panelPlaceholderRO.disconnect();
+            this.panelPlaceholderRO = undefined;   
+        }
+    }
+
 }

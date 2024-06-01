@@ -9,6 +9,8 @@ import { PanelStateBase } from "./PanelStateBase";
 
 export class MaximizedState extends PanelStateBase {
 
+    private panelPlaceholderRO: ResizeObserver = undefined;
+
     public enterState(): void {
         const restoreState = this.config.get("restoreState");
         // Note: Minimization not supported when we come from the Docked State
@@ -21,11 +23,11 @@ export class MaximizedState extends PanelStateBase {
     }
 
     public leaveState(): void {
-        
+        this.stopSizeObservation();
     }
 
     public dispose(): void {
-        
+        this.stopSizeObservation();
     }
 
     async minimize(): Promise<boolean> {
@@ -46,6 +48,8 @@ export class MaximizedState extends PanelStateBase {
 
         const domContentFrame = this.panel.getContentFrameDOM();
 
+        this.startSizeObservation();
+
         if(previousState === PanelContainerState.Docked && wasHeaderVisible === false) {
             const domHeader = this.panel.getFrameHeaderDOM();
             await AnimationHelper.animateRestoreNoHeader(domContentFrame.get(), domHeader.get(), originalRect);;
@@ -60,7 +64,10 @@ export class MaximizedState extends PanelStateBase {
             }
         }
 
+        this.stopSizeObservation();
+
         domContentFrame.zIndex("");
+        this.panel.updateLayoutState();
         this.panel.setHeaderVisibility(wasHeaderVisible);
         domContentFrame.applyRect(originalRect);
 
@@ -76,7 +83,27 @@ export class MaximizedState extends PanelStateBase {
     }
 
     public resize(rect: IRect) {
+        if(this.panelPlaceholderRO !== undefined)
+            return;
         const containerRect = this.dockManager.getContainerBoundingRect();
         this.panel.getContentFrameDOM().applyRect(containerRect);       
+    }
+
+    private startSizeObservation() {
+        this.panelPlaceholderRO = new ResizeObserver((entries) => {
+            this.panel.invalidate();
+        });
+
+        const domContainerFrame = this.panel.getContentFrameDOM().get();
+        this.panelPlaceholderRO.observe(domContainerFrame, {box: "border-box"});       
+    }
+
+    private stopSizeObservation() {
+        if(this.panelPlaceholderRO !== undefined) {
+            const domContainerFrame = this.panel.getContentFrameDOM().get();
+            this.panelPlaceholderRO.unobserve(domContainerFrame);       
+            this.panelPlaceholderRO.disconnect();
+            this.panelPlaceholderRO = undefined;   
+        }
     }
 }

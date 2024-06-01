@@ -1,11 +1,14 @@
 import { IDockContainer } from "../common/declarations";
-import { SelectionState, TabOrientation } from "../common/enumerations";
+import { IRect } from "../common/dimensions";
+import { PanelContainerState, SelectionState, TabOrientation } from "../common/enumerations";
 import { ITabbedPanelAPI } from "../common/panel-api";
 import { DockManager } from "../facade/DockManager";
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { TabHost } from "../tabview/TabHost";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { DOM } from "../utils/DOM";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
+import { RectHelper } from "../utils/rect-helper";
 import { PanelContainer } from "./PanelContainer";
 
 
@@ -38,6 +41,15 @@ export class TabbedPanelContainer extends PanelContainer {
         ArrayUtils.removeItem(this.childContainers, container);
         this.tabHost.performLayout(this.childContainers, false);
         this.updateContainerState();
+    }
+
+    setVisible(visible: boolean): void {
+        super.setVisible(visible);
+        if(visible === false) {
+            this.childContainers.forEach(container => container.setVisible(false));
+        } else {
+            this.tabHost.getSelectedTab().getContainer().setVisible(true);
+        }
     }
 
     protected onInitialized(): void {
@@ -77,6 +89,18 @@ export class TabbedPanelContainer extends PanelContainer {
         this.childContainers?.forEach(child => {
             child.getContentFrameDOM().zIndex(zIndex + 1)
         });
+    }
+
+    resize(rect: IRect): void {
+        if(this.state.getCurrentState() === PanelContainerState.Maximized) {
+            rect = RectHelper.fromDOMRect(this.dockManager.getContainerBoundingRect());
+        }
+        super.resize(rect);
+        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+        const headerBounds = this.getFrameHeaderDOM().getHeight();
+        rect.y += headerBounds
+        rect.h -= headerBounds;
+        this.tabHost.resize(rect);
     }
 
     private overrideFocusedState() {

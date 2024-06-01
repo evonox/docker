@@ -54,7 +54,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private contentPanelMouseDown: DOMEvent<MouseEvent>;
 
-    private state: PanelStateMachine;
+    protected state: PanelStateMachine;
 
     private _loadedSize: ISize;
 
@@ -259,6 +259,11 @@ export class PanelContainer extends Component implements IDockContainer {
 
     resize(rect: IRect): void {
         this.state.resize(rect);
+    }
+
+    invalidate() {
+        const bounds = this.domContentFrame.getComputedRect();
+        this.resize(bounds);
     }
 
     // PanelContainer is leaf node => no layouting logic

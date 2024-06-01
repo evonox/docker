@@ -13,6 +13,7 @@ import { state } from "../framework/decorators";
 import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
 import { TabHandle } from "./TabHandle";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class TabHost extends Component {
 
