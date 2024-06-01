@@ -77,10 +77,11 @@ export class DockLayoutEngine {
                     const height = parentNode.container.getHeight();
                     // TODO: CALL DESTROY - IS IT THE SAME???
                     // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
-                    parentNode.container.dispose();
 
+                    parentNode.container.dispose();
                     otherChild.container.resize({x: null, y: null, w: width, h: height});
                     grandParent.performLayout(false);
+
                 } else {
                     parentNode.detachFromParent();
                     // TODO: CALL DESTROY - IS IT THE SAME???
@@ -89,7 +90,6 @@ export class DockLayoutEngine {
                     this.dockManager.setRootNode(otherChild);
                 }
             }
-
         } else {
             parentNode.performLayout(false);
 

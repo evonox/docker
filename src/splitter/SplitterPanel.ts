@@ -9,6 +9,8 @@ import "./SplitterPanel.css";
 import { MathHelper } from "../utils/math-helper";
 import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
+import { DOMRegistry } from "../utils/DOMRegistry";
 
 export class SplitterPanel extends Component {
 
@@ -34,7 +36,9 @@ export class SplitterPanel extends Component {
     }
 
     protected onInitialRender(): HTMLElement {
-        this.domSplitterPanelWrapper = DOM.create("div").addClass("DockerTS-SplitterPanelWrapper");
+        this.domSplitterPanelWrapper = DOM.create("div")
+            .addClass("DockerTS-SplitterPanelWrapper")
+            .cacheBounds(false);
         this.domSplitterPanel = DOM.create("div").addClass("DockerTS-SplitterPanel")
             .addClass(
                 this.orientation === OrientationKind.Row 
@@ -84,7 +88,9 @@ export class SplitterPanel extends Component {
     private removeFromDOM() {
         this.childContainers.forEach(container => {
             const domContainerElement = container.getDOM();
-            DOM.from(domContainerElement).removeFromDOM();
+            if(DOMRegistry.existsDOM(domContainerElement)) {
+                DOM.from(domContainerElement).removeFromDOM();
+            }
         });
 
         this.splitterBars.forEach(bar => bar.dispose());
@@ -212,8 +218,7 @@ export class SplitterPanel extends Component {
             const originalSize = this.getVaryingSize(childContainer.getDOM());
             const newSize = originalSize * scaleMultiplier;
             this.containerSizes[i] = newSize;
-
-           
+          
             totalNewSize += newSize;
         }
     }
@@ -235,6 +240,8 @@ export class SplitterPanel extends Component {
 
         // Apply the CSS property value
         this.domSplitterPanel.css("--docker-splitter-panel-sizing", propertyValue);
+        // Note: Child containers may need to have this custom variable updated for measuring purposes
+        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
     }
 
     private triggerChildContainerResize() {
@@ -250,7 +257,8 @@ export class SplitterPanel extends Component {
             let childRect: IRect;
             const containerBounds = DOM.from(childContainer.getDOM()).getBoundsRect();
             if(this.orientation === OrientationKind.Row) {
-                childRect = RectHelper.from(varyingDim, containerBounds.y, size, splitterBounds.h);
+                childRect = RectHelper.from(
+                    MathHelper.roundToPX(varyingDim), containerBounds.y, MathHelper.roundToPX(size), splitterBounds.h);
             } else if(this.orientation === OrientationKind.Column) {
                 childRect = RectHelper.from(containerBounds.x, varyingDim, splitterBounds.w, size);
             }
@@ -261,9 +269,11 @@ export class SplitterPanel extends Component {
     }
 
     private computeInitialSize() {
-        const count = this.childContainers.length;
-        const ratios = new Array(count).fill(1 / count);
-        this.setRatios(ratios);
+        if(this.containerSizes.length === 0) {
+            const count = this.childContainers.length;
+            const ratios = new Array(count).fill(1 / count);
+            this.setRatios(ratios);   
+        }
     }
 
     private getVaryingSize(element: DOM<HTMLElement> | HTMLElement) {
