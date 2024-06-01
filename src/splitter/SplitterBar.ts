@@ -98,8 +98,8 @@ export class SplitterBar extends Component {
             this.overflowGuard.reset();   
         }
         // Current Widths
-        const prevWidth = this.prevContainer.getWidth();
-        const nextWidth = this.nextContainer.getWidth();
+        const prevWidth = this.splitterPanel.getContainerSize(this.prevContainer);
+        const nextWidth = this.splitterPanel.getContainerSize(this.nextContainer);
 
         // Minimum Allowed Widths
         const prevMinWidth = this.prevContainer.getMinWidth();

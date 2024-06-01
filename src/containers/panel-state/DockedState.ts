@@ -3,7 +3,6 @@ import { PanelContainerState } from "../../common/enumerations";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
-import { DOMUpdateInitiator } from "../../utils/DOMUpdateInitiator";
 import { AnimationHelper } from "../../utils/animation-helper";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelStateBase } from "./PanelStateBase";
@@ -17,6 +16,8 @@ export class DockedState extends PanelStateBase {
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+
+        this.startSizeObservation();
     }
 
     public leaveState(): void {
@@ -53,9 +54,6 @@ export class DockedState extends PanelStateBase {
 
         this.panel.updateLayoutState();
         
-
-        this.startSizeObservation();
-
         const viewportRect = this.dockManager.getContainerBoundingRect();
         if(this.panel.isHeaderVisible() === false) {
             const domFrameHeader = this.panel.getFrameHeaderDOM().get();
@@ -72,9 +70,7 @@ export class DockedState extends PanelStateBase {
             await AnimationHelper.animateMaximize(this.panel.getContentFrameDOM().get(), {
                 x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
             });    
-        }
-        
-        this.stopSizeObservation();
+        }       
 
         return true;
     }
@@ -90,10 +86,6 @@ export class DockedState extends PanelStateBase {
     }
 
     public resize(rect: IRect) {
-        // Note: Prevent resize observer loop
-        if(this.panelPlaceholderRO !== undefined)
-            return;
-
         if(RectHelper.isSizeOnly(rect)) {
             this.panel.getContentFrameDOM().applySize(rect);
         } else {
@@ -103,17 +95,18 @@ export class DockedState extends PanelStateBase {
 
     private startSizeObservation() {
         this.panelPlaceholderRO = new ResizeObserver((entries) => {
-            this.panel.invalidate();
+            const rect = this.panel.getPlaceholderDOM().getBoundingClientRect();
+            this.panel.getContentFrameDOM().applyRect(rect);
         });
 
-        const domContainerFrame = this.panel.getContentFrameDOM().get();
-        this.panelPlaceholderRO.observe(domContainerFrame, {box: "border-box"});       
+        const domPlaceholderDOM = this.panel.getPlaceholderDOM().get();
+        this.panelPlaceholderRO.observe(domPlaceholderDOM, {box: "border-box"});       
     }
 
     private stopSizeObservation() {
         if(this.panelPlaceholderRO !== undefined) {
-            const domContainerFrame = this.panel.getContentFrameDOM().get();
-            this.panelPlaceholderRO.unobserve(domContainerFrame);       
+            const domPlaceholderDOM = this.panel.getPlaceholderDOM().get();
+            this.panelPlaceholderRO.unobserve(domPlaceholderDOM);       
             this.panelPlaceholderRO.disconnect();
             this.panelPlaceholderRO = undefined;   
         }

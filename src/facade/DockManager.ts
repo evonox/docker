@@ -501,7 +501,7 @@ export class DockManager {
     }
     
     private resize(rect: IRect) {
-        this.context.model.rootNode.container.resize(rect);
+        // this.context.model.rootNode.container.resize(rect);
 
         // TODO: POSITION DIALOGS TO THE CONTAINER VIEWPORT - WHEN THE BROWSER WINDOW GETS SMALLER
     }

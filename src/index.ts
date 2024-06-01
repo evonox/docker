@@ -206,7 +206,7 @@ async function performDocking() {
         const containerLeft = await dockManager.createPanel("panel4");
         // const containerBottom = await dockManager.createPanel("panel5");
         const containerFloat = await dockManager.createPanel("panel6", {key: "BOTTOM"});
-        // const containerFloat2 = await dockManager.createPanel("panel6", {key: "FLOATING"});
+        const containerFloat2 = await dockManager.createPanel("panel6", {key: "FLOATING"});
         const tabbedContainer = await dockManager.createTabbedPanel("tabbedPanel");
         tabbedContainer.addContainer(containerThree1);
         tabbedContainer.addContainer(containerThree2);
@@ -221,6 +221,7 @@ async function performDocking() {
         // dockManager.dockFill(dockLeftNode, containerBottom);
         const node = dockManager.dockDown(dockManager.getDocumentNode(), containerFloat, 0.4);
         dockManager.dockFill(node, tabbedContainer);
+        //dockManager.dockFill(node, containerFloat2);
 
         // dockManager.floatDialog(containerFloat2, {x: 50, y: 50, w: 500, h: 200});
     }

@@ -142,6 +142,7 @@ export class TabHost extends Component {
     }
 
     resize(rect: IRect) {
+        return; 
         const domTabHost = DOM.from(this.getDOM());
         if(RectHelper.isSizeOnly(rect)) {
             rect.x = domTabHost.getLeft();
@@ -153,6 +154,7 @@ export class TabHost extends Component {
     }
 
     invalidate() {
+        return;
         const domBounds = this.getDOM().getBoundingClientRect();
         const rect = RectHelper.fromDOMRect(domBounds);
         this.resize(rect);
@@ -240,7 +242,7 @@ export class TabHost extends Component {
         const movedContainer = childContainers[from];
         childContainers.splice(from, 1);
         childContainers.splice(to, 0, movedContainer);
-       
+
         // Free all the internals
         this.performLayout([], false);
         // Introduce the new children layout
@@ -250,6 +252,11 @@ export class TabHost extends Component {
         this.updateContainerState();
         this.updateLayoutState();
         this.dockManager.setActivePanel(movedContainer);
+
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        const rect = movedContainer.getPlaceholderDOM().getBoundingClientRect();
+        movedContainer.getContentFrameDOM().applyRect(rect);   
+
     }
 
     getTabPageByHandle(tabHandle: TabHandle): TabPage {

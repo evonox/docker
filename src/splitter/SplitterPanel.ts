@@ -43,7 +43,7 @@ export class SplitterPanel extends Component {
             .addClass(
                 this.orientation === OrientationKind.Row 
                 ? "DockerTS-SplitterPanel--Row" : "DockerTS-SplitterPanel--Column"
-            ).appendTo(this.domSplitterPanelWrapper);
+            ).appendTo(this.domSplitterPanelWrapper).cacheBounds(false);
 
         this.constructSplitterDOMInternals();
 
@@ -163,10 +163,11 @@ export class SplitterPanel extends Component {
         this.containerSizes = ratios.map(ratio => ratio * contentSize);
 
         this.applyChildContainerSizes();
-        this.triggerChildContainerResize();
+        // this.triggerChildContainerResize();
     }
 
     resize(rect: IRect) {
+        return;
         if(this.childContainers.length <= 1)
             return;
         this.domSplitterPanel.applySize(rect);
@@ -193,7 +194,7 @@ export class SplitterPanel extends Component {
         this.containerSizes[nextIndex] = payload.nextSize;
 
         this.applyChildContainerSizes();
-        this.triggerChildContainerResize();
+        // this.triggerChildContainerResize();
     }
 
     private recomputeContainerSizes(rect: IRect) {
@@ -241,7 +242,7 @@ export class SplitterPanel extends Component {
         // Apply the CSS property value
         this.domSplitterPanel.css("--docker-splitter-panel-sizing", propertyValue);
         // Note: Child containers may need to have this custom variable updated for measuring purposes
-        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+        // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
     }
 
     private triggerChildContainerResize() {
@@ -255,7 +256,7 @@ export class SplitterPanel extends Component {
             const size = this.containerSizes[i];
 
             let childRect: IRect;
-            const containerBounds = DOM.from(childContainer.getDOM()).getBoundsRect();
+            const containerBounds = DOM.from(childContainer.getDOM()).getBoundingClientRect();
             if(this.orientation === OrientationKind.Row) {
                 childRect = RectHelper.from(
                     MathHelper.roundToPX(varyingDim), containerBounds.y, MathHelper.roundToPX(size), splitterBounds.h);

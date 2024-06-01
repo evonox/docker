@@ -150,11 +150,9 @@ export class PanelContainer extends Component implements IDockContainer {
         if(visible) {
             // TODO: DEBUG
             this.domContentFrame.show();
-            DOMUpdateInitiator.forceAllEnqueuedUpdates();
-            const rect = this.domContentFrame.getBoundingClientRect();
-            this.domContentFrame.applyRect(rect);
-            // this.updateLayoutState();
-            //this.updateContainerState();
+            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+            const rect = this.domPanelPlaceholder.getBoundingClientRect();
+            this.domContentFrame.applyRect(rect);   
         } else {
             this.domContentFrame.hide();
         }
