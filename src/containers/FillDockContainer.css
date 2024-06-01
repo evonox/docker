@@ -1,4 +1,5 @@
 
 .DockerTS-FillDockContainer {
     display: grid;
+    background: red;
 }

@@ -152,29 +152,29 @@ export class DraggableContainer implements IDockContainer {
 
         this.performDrag(dx, dy);
 
-        const domBounds = DOM.from(this.topElement).getBounds();
-        this.eventManager.triggerEvent("onDraggableDragMove", {event, x: domBounds.left, y: domBounds.top});
+        const domBounds = DOM.from(this.topElement).getBoundsRect();
+        this.eventManager.triggerEvent("onDraggableDragMove", {event, x: domBounds.x, y: domBounds.y});
 
         this.lastMousePosition = {x: event.pageX, y: event.pageY};
     }
 
     private performDrag(dx: number, dy: number) {
-        const domBounds = DOM.from(this.topElement).getBounds();
-        const x = domBounds.left + dx;
-        const y = domBounds.top + dy;
+        const domBounds = DOM.from(this.topElement).getBoundsRect();
+        const x = domBounds.x + dx;
+        const y = domBounds.y + dy;
         DOM.from(this.topElement).left(x).top(y);
     }
 
     // Check if the dragged dialog is inside DockerTS Viewport
     private constrainDialogInsideViewport(dx: number, dy: number, event: MouseEvent): [number, number] {
-        const domBounds = DOM.from(this.topElement).getBounds();
+        const domBounds = DOM.from(this.topElement).getBoundsRect();
         const domViewport = this.dockMananger.getContainerBoundingRect();
         // Compute current bounds
         const bounds: IRect = {
-            x: domBounds.left + dx,
-            y: domBounds.top + dy,
-            w: domBounds.width,
-            h: domBounds.height
+            x: domBounds.x + dx,
+            y: domBounds.y + dy,
+            w: domBounds.w,
+            h: domBounds.h
         };
             
         // Left, right and bottom edge can hide the floating dialog only by half
@@ -184,20 +184,20 @@ export class DraggableContainer implements IDockContainer {
         }
         // Constrain the bounds
         if(middlePoint.x < domViewport.left) {
-            dx = domViewport.left - (domBounds.left + domBounds.width / 2);
+            dx = domViewport.left - (domBounds.x + domBounds.w / 2);
             this.guardX.startDragOverflow(event.pageX, OverflowDirection.Decrementing);
         }
         if(middlePoint.x > domViewport.right) {
-            dx = domViewport.right - (domBounds.left + domBounds.width / 2);
+            dx = domViewport.right - (domBounds.x + domBounds.w / 2);
             this.guardX.startDragOverflow(event.pageX, OverflowDirection.Incrementing);
         }
         // Top edge must not be crossed
         if(bounds.y < domViewport.top) {
-            dy = domViewport.top - domBounds.top;
+            dy = domViewport.top - domBounds.y;
             this.guardY.startDragOverflow(this.lastMousePosition.y + dy, OverflowDirection.Decrementing);
         }
         if(middlePoint.y > domViewport.bottom) {
-            dy = domViewport.bottom - (domBounds.top + domBounds.height / 2);
+            dy = domViewport.bottom - (domBounds.y + domBounds.h / 2);
             this.guardY.startDragOverflow(this.lastMousePosition.y + dy, OverflowDirection.Incrementing);
         }   
 
@@ -243,8 +243,8 @@ export class DraggableContainer implements IDockContainer {
         this.delegate.performLayout(children, relayoutEvenIfEqual);
     }
 
-    resize(width: number, height: number): void {
-        this.delegate.resize(width, height);
+    resize(rect: IRect): void {
+        this.delegate.resize(rect);
     }
 
     getContainerType(): ContainerType {

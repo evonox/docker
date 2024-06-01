@@ -1,10 +1,8 @@
 import { IRect, ISize } from "../common/dimensions";
-import { ArrayUtils } from "./ArrayUtils";
 import { DOMRegistry } from "./DOMRegistry";
 import { DOMUpdateInitiator } from "./DOMUpdateInitiator";
+import { MathHelper } from "./math-helper";
 import { RectHelper } from "./rect-helper";
-
-const COORDINATE_PRECISION = 3;
 
 export interface CSSClassObject {
     [key: string]: boolean;
@@ -16,6 +14,8 @@ export interface CSSClassObject {
 export class DOM<T extends HTMLElement> {
 
     private cssClasses: Set<string> = new Set<string>();
+
+    private isBoundsCachingOn = true;
 
     constructor(private element: T) {
         DOMRegistry.setDOM(this.element, this);
@@ -38,7 +38,7 @@ export class DOM<T extends HTMLElement> {
                 this.element.classList.add(name);
             });
             // TODO: DEBUG            
-            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+            // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
         }
         return this;
     }
@@ -51,7 +51,7 @@ export class DOM<T extends HTMLElement> {
                 this.element.classList.remove(name);
             });
             // TODO: DEBUG            
-            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+            // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
         }        
         return this;
     }
@@ -124,7 +124,7 @@ export class DOM<T extends HTMLElement> {
             this.element.style.setProperty(propertyName, propertyValue);
         });
         // TODO: DEBUG            
-        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+        // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
 
         return this;
     }
@@ -134,44 +134,70 @@ export class DOM<T extends HTMLElement> {
      * Dimensions Changing Methods
      */
 
+    cacheBounds(flag: boolean): DOM<T> {
+        this.isBoundsCachingOn = flag;
+        return this;
+    }
+
     getLeft(): number {
-        if(this.styleMap.has("left") === false)  {
-            return this.element.offsetLeft;
+        if(this.isBoundsCachingOn === false) {
+            return this.getBoundingClientRect().left;
+        } else if(this.styleMap.has("left") === false)  {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("left"));
         } else {
             return parseFloat(this.getCss("left"));
         }
     }
 
     getTop(): number {
-        if(this.styleMap.has("top") === false) {
-            return this.element.offsetTop;
+        if(this.isBoundsCachingOn === false) {
+            return this.getBoundingClientRect().top;
+        } else if(this.styleMap.has("top") === false) {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("top"));           
         } else {
             return parseFloat(this.getCss("top"));           
         }
     }
 
     getWidth(): number {
-        if(this.styleMap.has("width") === false) {
-            return this.element.offsetWidth;
+        if(this.isBoundsCachingOn === false) {
+            return this.getBoundingClientRect().width;
+        } else if(this.styleMap.has("width") === false) {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("width"));
         } else {
             return parseFloat(this.getCss("width"));
         }
     }
 
     getHeight(): number {
-        if(this.styleMap.has("height") === false) {
-            return this.element.offsetHeight;
+        if(this.isBoundsCachingOn === false) {
+            return this.getBoundingClientRect().height;
+        } else if(this.styleMap.has("height") === false) {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("height"));
         } else {
             return parseFloat(this.getCss("height"));
         }
     }
 
-    getBounds(): DOMRect {
+    getBoundingClientRect(): DOMRect {
         return this.element.getBoundingClientRect();
     }
 
     getBoundsRect(): IRect {
-        return RectHelper.fromDOMRect(this.getBounds());
+        if(this.isBoundsCachingOn === false) {
+            return RectHelper.fromDOMRect(this.getBoundingClientRect());
+        } else {
+            return {
+                x: this.getLeft(),
+                y: this.getTop(),
+                w: this.getWidth(),
+                h: this.getHeight()
+            }
+        }
     }
 
     getComputedRect(): IRect {
@@ -206,7 +232,7 @@ export class DOM<T extends HTMLElement> {
         if(typeof value === "string") {
             this.css("left", value);
         } else {
-            this.css("left", value.toFixed(COORDINATE_PRECISION) + "px");               
+            this.css("left", MathHelper.toPX(value));               
         }
         return this;
     }
@@ -215,7 +241,7 @@ export class DOM<T extends HTMLElement> {
         if(typeof value === "string") {
             this.css("top", value);
         } else {
-            this.css("top", value.toFixed(COORDINATE_PRECISION) + "px");
+            this.css("top", MathHelper.toPX(value));
         }
         return this;
     }
@@ -224,7 +250,7 @@ export class DOM<T extends HTMLElement> {
         if(typeof value === "string") {
             this.css("width", value);
         } else {
-            this.css("width", value.toFixed(COORDINATE_PRECISION) + "px");
+            this.css("width", MathHelper.toPX(value));
         }
         return this;
     }
@@ -233,7 +259,16 @@ export class DOM<T extends HTMLElement> {
         if(typeof value === "string") {
             this.css("height", value);
         } else {
-            this.css("height", value.toFixed(COORDINATE_PRECISION) + "px");
+            this.css("height", MathHelper.toPX(value));
+        }
+        return this;
+    }
+
+    applySize(rect: DOMRect | IRect | ISize ): DOM<T> {
+        if(rect instanceof DOMRect) {
+            this.width(rect.width).height(rect.height);
+        } else {
+            this.width(rect.w).height(rect.h);
         }
         return this;
     }
@@ -247,6 +282,22 @@ export class DOM<T extends HTMLElement> {
         return this;
     }
 
+    private storeBoundsToCache() {
+        let bounds = RectHelper.fromDOMRect(this.element.getBoundingClientRect());
+        bounds = RectHelper.floor(bounds);
+        if(this.styleMap.has("left") === false) {
+            this.styleMap.set("left", `${bounds.x}px`);
+        }
+        if(this.styleMap.has("top") === false) {
+            this.styleMap.set("top", `${bounds.y}px`);
+        }
+        if(this.styleMap.has("width") === false) {
+            this.styleMap.set("width", `${bounds.w}px`);
+        }
+        if(this.styleMap.has("height") === false) {
+            this.styleMap.set("height", `${bounds.h}px`);
+        }
+    }
 
     /**
      * Misc Methods

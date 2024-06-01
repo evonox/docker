@@ -3,20 +3,22 @@ import { PanelContainerState } from "../../common/enumerations";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
+import { DOMUpdateInitiator } from "../../utils/DOMUpdateInitiator";
 import { AnimationHelper } from "../../utils/animation-helper";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelStateBase } from "./PanelStateBase";
 
 export class DockedState extends PanelStateBase {
 
-    private panelPlaceholderRO: ResizeObserver;
+    private panelPlaceholderRO: ResizeObserver = undefined;
 
     public enterState(): void {
         this.panelPlaceholderRO = new ResizeObserver((entries) => {
             // TODO: DEBUG WORKAROUND - There is infinite resizing loop. Not sure why?
-            window.requestAnimationFrame(() => {
-                this.updateLayoutState();
-            });
+            // window.requestAnimationFrame(() => {
+            //     this.updateLayoutState();
+            // });
+            // this.updateLayoutState();
         });
 
         const domPlaceholder = this.panel.getPlaceholderDOM();
@@ -88,16 +90,27 @@ export class DockedState extends PanelStateBase {
     public updateLayoutState(): void {
         if(this.panel.isHidden())
             return;
-        super.updateLayoutState();
-
         // Note: The returned coordinates might not be the whole numbers
         // To prevent content flickering we "floor" them
-        let rect = this.panel.getPlaceholderDOM().getBoundsRect();
-        rect = RectHelper.floor(rect);
-        this.panel.getContentFrameDOM().applyRect(rect);
+        
+        // DEBUG: DO LAYOUT REFLOW INTENTIONALLY
+
+        // let rect = this.panel.getPlaceholderDOM().getBoundsRect();
+        // rect = RectHelper.floor(rect);
+        // this.panel.getContentFrameDOM().applyRect(rect);
+
+        super.updateLayoutState();
     }
 
     public updatePanelState(): void {
          super.updatePanelState();
+    }
+
+    public resize(rect: IRect) {
+        if(RectHelper.isSizeOnly(rect)) {
+            this.panel.getContentFrameDOM().applySize(rect);
+        } else {
+            this.panel.getContentFrameDOM().applyRect(rect);       
+        }
     }
 }

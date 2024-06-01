@@ -39,7 +39,10 @@ export class MaximizedState extends PanelStateBase {
     async restore(): Promise<boolean> {
         const previousState = this.config.get("restoreState", PanelContainerState.Docked);
         const wasHeaderVisible = this.config.get("wasHeaderVisible", true);
-        const originalRect: IRect = this.config.get("originalRect");
+        let originalRect: IRect = this.config.get("originalRect");
+        if(previousState === PanelContainerState.Docked) {
+            originalRect = this.panel.getPlaceholderDOM().getBoundsRect();
+        }
 
         const domContentFrame = this.panel.getContentFrameDOM();
 
@@ -59,17 +62,21 @@ export class MaximizedState extends PanelStateBase {
 
         domContentFrame.zIndex("");
         this.panel.setHeaderVisibility(wasHeaderVisible);
+        domContentFrame.applyRect(originalRect);
 
         return true;
     }
 
     public updateLayoutState(): void {
-        const rect = this.dockManager.getContainerBoundingRect();
-        this.panel.getContentFrameDOM().applyRect(rect);
     }
 
     public updatePanelState(): void {
         super.updatePanelState();
         
+    }
+
+    public resize(rect: IRect) {
+        const containerRect = this.dockManager.getContainerBoundingRect();
+        this.panel.getContentFrameDOM().applyRect(containerRect);       
     }
 }

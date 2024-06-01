@@ -5,10 +5,11 @@ import { ComponentEventHandler, ComponentEventSubscription } from "../framework/
 import { ContainerType, TabOrientation } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
 import { DOM } from "../utils/DOM";
-import { ISize } from "../common/dimensions";
+import { IRect, ISize } from "../common/dimensions";
 import { TabHost } from "../tabview/TabHost";
 
 import "./FillDockContainer.css";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 /**
  * Decorator over TabHost
@@ -20,7 +21,7 @@ export class FillDockContainer implements IDockContainer {
     private _loadedSize: ISize;
 
     constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
-        this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer");
+        this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer").cacheBounds(false);
         this.tabHost = new TabHost(this.dockManager, this.tabStripDirection);
         this.domContainer.appendChild(this.tabHost.getDOM());
     }
@@ -90,7 +91,9 @@ export class FillDockContainer implements IDockContainer {
         this.tabHost.performLayout(children, relayoutEvenIfEqual);
     }
 
-    resize(width: number, height: number): void {}
+    resize(rect: IRect): void {
+        this.tabHost.resize(rect);
+    }
 
     getContainerType(): ContainerType {
         return ContainerType.FillLayout;

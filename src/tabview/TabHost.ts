@@ -10,6 +10,9 @@ import { TabHostStrip } from "./TabHostStrip";
 import "./TabHost.css";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { state } from "../framework/decorators";
+import { IRect } from "../common/dimensions";
+import { RectHelper } from "../utils/rect-helper";
+import { TabHandle } from "./TabHandle";
 
 export class TabHost extends Component {
 
@@ -137,6 +140,40 @@ export class TabHost extends Component {
         }
     }
 
+    resize(rect: IRect) {
+        const domTabHost = DOM.from(this.getDOM());
+        if(RectHelper.isSizeOnly(rect)) {
+            rect.x = domTabHost.getLeft();
+            rect.y = domTabHost.getTop();
+        }
+        domTabHost.applyRect(rect);
+        const tabContentRect =  this.computeTabContentRect(rect);
+        this.tabPages.forEach(page => page.getContainer().resize(tabContentRect));
+    }
+
+    invalidate() {
+        const domBounds = this.getDOM().getBoundingClientRect();
+        const rect = RectHelper.fromDOMRect(domBounds);
+        this.resize(rect);
+    }
+
+    private computeTabContentRect(rect: IRect): IRect {
+        if(this.tabStripDirection === TabOrientation.Top) {
+            const headerHeight = DOM.from(this.tabStrip.getDOM()).getHeight() + this.domSeparator.getHeight();
+            return RectHelper.from(rect.x, rect.y + headerHeight, rect.w, rect.h - headerHeight);
+        } else if(this.tabStripDirection === TabOrientation.Bottom) {
+            const headerHeight = DOM.from(this.tabStrip.getDOM()).getHeight() + this.domSeparator.getHeight();
+            return RectHelper.from(rect.x, rect.y, rect.w, rect.h - headerHeight);
+        } else if(this.tabStripDirection === TabOrientation.Left) {
+            const headerWidth = DOM.from(this.tabStrip.getDOM()).getWidth() + this.domSeparator.getWidth();
+            return RectHelper.from(rect.x + headerWidth, rect.y , rect.w - headerWidth, rect.h);
+
+        } else if(this.tabStripDirection === TabOrientation.Right) {
+            const headerWidth = DOM.from(this.tabStrip.getDOM()).getWidth() + this.domSeparator.getWidth();
+            return RectHelper.from(rect.x , rect.y , rect.w - headerWidth, rect.h);
+        }
+    }
+
     private isContainerInsideHost(container: IDockContainer): boolean {
         return this.getTabPageForContainer(container) !== undefined;
     }
@@ -150,7 +187,7 @@ export class TabHost extends Component {
      */
 
     protected onInitialized(): void {
-        this.tabStrip = new TabHostStrip(this.dockManager, this.tabStripDirection);
+        this.tabStrip = new TabHostStrip(this.dockManager, this, this.tabStripDirection);
         this.tabStrip.on("onTabActivated", tabIndex => {
             const activePanel = this.tabPages[tabIndex].getContainer();
             this.dockManager.setActivePanel(activePanel);
@@ -158,9 +195,6 @@ export class TabHost extends Component {
         this.tabStrip.on("onTabReordered", ({from, to}) => {
             this.handleReorderTabs(from, to);
         });
-        this.tabStrip.on("onDockingDragStart", this.handleDockingDragStart.bind(this));
-        this.tabStrip.on("onDockingDragMove", this.handleDockingDragMove.bind(this));
-        this.tabStrip.on("onDockingDragStop", this.handleDockingDragEnd.bind(this));
     }
 
     protected onDisposed(): void {
@@ -174,7 +208,8 @@ export class TabHost extends Component {
                 this.tabStripDirection === TabOrientation.Top || this.tabStripDirection === TabOrientation.Bottom,
             "DockerTS-TabStrip__Separator--Horizontal":
                 this.tabStripDirection === TabOrientation.Left || this.tabStripDirection === TabOrientation.Right
-        });
+        }).cacheBounds(false);
+
         this.domContent = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-TabContent");
 
         if(this.tabStripDirection === TabOrientation.Top) {
@@ -216,21 +251,7 @@ export class TabHost extends Component {
         this.dockManager.setActivePanel(movedContainer);
     }
 
-    // Dragged Panel Container in Dock / Undock Operation
-    private draggedPanel: PanelContainer;
-
-    private async handleDockingDragStart({event, dragOffset, tabHandle}: any) {
-        const tabPage = this.tabPages.find(page => page.getTabHandle() === tabHandle);
-        this.draggedPanel = tabPage.getContainer();
-        await this.draggedPanel.requestUndockToDialog(event, dragOffset);
-        this.draggedPanel.triggerEvent("onDockingDragStart", event);       
-    }
-
-    private handleDockingDragMove(event: MouseEvent) {
-        this.draggedPanel.triggerEvent("onDockingDragMove", event);
-    }
-
-    private handleDockingDragEnd(event: MouseEvent) {
-        this.draggedPanel.triggerEvent("onDockingDragStop", event);
+    getTabPageByHandle(tabHandle: TabHandle): TabPage {
+        return this.tabPages.find(page => page.getTabHandle() === tabHandle);
     }
 }

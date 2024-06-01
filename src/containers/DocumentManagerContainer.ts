@@ -10,4 +10,8 @@ export class DocumentManagerContainer extends FillDockContainer {
     constructor(dockManager: DockManager) {
         super(dockManager, TabOrientation.Top);
     }
+
+    getMinimumChildNodeCount(): number {
+        return 0;
+    }
 }

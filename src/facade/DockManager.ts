@@ -22,6 +22,8 @@ import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ChannelManager } from "./ChannelManager";
 import { TabbedPanelContainer } from "../containers/TabbedPanelContainer";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
+import { DebugHelper } from "../utils/DebugHelper";
 
 
 /**
@@ -65,7 +67,13 @@ export class DockManager {
         this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
         DOM.from(this.container).css("position", "relative")
             .css("display", "grid")
-            .css("overflow", "hidden");
+            .css("overflow", "hidden")
+            .cacheBounds(false);
+
+        // Lets contrain the resize logic to double rate than FPS to prevent flickering
+        this.handleContainerResized = _.throttle(this.handleContainerResized.bind(this),
+            1000 / (this.config.dragAndDropFrameRate * 2), {leading: true, trailing: true}
+        );
         
         DragAndDrop.initialize(
             this.config.zIndexes.zIndexDragAndDropBlocker,
@@ -90,9 +98,7 @@ export class DockManager {
 
         // Initialize ResizeObserver
         this.resizeObserver = new ResizeObserver(() => {
-            requestAnimationFrame(() => {
-                this.updateContainerState();
-            })
+            this.handleContainerResized();
         });
         this.resizeObserver.observe(this.container, {box: "border-box"});
 
@@ -101,8 +107,8 @@ export class DockManager {
         this.lastDialogZIndex = this.config.zIndexes.zIndexDialogCounter;
 
         // Resize to the container
-        this.resize(this.container.clientWidth, this.container.clientHeight);
         this.rebuildLayout(this.context.model.rootNode);
+        this.invalidate();
     }
 
     /**
@@ -117,7 +123,7 @@ export class DockManager {
         return this.container.getBoundingClientRect();
     }
 
-    getDialogRootElement(): HTMLElement {
+    getContainerElement(): HTMLElement {
         return this.container;
     }
 
@@ -302,7 +308,7 @@ export class DockManager {
 
         const dialog = new Dialog(this, container);
         dialog.setPosition(rect.x, rect.y);
-        dialog.resize(rect.w, rect.h);
+        dialog.resize(rect);
         this.bindDialogDragEvents(dialog);
 
         return dialog;
@@ -465,7 +471,15 @@ export class DockManager {
     }
 
     invalidate() {
-        this.resize(this.container.clientWidth, this.container.clientHeight);
+        const startTime = DebugHelper.startMeasuring();
+        // We force any pending updates before resizing the layout
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        // Get the current container bounds and resize the dock layout accordingly
+        const rect = DOM.from(this.container).getBoundsRect();
+        this.resize(rect);
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+
+        DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
     }
 
     private updateContainerState() {
@@ -481,9 +495,13 @@ export class DockManager {
             dialog.getPanel().updateLayoutState();
         }
     }
+
+    private handleContainerResized() {
+        this.invalidate();
+    }
     
-    private resize(width: number, height: number) {
-        this.context.model.rootNode.container.resize(width, height);
+    private resize(rect: IRect) {
+        this.context.model.rootNode.container.resize(rect);
 
         // TODO: POSITION DIALOGS TO THE CONTAINER VIEWPORT - WHEN THE BROWSER WINDOW GETS SMALLER
     }

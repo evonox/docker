@@ -7,7 +7,7 @@ import { IState } from "../common/serialization";
 import { Component } from "../framework/Component";
 import { DOM } from "../utils/DOM";
 import { ContainerType, PanelContainerState } from "../common/enumerations";
-import { IPoint, ISize } from "../common/dimensions";
+import { IPoint, IRect, ISize } from "../common/dimensions";
 import { PanelButtonBar } from "../core/PanelButtonBar";
 
 import "./PanelContainer.css";
@@ -18,6 +18,7 @@ import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANE
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
+import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -147,8 +148,13 @@ export class PanelContainer extends Component implements IDockContainer {
     setVisible(visible: boolean): void {
         this._isVisible = visible;
         if(visible) {
+            // TODO: DEBUG
             this.domContentFrame.show();
-            this.updateContainerState();
+            DOMUpdateInitiator.forceAllEnqueuedUpdates();
+            const rect = this.domContentFrame.getBoundingClientRect();
+            this.domContentFrame.applyRect(rect);
+            // this.updateLayoutState();
+            //this.updateContainerState();
         } else {
             this.domContentFrame.hide();
         }
@@ -197,7 +203,7 @@ export class PanelContainer extends Component implements IDockContainer {
      */
 
     getPosition(): IPoint {
-        const bounds = this.domContentFrame.getBounds();
+        const bounds = this.domContentFrame.getBoundsRect();
         return {x: bounds.x, y: bounds.y};
     }
 
@@ -251,12 +257,8 @@ export class PanelContainer extends Component implements IDockContainer {
         this.state.maximize();
     }
 
-    /**
-     * RECALCULATE SIZE OF INTERNALS - NOTIFY ON RESIZE THE PANEL
-     * REMOVE JS DIMENSION CALCULATION AS MUCH AS POSSIBLE
-     */
-    resize(width: number, height: number): void {
-        this.state.updateLayoutState();
+    resize(rect: IRect): void {
+        this.state.resize(rect);
     }
 
     // PanelContainer is leaf node => no layouting logic
@@ -369,16 +371,24 @@ export class PanelContainer extends Component implements IDockContainer {
                 .appendTo(this.domContentContainer);
                 
         this.bind(this.domContentContainer.get(), "mousedown", this.handleMouseFocusEvent.bind(this));
-        this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
+        this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
 
-        this.domPanelPlaceholder = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-PanelPlaceholder");
+        this.domPanelPlaceholder = DOM.create("div").attr("tabIndex", "-1")
+                .addClass("DockerTS-PanelPlaceholder").cacheBounds(false);
 
         this.bind(this.domContentFrame.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
 
         this.state = new PanelStateMachine(this.dockManager, this, PanelContainerState.Docked);
 
+        // TODO: DEBUG
+        // this.domContentFrame.show();
+        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        // const rect = this.domContentFrame.getBoundingClientRect();
+        // this.domContentFrame.applyRect(rect);
+
         this.updateTitle();
         this.updateContainerState();
+        this.updateLayoutState();
 
         return this.domPanelPlaceholder.get();
     }
@@ -446,7 +456,7 @@ export class PanelContainer extends Component implements IDockContainer {
         //     this.panelPlaceholderRO.unobserve(this.domDialogFrame);
         // }
 
-        this.dockManager.getDialogRootElement().appendChild(this.domContentFrame.get());
+        this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
         // this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }

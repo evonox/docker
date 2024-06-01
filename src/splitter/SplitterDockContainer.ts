@@ -4,7 +4,7 @@ import { SplitterPanel } from "./SplitterPanel";
 import { IState } from "../common/serialization";
 import { ContainerType, OrientationKind } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
-import { ISize } from "../common/dimensions";
+import { IRect, ISize } from "../common/dimensions";
 
 /**
  * This class is a pure adapter for the SplitterPanel to apply it easily to the docking facilities
@@ -73,8 +73,8 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.splitterPanel.setRatios(ratios);
     }
 
-    resize(width: number, height: number): void {
-        this.splitterPanel.resize(width, height);
+    resize(rect: IRect): void {
+        this.splitterPanel.resize(rect);
     }
 
     dispose() {

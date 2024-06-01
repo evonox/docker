@@ -100,9 +100,9 @@ export class ContextMenu extends Component {
     }
 
     private isClickInsideMenu(event: MouseEvent) {
-        const menuBounds = this.domContextMenu.getBounds();
-        return menuBounds.left < event.pageX && menuBounds.top < event.pageY &&
-            event.pageX < menuBounds.right && event.pageY < menuBounds.bottom;
+        const menuBounds = this.domContextMenu.getBoundsRect();
+        return menuBounds.x < event.pageX && menuBounds.y < event.pageY &&
+            event.pageX < menuBounds.x + menuBounds.w && event.pageY < menuBounds.y + menuBounds.h;
     }
 
 }

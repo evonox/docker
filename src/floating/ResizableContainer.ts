@@ -195,8 +195,8 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private performDrag(handle: ResizeHandle, currentPos: IPoint, dx: number, dy: number) {
-        const bounds = DOM.from(this.topElement).getBounds();
-        const rect: IRect = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
+        const rect = DOM.from(this.topElement).getBoundsRect();
+        //const rect: IRect = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
         rect.w = this.delegate.getWidth();
         rect.h = this.delegate.getHeight();
 
@@ -306,8 +306,8 @@ export class ResizableContainer implements IDockContainer {
         return this.delegate.getHeight();
     }
 
-    resize(width: number, height: number): void {
-        this.delegate.resize(width, height);
+    resize(rect: IRect): void {
+        this.delegate.resize(rect);
     }
 
     getContainerType(): ContainerType {

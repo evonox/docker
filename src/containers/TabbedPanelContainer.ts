@@ -28,7 +28,7 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     addContainer(container: PanelContainer) {
-        this.getDockManager().getDialogRootElement().appendChild(container.getContentFrameDOM().get());
+        this.getDockManager().getContainerElement().appendChild(container.getContentFrameDOM().get());
         this.childContainers.push(container);
         this.tabHost.performLayout(this.childContainers, false);
         this.updateContainerState();

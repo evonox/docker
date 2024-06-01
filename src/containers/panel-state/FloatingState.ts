@@ -12,7 +12,7 @@ import { SharedStateConfig } from "./SharedStateConfig";
 
 export class FloatingState extends PanelStateBase {
 
-    private dialogFrameRO: ResizeObserver;
+    private dialogFrameRO: ResizeObserver = undefined;
 
     private isCollapsed: boolean;
     private lastDialogExpandedHeight: number;
@@ -27,13 +27,6 @@ export class FloatingState extends PanelStateBase {
         if(this.dialog === undefined) {
             this.dialog = this.config.get("panelDialog");
         }
-
-        this.dialogFrameRO = new ResizeObserver((entries) => {
-            this.updateLayoutState();
-        });
-
-        const domDialogFrame = this.dialog.getDialogFrameDOM();
-        this.dialogFrameRO.observe(domDialogFrame, {box: "border-box"});       
 
         const previousPosition =  this.config.get("originalRect");
         if(previousPosition !== undefined) {
@@ -52,15 +45,29 @@ export class FloatingState extends PanelStateBase {
     }
 
     public leaveState(): void {
-        const domDialogFrame = this.dialog.getDialogFrameDOM();
-        this.dialogFrameRO.unobserve(domDialogFrame);       
-        this.dialogFrameRO.disconnect();
-        this.dialogFrameRO = undefined;
-       
+       this.stopSizeObservation();
     }
 
     public dispose(): void {
-        
+        this.stopSizeObservation();
+    }
+
+    private startSizeObservation() {
+        this.dialogFrameRO = new ResizeObserver((entries) => {
+            this.updateLayoutState();
+        });
+
+        const domDialogFrame = this.dialog.getDialogFrameDOM();
+        this.dialogFrameRO.observe(domDialogFrame, {box: "border-box"});       
+    }
+
+    private stopSizeObservation() {
+        if(this.dialogFrameRO !== undefined) {
+            const domDialogFrame = this.dialog.getDialogFrameDOM();
+            this.dialogFrameRO.unobserve(domDialogFrame);       
+            this.dialogFrameRO.disconnect();
+            this.dialogFrameRO = undefined;   
+        }
     }
 
     async maximize(): Promise<boolean> {
@@ -172,23 +179,27 @@ export class FloatingState extends PanelStateBase {
     }
 
 
-    public updateLayoutState(): void {
-        // TODO: REWORK TO DOM HELPER getComputedRect
-        const cssStyle = window.getComputedStyle(this.dialog.getDialogFrameDOM())
-        this.panel.getContentFrameDOM().applyRect({
-            x: parseFloat(cssStyle.left),
-            y: parseFloat(cssStyle.top),
-            w: parseFloat(cssStyle.width),
-            h: parseFloat(cssStyle.height)
-        });
-    }
-
     public updatePanelState(): void {
         super.updatePanelState();
-        
+       
         const zIndex = DOM.from(this.dialog.getDialogFrameDOM()).getZIndex();
-        console.dir("---UPDATE STATE --- ");
-        console.dir(zIndex);
         this.panel.getContentFrameDOM().zIndex(zIndex);
+    }
+
+    public updateLayoutState(): void {
+        // // TODO: REWORK TO DOM HELPER getComputedRect
+        // const cssStyle = window.getComputedStyle(this.dialog.getDialogFrameDOM())
+        // this.panel.getContentFrameDOM().applyRect({
+        //     x: parseFloat(cssStyle.left),
+        //     y: parseFloat(cssStyle.top),
+        //     w: parseFloat(cssStyle.width),
+        //     h: parseFloat(cssStyle.height)
+        // });
+    }
+
+
+    public resize(rect: IRect) {
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.applyRect(rect);
     }
 }

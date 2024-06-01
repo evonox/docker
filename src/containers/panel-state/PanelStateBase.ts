@@ -1,28 +1,35 @@
-import { ISize } from "../../common/dimensions";
+import { IRect, ISize } from "../../common/dimensions";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
+import { RectHelper } from "../../utils/rect-helper";
 import { PanelContainer } from "../PanelContainer";
 import { IGenericPanelState } from "./IPanelState";
 import { SharedStateConfig } from "./SharedStateConfig";
+import * as _ from "lodash-es";
 
 /**
  * Class for common logic for all states
  */
 export abstract class PanelStateBase implements IGenericPanelState {
 
-    private _lastSize: ISize = {w: -1, h: -1};
+    private _lastNotifiedSize: ISize = {w: -1, h: -1};
+    private readonly RESIZE_FRAME_RATE = 60;
 
     constructor(
         protected dockManager: DockManager, 
         protected panel: PanelContainer,
         protected config: SharedStateConfig
-    ) {}
+    ) {
+        // We reduce the invocation of the resize notifications to maximum 60 FPS now
+        this.invokeClientResizeEvent = _.throttle(this.invokeClientResizeEvent.bind(this), 
+            1000 / this.RESIZE_FRAME_RATE, {leading: true, trailing: true});
+    }
 
     enterState(): void {}
     leaveState(): void {}
     dispose(): void {}
 
-    // Transition State methods - by default return "false" - means that transition not allowed
+    // Transition State methods - by default return "false" - means that given transition is not allowed
     async dockPanel(): Promise<boolean> {
         return false;
     }
@@ -52,16 +59,25 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     protected notifySizeChanged() {
-        console.log("NOTIFY SIZE CHANGED");
-        const { w, h} = this.panel.getContentContainerDOM().getBoundsRect();
-        if(this._lastSize.w !== w || this._lastSize.h !== h) {
-            this._lastSize = {w: w, h: h};
-            this.panel.getAPI().onResize?.(w, h);
+        let rect = this.panel.getContentContainerDOM().getBoundsRect();
+        // We round down to whole pixels to prevent vain resize notifications
+        rect = RectHelper.floor(rect); 
+        if(this.hasSizeChanged(rect)) {
+            this._lastNotifiedSize = {w: rect.w, h: rect.h};
+            // Invoke the throttled method for resizing
+            this.invokeClientResizeEvent(rect);
         }
     }
 
+    private invokeClientResizeEvent(rect: IRect) {
+        this.panel.getAPI().onResize?.(rect.w, rect.h);
+    }
 
-    // Misc update state methods
+    private hasSizeChanged(rect: IRect) {
+        return this._lastNotifiedSize.w !== rect.w || this._lastNotifiedSize.h !== rect.h;
+    }
+
+    // If panel is active / focused - toggle the visual style of the frame header
     updatePanelState(): void {
         const domFrameHeader = this.panel.getFrameHeaderDOM();
         if(this.dockManager.getActivePanel() === this.panel) {
@@ -71,7 +87,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         }
     }
 
-    updateLayoutState(): void {
-        this.notifySizeChanged();
-    }
+    updateLayoutState(): void {}
+
+    public abstract resize(rect: IRect): void;
 }

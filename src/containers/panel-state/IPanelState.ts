@@ -1,4 +1,5 @@
-import { Dialog } from "../../floating/Dialog";
+import type { IRect } from "../../common/dimensions";
+import type { Dialog } from "../../floating/Dialog";
 
 /**
  * Generic panel state API interface
@@ -20,6 +21,7 @@ export interface IPanelStateAPI {
     // Misc update panel state methods
     updatePanelState(): void;
     updateLayoutState(): void;
+    resize(rect: IRect): void;
 }
 
 

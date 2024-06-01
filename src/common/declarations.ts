@@ -1,5 +1,5 @@
 import type { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { ISize } from "./dimensions";
+import { IRect, ISize } from "./dimensions";
 import { ContainerType } from "./enumerations";
 import type { IContextMenuAPI } from "./panel-api";
 import type { IState } from "./serialization";
@@ -54,7 +54,7 @@ export interface IDockContainer extends IEventEmitter {
     updateLayoutState(): void;
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
-    resize(width: number, height: number): void;
+    resize(rect: IRect): void;
 
     // Persitence Management
     saveState(state: IState): void;

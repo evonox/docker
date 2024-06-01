@@ -84,4 +84,8 @@ export class MinimizedState extends PanelStateBase {
     public updatePanelState(): void {
         super.updatePanelState();
     }
+
+    public resize(rect: IRect) {
+        
+    }
 }

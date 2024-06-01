@@ -1,3 +1,4 @@
+import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
@@ -105,6 +106,10 @@ export class PanelStateMachine implements IPanelStateAPI {
 
     updateLayoutState(): void {
         this.currentState.updateLayoutState();
+    }
+
+    resize(rect: IRect) {
+        this.currentState.resize(rect);
     }
 
     // Generic private method to change state

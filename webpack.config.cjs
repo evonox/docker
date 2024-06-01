@@ -28,6 +28,12 @@ module.exports = {
   },
   devServer: {
     static: './dist',
+    // Headers to allow more precise high-resolution clock measuring
+    // URL: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp"
+    }
   }, 
   plugins: [
     new HtmlWebpackPlugin({

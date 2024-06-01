@@ -15,11 +15,11 @@
 }
 
 .DockerTS-SplitterPanel--Row {
-    grid-template-columns: var(--docker-ratio-mapping);
+    grid-template-columns: var(--docker-splitter-panel-sizing);
 }
 
 .DockerTS-SplitterPanel--Column {
-    grid-template-rows: var(--docker-ratio-mapping);
+    grid-template-rows: var(--docker-splitter-panel-sizing);
 }
 
 .DockerTS-SplitterPanel__ContainerWrapper {

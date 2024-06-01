@@ -102,7 +102,7 @@ export class DockWheel {
             };
             this.domMainWheel.left(middlePoint.x).top(middlePoint.y);
 
-            const domDockerContainer = this.dockManager.getDialogRootElement();
+            const domDockerContainer = this.dockManager.getContainerElement();
             this.domMainWheel.appendTo(domDockerContainer);
             this.domSideWheel.appendTo(domDockerContainer);
 
@@ -160,7 +160,7 @@ export class DockWheel {
             if(this.previewOff) {
                 this.previewOff = false;
                 this.originalBounds = DOM.from(this.activeDialog.getDialogFrameDOM()).getComputedRect();
-                this.domPanelPreview.css("opacity", "").applyRect(this.originalBounds).appendTo(this.dockManager.getDialogRootElement());   
+                this.domPanelPreview.css("opacity", "").applyRect(this.originalBounds).appendTo(this.dockManager.getContainerElement());   
             }
             this.domPanelPreview.css("opacity", "");
 
@@ -217,7 +217,7 @@ export class DockWheel {
     }
     
     private positionDockPlaceholder(rect: IRect) {
-        const domNode = this.dockManager.getDialogRootElement();
+        const domNode = this.dockManager.getContainerElement();
     }
  
     private handleDockRequest(wheelType: WheelTypes, dialog: Dialog) {

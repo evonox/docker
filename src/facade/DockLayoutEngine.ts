@@ -7,6 +7,8 @@ import { FillDockContainer } from "../containers/FillDockContainer";
 import { TabHandle } from "../tabview/TabHandle";
 import { ContainerType, OrientationKind, TabOrientation } from "../common/enumerations";
 import { IRect } from "../common/dimensions";
+import { DOM } from "../utils/DOM";
+import { RectHelper } from "../utils/rect-helper";
 
 /**
  * DockLayoutEngine - class responsible for layout operations
@@ -77,7 +79,7 @@ export class DockLayoutEngine {
                     // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
                     parentNode.container.dispose();
 
-                    otherChild.container.resize(width, height);
+                    otherChild.container.resize({x: null, y: null, w: width, h: height});
                     grandParent.performLayout(false);
                 } else {
                     parentNode.detachFromParent();
@@ -126,7 +128,7 @@ export class DockLayoutEngine {
                     parentNode.detachFromParent();
                     const width = parentNode.container.getWidth();
                     const height = parentNode.container.getHeight();
-                    otherChild.container.resize(width, height);
+                    otherChild.container.resize({x: null, y: null, w: width, h: height});
                     // TODO: CALL DESTROY - IS IT THE SAME???
                     // TODO: INVOKE onClose for React unMount && notifyOnClose Panel BEFORE
                     parentNode.container.dispose();
@@ -236,8 +238,8 @@ export class DockLayoutEngine {
             compositeNode.performLayout(true);
 
             compositeNode.container.setActiveChild(newNode.container);
-            compositeNode.container.resize(referenceNodeWidth, referenceNodeHeight);
-            referenceParent.container.resize(referenceNodeWidth, referenceParentNodeHeight);
+            compositeNode.container.resize({x: null, y: null, w: referenceNodeWidth, h: referenceNodeHeight});
+            referenceParent.container.resize({x: null, y: null, w: referenceNodeWidth, h: referenceParentNodeHeight});
         } else {
             referenceParent = referenceNode.parent;
             if(insertBeforeReference) {
@@ -251,16 +253,15 @@ export class DockLayoutEngine {
 
         let containerWidth = newNode.container.getWidth();
         let containerHeight = newNode.container.getHeight();
-        newNode.container.resize(containerWidth, containerHeight);
+        newNode.container.resize({x: null, y: null, w: containerWidth, h: containerHeight});
 
         this.dockManager.invalidate();
         this.dockManager.notifyOnDock(newNode);
     }
 
     private forceResizeCompositeContainer(container: IDockContainer) {
-        const width = container.getDOM().clientWidth;
-        const height = container.getDOM().clientHeight;
-        container.resize(width, height);
+        const rect = RectHelper.fromDOMRect(DOM.from(container.getDOM()).getBoundingClientRect());
+        container.resize(rect);
     }
 
     private mapOrientationToContainerType(orientation: OrientationKind): ContainerType {

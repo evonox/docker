@@ -41,14 +41,6 @@ export class SplitterBar extends Component {
         return this.orientation === OrientationKind.Row ? this.domBar.getWidth() : this.domBar.getHeight();
     }
 
-    // adjustFixedDimension(size: number) {
-    //     if(this.orientation === OrientationKind.Row) {
-    //         this.domBar.height(size);
-    //     } else {
-    //         this.domBar.width(size);
-    //     }
-    // }
-
     protected onInitialized(): void {}
 
     protected onDisposed(): void {}
@@ -60,7 +52,7 @@ export class SplitterBar extends Component {
                 this.orientation === OrientationKind.Row 
                     ? "DockerTS-SplitterBar--Row" 
                     : "DockerTS-SplitterBar--Column"
-            );
+            ).cacheBounds(false);
 
         this.bind(this.domBar.get(), "mousedown", this.handleMouseDown);
         return this.domBar.get();
@@ -109,9 +101,6 @@ export class SplitterBar extends Component {
         const prevWidth = this.prevContainer.getWidth();
         const nextWidth = this.nextContainer.getWidth();
 
-        console.dir(prevWidth);
-        console.dir(nextWidth);
-
         // Minimum Allowed Widths
         const prevMinWidth = this.prevContainer.getMinWidth();
         const nextMinWidth = this.nextContainer.getMinWidth();
@@ -137,15 +126,7 @@ export class SplitterBar extends Component {
             prevSize: newPrevWidth, nextSize: newNextWidth
         };
 
-        console.log(newPrevWidth + newNextWidth)
-
-        console.dir(payload);
-
         this.triggerEvent("onResized", payload);
-
-        // Resize the containers
-        // this.prevContainer.resize(newPrevWidth, this.prevContainer.getHeight());
-        // this.nextContainer.resize(newNextWidth, this.nextContainer.getHeight());
     }
 
     private processDraggingY(delta: number, event: MouseEvent) {

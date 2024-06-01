@@ -65,10 +65,10 @@ export class Dialog implements IEventEmitter {
     private initialize() {
         // Construct Dialog DOM & Decorators
         this.domDialog = DOM.create("div").attr("tabIndex", "-1").addClass("DockerTS-Dialog");
-            //.appendChild(this.panel.getDOM())
         this.draggable = new DraggableContainer(this.dockManager, this.panel, this.domDialog.get(), this.panel.getHeaderElement());
         this.resizable = new ResizableContainer(this.dockManager, this.draggable, this.domDialog.get());        
-        this.domDialog.appendTo(this.dockManager.getDialogRootElement());
+        this.domDialog.appendTo(this.dockManager.getContainerElement());
+        this.resizable.on("onDialogResized", this.handleResizeEvent.bind(this));
 
         // Bind the DOM events
         this.mouseDownEvent = new DOMEvent<MouseEvent>(this.domDialog.get());
@@ -76,25 +76,19 @@ export class Dialog implements IEventEmitter {
         this.focusEvent = new DOMEvent<FocusEvent>(this.domDialog.get());
         this.focusEvent.bind("focus", this.handleOnFocus.bind(this), {capture: false});
         this.panel.on("onFocused", this.handleOnFocus.bind(this));
-
-
+        this.panel.on("onExpanded", this.handleOnExpand.bind(this));
+        this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
 
         // Bind Component Events - Dragging Facilities
         this.draggable.on("onDraggableDragStart", this.handleDragStartEvent);
         this.draggable.on("onDraggableDragMove", this.handleDragMoveEvent);
         this.draggable.on("onDraggableDragStop", this.handleDragEndEvent);
        
-        this.panel.on("onExpanded", this.handleOnExpand.bind(this));
-        this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
-
-        this.resizable.on("onDialogResized", this.handleResizeEvent.bind(this));
 
         // Resize the dialog
-        this.resize(this.panel.getWidth(), this.panel.getHeight());
-
-        this.panel.prepareForFloating(this);
-
-        this.panel.updateLayoutState();
+        this.panel.prepareForFloating(this).then(() => {
+            this.resizePanelByDialog();
+        });
 
         // Bring the dialog to the front
         this.bringToFront();
@@ -135,13 +129,12 @@ export class Dialog implements IEventEmitter {
     }
 
     setPosition(x: number, y: number) {
-        const outerRect = this.dockManager.getDialogRootElement().getBoundingClientRect();
+        const outerRect = this.dockManager.getContainerElement().getBoundingClientRect();
         this.position = {x: x - outerRect.left, y: y - outerRect.top};
-        this.domDialog.left(this.position.x).top(this.position.y);
-        
-        this.panel.updateLayoutState();
+        this.domDialog.left(this.position.x).top(this.position.y);  
+        this.resizePanelByDialog();
 
-        this.dockManager.notifyOnChangeDialogPosition(this, x, y);
+        //this.dockManager.notifyOnChangeDialogPosition(this, x, y);
     }
 
     getPosition(): IPoint {
@@ -191,11 +184,15 @@ export class Dialog implements IEventEmitter {
         // TODO: INJECT BACK TO THE DOCKING CONTAINER
     }
 
-    resize(width: number, height: number) {
-        this.domDialog.width(width).height(height);   
-        this.panel.resize(width, height);
-        //this.resizable.resize(width, height);
-        this.panel.updateLayoutState();
+    resize(rect: IRect) {
+        this.domDialog.width(rect.w).height(rect.h);
+        this.resizePanelByDialog();
+    }
+
+    // TODO: SUBTRACT BORDER SIZE
+    private resizePanelByDialog() {
+        const rect = this.domDialog.getBoundsRect();
+        this.panel.resize(rect);
     }
 
     bringToFront() {
@@ -210,7 +207,7 @@ export class Dialog implements IEventEmitter {
 
     private handleResizeEvent(rect: IRect) {
         this.setPosition(rect.x, rect.y);
-        this.resize(rect.w, rect.h);
+        this.resize(rect);
     }
 
     private handleOnFocus() {

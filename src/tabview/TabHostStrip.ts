@@ -6,10 +6,12 @@ import { TabStripButtonBar } from "../core/TabStripButtonBar";
 import { TABSTRIP_SCROLL_LEFT, TABSTRIP_SCROLL_RIGHT, TABSTRIP_SHOW_MENU } from "../core/panel-default-buttons";
 import { DockManager } from "../facade/DockManager";
 import { Component } from "../framework/Component";
+import { TabDualOperation } from "../operations/TabDualOperation";
 import { TabReorderOperation } from "../operations/TabReorderOperation";
 import { DOM } from "../utils/DOM";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { TabHandle } from "./TabHandle";
+import { TabHost } from "./TabHost";
 
 import "./TabHostStrip.css";
 
@@ -36,12 +38,16 @@ export class TabHostStrip extends Component {
 
     constructor(
         private dockManager: DockManager,
+        private tabHost: TabHost,
         private orientation: TabOrientation
     ) {
         super();
         this.initializeComponent();
     }
 
+    getTabHost(): TabHost {
+        return this.tabHost;
+    }
 
     attachTabHandle(tabHandle: TabHandle) {
         this.tabHandles.push(tabHandle);
@@ -81,7 +87,7 @@ export class TabHostStrip extends Component {
                     this.orientation === TabOrientation.Top || this.orientation === TabOrientation.Bottom,
                 "DockerTS-TabStrip--Vertical": 
                     this.orientation === TabOrientation.Left || this.orientation === TabOrientation.Right
-            });
+            }).cacheBounds(false);
 
         this.domTabHandleContainer = DOM.create("div").addClass("DockerTS-TabStrip__TabHandleContainer")
             .appendTo(this.domTabStrip);
@@ -167,45 +173,23 @@ export class TabHostStrip extends Component {
      * Starts the tab ordering request
      */
     private handleTabOrderingRequest({event, tabHandle}: any) {
-        let isUndockInitiated = false;
 
-        const reorderingOperation = new TabReorderOperation(
-            this.dockManager, this, tabHandle, tabHandle.getUndockEnabled()
+
+        const tabDualOperation = new TabDualOperation(
+            this.dockManager, this, tabHandle
         );
-        reorderingOperation.processMouseDown(event);
+        tabDualOperation.processMouseDown(event);
 
-        reorderingOperation.on("onTabReorder", payload => {
+        tabDualOperation.on("onTabReordered", payload => {
             this.triggerEvent("onTabReordered", payload);
         });
 
-        reorderingOperation.on("onUndockRequest", async (event) => {
-            isUndockInitiated = true;
-            const domTabHandle = tabHandle.getDOM().getBoundingClientRect();
-            const dragOffset: IPoint = {
-                x: Math.max(event.pageX - domTabHandle.left, 40),
-                y: domTabHandle.height / 2
-            };
-            this.triggerEvent("onDockingDragStart", {event, dragOffset, tabHandle});  
-        });
-
         DragAndDrop.start(event, 
-            event => {
-                if(isUndockInitiated) {
-                    this.triggerEvent("onDockingDragMove", event);
-                } else {
-                    reorderingOperation.processMouseMove(event)
-                }
-            },
-             event => {
-                if(isUndockInitiated) {
-                    this.triggerEvent("onDockingDragStop", event);
-                } else {
-                    reorderingOperation.processMouseUp(event)
-                }
-             },
+            event => tabDualOperation.processMouseMove(event),
+             event => tabDualOperation.processMouseUp(event),
             "pointer", 
             () => {
-                reorderingOperation.processCancelRequest()
+                tabDualOperation.processCancelRequest()
             }, 
             DetectionMode.withThreshold
         );

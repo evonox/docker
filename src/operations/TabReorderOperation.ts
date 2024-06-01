@@ -13,7 +13,7 @@ import { TabReorderIndexMap } from "./TabReorderIndexMap";
  * Method Object Pattern - used to process the drag-and-drop operation for the tab handle reordering
  * 
  * Events:
- *      onTabReorder    - raised on successful tab reorder operation
+ *      onTabReordered  - raised on successful tab reorder operation
  *      onCancelled     - raised in case of the tab reorder operation is cancelled (e.g. by Escape key)
  *      onUndockRequest - raised when this operation transforms from tab reordering to undock operation
  */
@@ -81,7 +81,7 @@ export class TabReorderOperation implements IEventEmitter {
     processMouseDown(event: MouseEvent) {
         this.initialize();
 
-        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBounds();
+        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBoundingClientRect();
         this.dragOffset = {
             x: event.pageX - boundsDraggedHandle.left,
             y: event.pageY - boundsDraggedHandle.top
@@ -109,8 +109,8 @@ export class TabReorderOperation implements IEventEmitter {
         this.indexMap = new TabReorderIndexMap(this.domTabHandles.length);
 
         // Initialize drag and drop bounds
-        this.dragMinimumLeft = this.domTabHandles[0].getBounds().left;
-        this.dragMaximumRight = this.domTabHandles[this.domTabHandles.length - 1].getBounds().right;
+        this.dragMinimumLeft = this.domTabHandles[0].getBoundingClientRect().left;
+        this.dragMaximumRight = this.domTabHandles[this.domTabHandles.length - 1].getBoundingClientRect().right;
 
         // Perform their positioning for drag-and-drop operation
         const zIndex = this.dockManager.config.zIndexes.zIndexTabReorderOperation;
@@ -122,8 +122,8 @@ export class TabReorderOperation implements IEventEmitter {
         domTabStrip.css("min-height", boundsTabStrip.h + "px");
 
         this.domTabHandles.forEach(dom => {
-            const parentBounds = dom.getOffsetParent().getBounds(); 
-            const bounds = dom.getBounds();
+            const parentBounds = dom.getOffsetParent().getBoundingClientRect(); 
+            const bounds = dom.getBoundingClientRect();
             dom.left(bounds.left - parentBounds.left)
                 .top(bounds.top - parentBounds.top)
                 .zIndex(zIndex);
@@ -141,17 +141,22 @@ export class TabReorderOperation implements IEventEmitter {
     }
 
     private clenaUp() {
+        this.unapplyInternalCSS();
+        this.dispose();
+    }
+
+    private unapplyInternalCSS() {
         // Cleanup all the applied CSS styles used by this operation
         this.domTabHandles.forEach(dom => {
             dom.css("position", "").css("left", "").css("top", "").zIndex("");
         });
-        this.domTabHandles = [];
 
         const domTabStrip = this.tabStrip.getDOM();
-        if(DOMRegistry.existsDOM(domTabStrip)) {
-            DOM.from(domTabStrip).css("min-width", "").css("min-height", "");
-        }
+        DOM.from(domTabStrip).css("min-width", "").css("min-height", "");
+    }
 
+    private dispose() {
+        this.domTabHandles = [];
         this.eventManager.disposeAll();
     }
 
@@ -170,7 +175,7 @@ export class TabReorderOperation implements IEventEmitter {
             isOutOfBounds = true;
         }
         // Adjust position by the nearest "positioned" element it is relative to
-        const parentBounds = domDraggedHandle.getOffsetParent().getBounds();
+        const parentBounds = domDraggedHandle.getOffsetParent().getBoundingClientRect();
         left = left - parentBounds.left;
         // Set the position
         domDraggedHandle.left(left);
@@ -180,7 +185,7 @@ export class TabReorderOperation implements IEventEmitter {
 
     private handleCompletionRequest() {
         if(this.fromIndex !== this.toIndex) {
-            this.eventManager.triggerEvent("onTabReorder", {from: this.fromIndex, to: this.toIndex});
+            this.eventManager.triggerEvent("onTabReordered", {from: this.fromIndex, to: this.toIndex});
         }
         this.clenaUp();
     }
@@ -191,8 +196,9 @@ export class TabReorderOperation implements IEventEmitter {
     }
 
     private handleUndockRequested(event: MouseEvent) {
+        this.unapplyInternalCSS();
         this.eventManager.triggerEvent("onUndockRequest", event);
-        this.clenaUp();
+        this.dispose();
     }
 
     private checkUndock(event: MouseEvent): boolean {
@@ -207,8 +213,8 @@ export class TabReorderOperation implements IEventEmitter {
         if(this.toIndex === 0)
             return false;
         const checkedToIndex =  this.indexMap.mapToReordered(this.toIndex - 1);
-        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBounds();
-        const checkedHandleBounds = this.domTabHandles[checkedToIndex].getBounds();
+        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBoundingClientRect();
+        const checkedHandleBounds = this.domTabHandles[checkedToIndex].getBoundingClientRect();
         const middlePointTrigger = checkedHandleBounds.left + checkedHandleBounds.width / 2;
         return boundsDraggedHandle.left <= middlePointTrigger;
     }
@@ -217,8 +223,8 @@ export class TabReorderOperation implements IEventEmitter {
         if(this.toIndex >= this.domTabHandles.length - 1)
             return false;
         const checkedToIndex = this.indexMap.mapToReordered(this.toIndex + 1);
-        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBounds();
-        const checkedHandleBounds = this.domTabHandles[checkedToIndex].getBounds();
+        const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBoundingClientRect();
+        const checkedHandleBounds = this.domTabHandles[checkedToIndex].getBoundingClientRect();
         const middlePointTrigger = checkedHandleBounds.left + checkedHandleBounds.width / 2;
         return boundsDraggedHandle.right >= middlePointTrigger;
     }
@@ -239,12 +245,12 @@ export class TabReorderOperation implements IEventEmitter {
         if(neighbourIndex < 0) {
             newLeft = this.tabStrip.getDOM().getBoundingClientRect().left;
         } else {
-            const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBounds();
+            const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBoundingClientRect();
             newLeft = boundsNeighbourHandle.right;
         }
 
         // Adjust position by the nearest "positioned" element it is relative to
-        const parentBounds = domTranslatedHandle.getOffsetParent().getBounds();
+        const parentBounds = domTranslatedHandle.getOffsetParent().getBoundingClientRect();
         newLeft = newLeft - parentBounds.left;
 
         this.lastAnimation = AnimationHelper.animateTabReorderTranslation(domTranslatedHandle.getElement(), newLeft);
@@ -265,18 +271,18 @@ export class TabReorderOperation implements IEventEmitter {
         }
 
         const domTranslatedHandle = this.domTabHandles[translatedTabHandleIndex];
-        const boundsTranslateHandle = domTranslatedHandle.getBounds();
+        const boundsTranslateHandle = domTranslatedHandle.getBoundingClientRect();
 
         let newLeft;
         if(neighbourIndex < 0) {
             newLeft = this.dragMaximumRight - boundsTranslateHandle.width;
         } else {
-            const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBounds();
+            const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBoundingClientRect();
             newLeft = boundsNeighbourHandle.left - boundsTranslateHandle.width
         }
         
         // Adjust position by the nearest "positioned" element it is relative to
-        const parentBounds = domTranslatedHandle.getOffsetParent().getBounds();
+        const parentBounds = domTranslatedHandle.getOffsetParent().getBoundingClientRect();
         newLeft = newLeft - parentBounds.left;
 
         this.lastAnimation = AnimationHelper.animateTabReorderTranslation(domTranslatedHandle.getElement(), newLeft);
