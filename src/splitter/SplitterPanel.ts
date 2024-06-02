@@ -256,7 +256,6 @@ export class SplitterPanel extends Component {
             }
             const ratio = sizes[i] / totalChildPanelSize * 100;
             let cssPropertyValue = `calc(${ratio.toFixed(5)}% - ${barSizeRemainder})`
-            //cssPropertyValue = ratio.toFixed(5) + "%";
             propertyValueParts.push(cssPropertyValue);
         }
         const propertyValue = propertyValueParts.join(" ");
