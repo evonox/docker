@@ -604,7 +604,7 @@ export class DockManager {
         const panelContainer: PanelContainer = node.container as PanelContainer;;
 
         // Construct the dialog
-        const dialog = new Dialog(this, panelContainer, null, false);
+        const dialog = new Dialog(this, panelContainer);
         this.bindDialogDragEvents(dialog);
 
         // const lastDialogSize = panelContainer.getLastDialogSize();
@@ -619,6 +619,8 @@ export class DockManager {
             // if(dragOffset.x > dialogWidth) {
             //     dragOffset.x = 0.75 * dialogWidth;
             // }
+            console.dir("SETTING DIALOG POSITION");
+            console.dir(dragOffset);
             dialog.setPosition(event.pageX - dragOffset.x, event.pageY - dragOffset.y);
             // TODO: INVOKE onMouseMove on Draggable - FIND BETTER WAY THEN INVOKE MOUSE MOVE HANDLER
         }
@@ -640,7 +642,7 @@ export class DockManager {
     }
 
     openInDialog(container: PanelContainer, event: MouseEvent, dragOffset: IPoint, disableResize: boolean) {
-        const dialog = new Dialog(this, container, null, disableResize);
+        const dialog = new Dialog(this, container);
         this.bindDialogDragEvents(dialog);
 
         if(event !== null) {

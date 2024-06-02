@@ -10,6 +10,7 @@ import { IPoint, IRect } from "../common/dimensions";
 import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 import "./Dialog.css";
+import { DebugHelper } from "../utils/DebugHelper";
 
 export class Dialog implements IEventEmitter {
 
@@ -19,7 +20,6 @@ export class Dialog implements IEventEmitter {
     private resizable: ResizableContainer;
 
     private mouseDownEvent: DOMEvent<MouseEvent>;
-    private focusEvent: DOMEvent<FocusEvent>;
 
     private position: IPoint;
     private isHidden: boolean = false;
@@ -33,8 +33,6 @@ export class Dialog implements IEventEmitter {
     constructor(
         private dockManager: DockManager,
         private panel: PanelContainer,
-        private grayOutParent?: PanelContainer,
-        private disableResize?: boolean
     ) {
         this.handleDragStartEvent = this.handleDragStartEvent.bind(this);
         this.handleDragMoveEvent = this.handleDragMoveEvent.bind(this);
@@ -73,8 +71,6 @@ export class Dialog implements IEventEmitter {
         // Bind the DOM events
         this.mouseDownEvent = new DOMEvent<MouseEvent>(this.domDialog.get());
         this.mouseDownEvent.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
-        this.focusEvent = new DOMEvent<FocusEvent>(this.domDialog.get());
-        this.focusEvent.bind("focus", this.handleOnFocus.bind(this), {capture: false});
         this.panel.on("onFocused", this.handleOnFocus.bind(this));
         this.panel.on("onExpanded", this.handleOnExpand.bind(this));
         this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
@@ -84,12 +80,6 @@ export class Dialog implements IEventEmitter {
         this.draggable.on("onDraggableDragMove", this.handleDragMoveEvent);
         this.draggable.on("onDraggableDragStop", this.handleDragEndEvent);
        
-
-        // Resize the dialog
-        this.panel.prepareForFloating(this).then(() => {
-            this.resizePanelByDialog();
-        });
-
         // Bring the dialog to the front
         this.bringToFront();
     }
@@ -131,10 +121,8 @@ export class Dialog implements IEventEmitter {
     setPosition(x: number, y: number) {
         const outerRect = this.dockManager.getContainerElement().getBoundingClientRect();
         this.position = {x: x - outerRect.left, y: y - outerRect.top};
-        this.domDialog.left(this.position.x).top(this.position.y);  
+        this.domDialog.left(this.position.x).top(this.position.y); 
         this.resizePanelByDialog();
-
-        //this.dockManager.notifyOnChangeDialogPosition(this, x, y);
     }
 
     getPosition(): IPoint {
@@ -161,7 +149,6 @@ export class Dialog implements IEventEmitter {
     close() {
         this.hide();
         this.remove();
-        // TODO: DOCKER NOTIFY ON CLOSE PANEL
         this.destroy();
     }
 
@@ -170,18 +157,14 @@ export class Dialog implements IEventEmitter {
     }
 
     destroy() {
-        // this.panel.saveLastDialogSize({w: this.resizable.getWidth(), h: this.resizable.getHeight()});
-
         this.mouseDownEvent.unbind();
-        this.focusEvent.unbind();
-
         this.eventManager.disposeAll();
 
         this.domDialog.removeFromDOM();
-        // TODO: REMOVE DRAGGABLE AND RESIZABLE
-        this.draggable.removeDecorator();
-        this.resizable.removeDecorator();
-        // TODO: INJECT BACK TO THE DOCKING CONTAINER
+        this.draggable.dispose();
+        this.resizable.dispose();
+
+        this.dockManager.getModelContext().removeDialog(this);
     }
 
     resize(rect: IRect) {
@@ -189,18 +172,11 @@ export class Dialog implements IEventEmitter {
         this.resizePanelByDialog();
     }
 
-    // TODO: SUBTRACT BORDER SIZE
-    private resizePanelByDialog() {
-        const rect = this.domDialog.getBoundsRect();
-        this.panel.resize(rect);
-    }
-
     bringToFront() {
-        // TODO: IS IT REALLY NECESSARY TO SET THE Z-INDEX ELEMENT CONTENT CONTAINER????
         const nextZIndex = this.dockManager.genNextDialogZIndex();
         this.domDialog.zIndex(nextZIndex);
-        //this.panel.setPanelZIndex(nextZIndex);
         this.dockManager.setActivePanel(this.panel);
+        // TODO: UNIFY UPDATE STATE
         this.panel.updateLayoutState();
         this.panel.updateContainerState();
     }
@@ -229,5 +205,10 @@ export class Dialog implements IEventEmitter {
 
     private handleOnExpand() {
         this.domDialog.height(this.lastExpanedSize);
+    }
+
+    private resizePanelByDialog() {
+        const rect = this.domDialog.getBoundsRect();
+        this.panel.resize(rect);
     }
 }

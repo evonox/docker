@@ -22,6 +22,7 @@ export class TabHost extends Component {
 
     // Flag means whether a undock operation is allowed on the TabHandle components
     private isUndockEnabled: boolean = true;
+    private isMaximizationEnabled: boolean = true;
 
     // Tab Page references
     private tabPages: TabPage[] = [];
@@ -41,6 +42,11 @@ export class TabHost extends Component {
     setEnableUndock(flag: boolean) {
         this.isUndockEnabled = flag;
         this.tabPages.forEach(page => page.setUndockEnabled(flag));
+    }
+
+    setEnableMaximization(flag: boolean) {
+        this.isMaximizationEnabled = flag;
+        this.tabPages.forEach(page => page.setMaximizationEnabled(flag));
     }
 
     setTabOrientation(tabOrientation: TabOrientation) {
@@ -123,7 +129,7 @@ export class TabHost extends Component {
                 childContainer.setHeaderVisibility(this.tabStripDirection === TabOrientation.Bottom);
 
                 const tabPage = new TabPage(this.dockManager, childContainer as PanelContainer, 
-                    this.tabStripDirection, this.isUndockEnabled);
+                    this.tabStripDirection, this.isUndockEnabled, this.isMaximizationEnabled);
 
                 this.tabPages.push(tabPage);
                 this.tabStrip.attachTabHandle(tabPage.getTabHandle());
@@ -142,7 +148,7 @@ export class TabHost extends Component {
     }
 
     resize(rect: IRect) {
-        return; 
+        return;
         const domTabHost = DOM.from(this.getDOM());
         if(RectHelper.isSizeOnly(rect)) {
             rect.x = domTabHost.getLeft();

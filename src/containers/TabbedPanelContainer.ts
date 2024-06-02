@@ -35,9 +35,16 @@ export class TabbedPanelContainer extends PanelContainer {
         this.childContainers.push(container);
         this.tabHost.performLayout(this.childContainers, false);
         this.updateContainerState();
+
+        // Redirecting the onFocused event
+        container.on("onFocused", () => {
+            this.triggerEvent("onFocused");
+        });
     }
 
     removeContainer(container: PanelContainer) {
+        // Clear all binded events
+        container.off("onFocused");
         ArrayUtils.removeItem(this.childContainers, container);
         this.tabHost.performLayout(this.childContainers, false);
         this.updateContainerState();
@@ -55,8 +62,9 @@ export class TabbedPanelContainer extends PanelContainer {
     protected onInitialized(): void {
         super.onInitialized();
         this.tabHost = new TabHost(this.getDockManager(), TabOrientation.Left);
-        // Note: We do not support Undock Behavior of contained Panel Containers for now
+        // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
         this.tabHost.setEnableUndock(false);
+        this.tabHost.setEnableMaximization(false);
     }
 
     protected onInitialRender(): HTMLElement {
@@ -96,11 +104,8 @@ export class TabbedPanelContainer extends PanelContainer {
             rect = RectHelper.fromDOMRect(this.dockManager.getContainerBoundingRect());
         }
         super.resize(rect);
-        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
-        const headerBounds = this.getFrameHeaderDOM().getHeight();
-        rect.y += headerBounds
-        rect.h -= headerBounds;
-        this.tabHost.resize(rect);
+        this.updateContainerState();
+        this.updateLayoutState();
     }
 
     private overrideFocusedState() {
@@ -133,17 +138,4 @@ export class TabbedPanelContainer extends PanelContainer {
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {
         this.tabHost.performLayout(this.childContainers, relayoutEvenIfEqual);
     }
-
-    // on(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-    //     return this.tabHost.on(eventName, handler);
-    // }
-
-    // off(eventName: string): void {
-    //     this.tabHost.off(eventName);
-    // }
-
-    // once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
-    //     return this.tabHost.once(eventName, handler);
-    // }
-
 }

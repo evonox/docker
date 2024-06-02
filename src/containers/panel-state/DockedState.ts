@@ -3,6 +3,7 @@ import { PanelContainerState } from "../../common/enumerations";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
+import { DOMUpdateInitiator } from "../../utils/DOMUpdateInitiator";
 import { AnimationHelper } from "../../utils/animation-helper";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelStateBase } from "./PanelStateBase";
@@ -30,10 +31,15 @@ export class DockedState extends PanelStateBase {
 
     async floatPanel(dialog: Dialog): Promise<boolean> {
         if(this.config.get("lastFloatingRect") === undefined) {
+            const minimumWidth = this.dockManager.config.minimumDefaultWidth;
+            const minimumHeight = this.dockManager.config.minimumDefaultHeight;
             const defaultPanelSizeMagnitude = this.dockManager.config.defaultPanelSizeMagnitude;
-            const floatWidth = this.panel.getMinWidth() * defaultPanelSizeMagnitude;
-            const floatHeight = this.panel.getMinHeight() * defaultPanelSizeMagnitude;
-            const rect: IRect = RectHelper.from(0, 0, floatWidth, floatHeight);
+            const floatWidth = Math.max(this.panel.getMinWidth() * defaultPanelSizeMagnitude, minimumWidth);
+            const floatHeight = Math.max(this.panel.getMinHeight() * defaultPanelSizeMagnitude, minimumHeight);
+            DOMUpdateInitiator.forceAllEnqueuedUpdates();
+            const dialogPosition = dialog.getPosition();
+            const rect: IRect = RectHelper.from(dialogPosition.x, dialogPosition.y, floatWidth, floatHeight);
+            console.dir(rect);
             this.config.set("lastFloatingRect", rect);
         }
         return true;
@@ -100,7 +106,7 @@ export class DockedState extends PanelStateBase {
 
     private startSizeObservation() {
         this.panelPlaceholderRO = new ResizeObserver((entries) => {
-            const rect = this.panel.getPlaceholderDOM().getBoundingClientRect();
+            const rect = this.panel.getPlaceholderDOM().getBoundsRect();
             this.panel.getContentFrameDOM().applyRect(rect);
         });
 

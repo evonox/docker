@@ -13,10 +13,12 @@
 
 .DockerTS-TabHost--Left {
     grid-template-columns: auto auto 1fr;
+    grid-template-rows: 100%;
 }
 
 .DockerTS-TabHost--Right {
     grid-template-columns: 1fr auto auto;
+    grid-template-rows: 100%;
 }
 
 .DockerTS-TabContent {

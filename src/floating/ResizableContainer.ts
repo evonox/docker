@@ -96,7 +96,6 @@ export class ResizableContainer implements IDockContainer {
     dispose() {
         this.removeDecorator();
         this.eventManager.disposeAll();
-        this.delegate.dispose()
     }
 
     removeDecorator() {

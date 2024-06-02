@@ -30,7 +30,8 @@ export class TabPage extends Component {
         private dockManager: DockManager, 
         private container: PanelContainer,
         private tabOrientation: TabOrientation,
-        private isUndockEnabled: boolean
+        private isUndockEnabled: boolean,
+        private isMaximizationEnabled: boolean,
     ) {
         super();
         this.initializeComponent();
@@ -54,6 +55,10 @@ export class TabPage extends Component {
 
     setUndockEnabled(flag: boolean) {
         this.tabHandle.setUndockEnabled(flag);
+    }
+
+    setMaximizationEnabled(flag: boolean) {
+        this.isMaximizationEnabled = flag;
     }
 
     /**
@@ -125,7 +130,9 @@ export class TabPage extends Component {
     }
 
     private handleTabDoubleClicked() {
-        this.container.toggleMaximizedPanelState();
+        if(this.isMaximizationEnabled) {
+            this.container.toggleMaximizedPanelState();
+        }
     }
 
     private handleTabMoved(payload: any) {

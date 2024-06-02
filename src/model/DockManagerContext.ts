@@ -2,6 +2,7 @@ import { DockManager } from "../facade/DockManager";
 import { Dialog } from "../floating/Dialog";
 import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
 import { DockModel } from "./DockModel";
+import { ArrayUtils } from "../utils/ArrayUtils";
 
 
 export class DockManagerContext {
@@ -28,5 +29,9 @@ export class DockManagerContext {
 
     appendDialog(dialog: Dialog) {
         this._model.dialogs.push(dialog);
+    }
+
+    removeDialog(dialog: Dialog) {
+        ArrayUtils.removeItem(this._model.dialogs, dialog);
     }
 }

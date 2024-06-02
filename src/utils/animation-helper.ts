@@ -174,4 +174,17 @@ export class AnimationHelper {
         });       
     }
 
+    static async animateDialogMove(targetElement: HTMLElement, targetLeft: number, targetTop: number, progress: () => void): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetLeft, top: targetTop},
+                {
+                    duration: 250,
+                    easing: "easeInOutCubic",
+                    progress: () => progress(),
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
 }

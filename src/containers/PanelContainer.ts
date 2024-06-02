@@ -383,12 +383,6 @@ export class PanelContainer extends Component implements IDockContainer {
 
         this.state = new PanelStateMachine(this.dockManager, this, PanelContainerState.Docked);
 
-        // TODO: DEBUG
-        // this.domContentFrame.show();
-        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
-        // const rect = this.domContentFrame.getBoundingClientRect();
-        // this.domContentFrame.applyRect(rect);
-
         this.updateTitle();
         this.updateContainerState();
         this.updateLayoutState();
@@ -463,20 +457,6 @@ export class PanelContainer extends Component implements IDockContainer {
         // this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }
-
-    async prepareForFloating(dialog: Dialog) {
-        // this.domDialogFrame = dialog.getDialogFrameDOM();
-        this.setVisible(true);
-        await this.state.floatPanel(dialog);
-        // this.panelPlaceholderRO.observe(this.domDialogFrame);
-
-        // this.containerState = PanelContainerState.Floating;
-        // setTimeout(() => {
-        //     this.updateContainerState();
-        //     this.updateLayoutState();   
-        // }, 1000);
-    }
-
 
     /**
      * Closing Facilities - TODO: TO BE DONE
