@@ -144,6 +144,14 @@ export class DockWheel {
     }
 
     onDialogDropped(dialog: Dialog) {
+        const activeWheelItem = this.getActiveWheelItem();
+        if(activeWheelItem !== undefined) {
+            this.handleDockRequest(activeWheelItem.getWheelType(), dialog);
+        }
+    }
+
+    private getActiveWheelItem(): DockWheelItem  {
+        return this.wheelItems.find(item => item.active === true);
     }
 
     private handleWheelMouseEnter(payload: {wheelItem: DockWheelItem, event: MouseEvent}) {
@@ -214,13 +222,42 @@ export class DockWheel {
                 return this.dockManager.getLayoutEngine().getDockBounds(rootNode, 
                     this.activeDialog.getPanel(), OrientationKind.Row, false);
         }
-    }
-    
-    private positionDockPlaceholder(rect: IRect) {
-        const domNode = this.dockManager.getContainerElement();
-    }
+    }   
  
     private handleDockRequest(wheelType: WheelTypes, dialog: Dialog) {
+        if(! this.activeNode)
+            return;
 
+        const rootNode = this.dockManager.getModelContext().model.rootNode;
+
+        switch(wheelType) {
+            case WheelTypes.Fill:
+                this.dockManager.dockDialogFill(this.activeNode, this.activeDialog);
+                break;
+            case WheelTypes.Left:
+                this.dockManager.dockDialogLeft(this.activeNode, this.activeDialog);
+                break;
+            case WheelTypes.Right:
+                this.dockManager.dockDialogRight(this.activeNode, this.activeDialog);
+                break;
+            case WheelTypes.Top:
+                this.dockManager.dockDialogUp(this.activeNode, this.activeDialog);
+                break;
+            case WheelTypes.Bottom:
+                this.dockManager.dockDialogDown(this.activeNode, this.activeDialog);
+                break;
+            case WheelTypes.SideLeft:
+                this.dockManager.dockDialogLeft(rootNode, this.activeDialog);
+                break;
+            case WheelTypes.SideRight:
+                this.dockManager.dockDialogRight(rootNode, this.activeDialog);
+                break;
+            case WheelTypes.SideTop:
+                this.dockManager.dockDialogUp(rootNode, this.activeDialog);
+                break;
+            case WheelTypes.SideBottom:
+                this.dockManager.dockDialogDown(rootNode, this.activeDialog);
+                break;
+        }
     }
 }

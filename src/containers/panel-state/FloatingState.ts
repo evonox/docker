@@ -75,6 +75,10 @@ export class FloatingState extends PanelStateBase {
         }
     }
 
+    async dockPanel(): Promise<boolean> {
+        return true;    
+    }
+
     async maximize(): Promise<boolean> {
         if(this.isCollapsed) {
             await this.expand(true);

@@ -275,31 +275,31 @@ export class DockManager {
     dockDialogLeft(referenceNode: DockNode, dialog: Dialog) {
         this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
             this.layoutEngine.dockLeft(refNode, newNode);
-        });                             
+        }, 0.5, false);                             
     }
 
     dockDialogRight(referenceNode: DockNode, dialog: Dialog) {
         this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
             this.layoutEngine.dockRight(refNode, newNode);
-        });                      
+        }, 0.5, true);                      
     }
 
     dockDialogUp(referenceNode: DockNode, dialog: Dialog) {
         this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
             this.layoutEngine.dockUp(refNode, newNode);
-        });              
+        }, 0.5, true);              
     }
 
     dockDialogDown(referenceNode: DockNode, dialog: Dialog) {
         this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
             this.layoutEngine.dockDown(refNode, newNode);
-        });       
+        }, 0.5, true);       
     }
 
     dockDialogFill(referenceNode: DockNode, dialog: Dialog) {
         this.requestDockDialog(referenceNode, dialog, (refNode, newNode) => {
             this.layoutEngine.dockFill(refNode, newNode);
-        });
+        }, 1, false);
     }
 
     floatDialog(container: PanelContainer, rect: IRect) {
@@ -420,16 +420,55 @@ export class DockManager {
         return newNode;
     }
 
-    private requestDockDialog(
+    private async requestDockDialog(
         referenceNode: DockNode, dialog: Dialog, 
-        layoutFn: (referenceNode: DockNode, newNode: DockNode) => void
+        layoutFn: (referenceNode: DockNode, newNode: DockNode) => void,
+        ratio: number, dockedToPrevious: boolean
     ) {
         const panel = dialog.getPanel();
         const newNode = new DockNode(panel);
-        panel.prepareForDocking();
+        await panel.prepareForDocking();
         // TODO: RESET ELEMENT CONTENT CONTAINER Z-INDEX - MOVE SOMEWHERE
         dialog.destroy();
+
+        // Get original ratios and splitter - for further computations
+        let ratios: number[] = null;
+        let oldSplitter: SplitterDockContainer;
+        if(referenceNode.parent && referenceNode.parent.container) {
+            oldSplitter = referenceNode.parent.container as SplitterDockContainer;
+            ratios = oldSplitter.getRatios();
+        }
+
         layoutFn(referenceNode, newNode);
+
+        // Update correct ratios
+        if(ratio && newNode.parent 
+            && (
+                newNode.parent.container.getContainerType() === ContainerType.ColumnLayout ||
+                newNode.parent.container.getContainerType() === ContainerType.RowLayout
+            )
+        ) {
+            const splitter = newNode.parent.container as SplitterDockContainer;
+            if(ratios && splitter === oldSplitter) {
+                if(dockedToPrevious) {
+                    for(let i = 0; i < ratios.length; i++) {
+                        ratios[i] = ratios[i] + ratios[i] * ratio;
+                    }
+                    ratios.push(ratio);
+                } else {
+                    ratios[0] = ratios[0] - ratio;
+                    ratios.unshift(ratio);
+                }
+                splitter.setRatios(ratios);
+            } else {
+                splitter.setContainerRatio(panel, ratio);
+            }
+        }
+
+        // Refresh Layout
+        this.rebuildLayout(this.context.model.rootNode);
+        this.invalidate();
+
         return newNode;
     }
 

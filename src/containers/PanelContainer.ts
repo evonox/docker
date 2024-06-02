@@ -460,12 +460,12 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.requestUndock(this);
     }
 
-    prepareForDocking() {
+    async prepareForDocking() {
         // if(this.domDialogFrame) {
         //     this.panelPlaceholderRO.unobserve(this.domDialogFrame);
         // }
-
         this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
+        await this.state.dockPanel();
         // this.containerState = PanelContainerState.Docked;
         this.updateContainerState();
     }

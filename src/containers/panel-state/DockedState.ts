@@ -39,7 +39,12 @@ export class DockedState extends PanelStateBase {
             DOMUpdateInitiator.forceAllEnqueuedUpdates();
             const dialogPosition = dialog.getPosition();
             const rect: IRect = RectHelper.from(dialogPosition.x, dialogPosition.y, floatWidth, floatHeight);
-            console.dir(rect);
+            this.config.set("lastFloatingRect", rect);
+        } else {
+            const rect: IRect = this.config.get("lastFloatingRect");
+            const dialogPosition = dialog.getPosition();
+            rect.x = dialogPosition.x;
+            rect.y = dialogPosition.y;
             this.config.set("lastFloatingRect", rect);
         }
         return true;
