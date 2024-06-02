@@ -28,10 +28,15 @@ export class FloatingState extends PanelStateBase {
             this.dialog = this.config.get("panelDialog");
         }
 
-        const previousPosition =  this.config.get("originalRect");
+        let previousPosition = this.config.get("lastFloatingRect");
+        if(previousPosition === undefined) {
+            previousPosition =  this.config.get("originalRect");
+        }
+
         if(previousPosition !== undefined) {
             const domDialog = this.dialog.getDialogFrameDOM();
             DOM.from(domDialog).applyRect(previousPosition);
+            this.panel.getContentFrameDOM().applyRect(previousPosition);
         }
 
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, true);
@@ -82,6 +87,7 @@ export class FloatingState extends PanelStateBase {
         this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
         
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
+        this.config.set("lastFloatingRect", rect);
         this.config.set("originalRect", rect);
 
         const domContentFrame = this.panel.getContentFrameDOM();
@@ -112,6 +118,7 @@ export class FloatingState extends PanelStateBase {
         const domContentFrame = this.panel.getContentFrameDOM();
 
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
+        this.config.set("lastFloatingRect", rect);
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("panelDialog", this.dialog);
         this.config.set("originalRect", rect);

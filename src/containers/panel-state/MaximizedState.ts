@@ -19,6 +19,9 @@ export class MaximizedState extends PanelStateBase {
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
 
+        const containerRect = this.dockManager.getContainerBoundingRect();
+        this.panel.getContentFrameDOM().applyRect(containerRect);
+
         this.updateLayoutState();
     }
 

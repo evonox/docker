@@ -61,8 +61,9 @@ export class MinimizedState extends PanelStateBase {
         await AnimationHelper.animateRestore(domContentFrame.get(), originalRect);
 
         const dialog: Dialog = this.config.get("panelDialog");
-        DOM.from(dialog.getDialogFrameDOM()).applyRect(currentRect);
         dialog.show();
+        // DOM.from(dialog.getDialogFrameDOM()).applyRect(originalRect);
+    //        this.panel.getContentFrameDOM().applyRect(originalRect);
 
 
         domContentFrame.zIndex("");

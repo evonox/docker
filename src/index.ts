@@ -131,7 +131,8 @@ dockManager.registerPanelType("panel5", "singleton", (dockManager) => {
             api.setPanelTitle("Bottom View");
             return domElement;
         },
-        getMinHeight: () => 100,
+        getMinWidth: () => 300,
+        getMinHeight: () => 150,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
@@ -200,27 +201,27 @@ async function performDocking() {
         const containerOne = await dockManager.createPanel("panel1");
         const containerTwo = await dockManager.createPanel("panel2");
         const containerThree = await dockManager.createPanel("panel3", {key: "1"});
-        // const containerThree1 = await dockManager.createPanel("panel3", {key: "2"});
-        // const containerThree2 = await dockManager.createPanel("panel3", {key: "3"});
-        // const containerThree3 = await dockManager.createPanel("panel3", {key: "4"});
+        const containerThree1 = await dockManager.createPanel("panel3", {key: "2"});
+        const containerThree2 = await dockManager.createPanel("panel3", {key: "3"});
+        const containerThree3 = await dockManager.createPanel("panel3", {key: "4"});
         const containerLeft = await dockManager.createPanel("panel4");
         const containerBottom = await dockManager.createPanel("panel5");
         const containerFloat = await dockManager.createPanel("panel6", {key: "BOTTOM"});
         const containerFloat2 = await dockManager.createPanel("panel6", {key: "FLOATING"});
-        // const tabbedContainer = await dockManager.createTabbedPanel("tabbedPanel");
-        // tabbedContainer.addContainer(containerThree1);
-        // tabbedContainer.addContainer(containerThree2);
-        // tabbedContainer.addContainer(containerThree3);
+        const tabbedContainer = await dockManager.createTabbedPanel("tabbedPanel");
+        tabbedContainer.addContainer(containerThree1);
+        tabbedContainer.addContainer(containerThree2);
+        tabbedContainer.addContainer(containerThree3);
 
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);
         dockManager.dockFill(dockManager.getDocumentNode(), containerTwo);
         dockManager.dockFill(dockManager.getDocumentNode(), containerThree);
+        dockManager.dockFill(dockManager.getDocumentNode(), tabbedContainer);
         const dockLeftNode = dockManager.dockLeft(dockManager.getDocumentNode(), containerLeft, 0.3);
         dockManager.setActivePanel(containerOne);
         dockManager.dockFill(dockLeftNode, containerBottom);
         const node = dockManager.dockDown(dockManager.getDocumentNode(), containerFloat, 0.4);
-        // dockManager.dockFill(node, tabbedContainer);
         dockManager.dockFill(node, containerFloat2);
 
         // dockManager.floatDialog(containerFloat2, {x: 50, y: 50, w: 500, h: 200});

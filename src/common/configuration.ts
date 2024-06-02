@@ -4,6 +4,7 @@
  */
 
 export interface IDockConfig {
+    defaultPanelSizeMagnitude?: number;
     minimizedWindowWidth?: number;
     minimizedWindowHeight?: number;
     dialogResizeHandleThickness?: number;
@@ -29,6 +30,7 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    defaultPanelSizeMagnitude: 1.5,
     minimizedWindowWidth: 250,
     minimizedWindowHeight: 24,
     dialogResizeHandleThickness: 10,    

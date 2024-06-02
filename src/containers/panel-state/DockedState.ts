@@ -29,8 +29,13 @@ export class DockedState extends PanelStateBase {
     }
 
     async floatPanel(dialog: Dialog): Promise<boolean> {
-        DOM.from(dialog.getDialogFrameDOM()).width(500).height(200);
-        this.updateLayoutState();
+        if(this.config.get("lastFloatingRect") === undefined) {
+            const defaultPanelSizeMagnitude = this.dockManager.config.defaultPanelSizeMagnitude;
+            const floatWidth = this.panel.getMinWidth() * defaultPanelSizeMagnitude;
+            const floatHeight = this.panel.getMinHeight() * defaultPanelSizeMagnitude;
+            const rect: IRect = RectHelper.from(0, 0, floatWidth, floatHeight);
+            this.config.set("lastFloatingRect", rect);
+        }
         return true;
     }
 
