@@ -1,5 +1,5 @@
 
-const PIXEL_FRACTION_DIGITS = 1;
+const PIXEL_FRACTION_DIGITS = 2;
 
 export class MathHelper {
 

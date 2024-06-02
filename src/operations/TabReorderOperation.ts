@@ -7,6 +7,7 @@ import { TabHostStrip } from "../tabview/TabHostStrip";
 import { DOM } from "../utils/DOM";
 import { DOMRegistry } from "../utils/DOMRegistry";
 import { AnimationHelper, IAnimation } from "../utils/animation-helper";
+import { MathHelper } from "../utils/math-helper";
 import { TabReorderIndexMap } from "./TabReorderIndexMap";
 
 /**
