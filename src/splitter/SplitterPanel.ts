@@ -20,6 +20,8 @@ export class SplitterPanel extends Component {
 
     private containerSizes: number[] = [];
 
+    private splitterPanelRO: ResizeObserver;
+
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         super();
         this.initializeComponent();
@@ -78,6 +80,13 @@ export class SplitterPanel extends Component {
         });
 
         this.computeInitialSize();
+
+        if(this.splitterPanelRO === undefined) {
+            this.splitterPanelRO = new ResizeObserver(() => {
+                this.adjustContainerSizesToNewDimensions();
+            });
+            this.splitterPanelRO.observe(this.domSplitterPanel.get());
+        }
     }
 
     private appendContainerToSplitter(container: IDockContainer) {
@@ -86,6 +95,9 @@ export class SplitterPanel extends Component {
     }
 
     private removeFromDOM() {
+        this.splitterPanelRO?.disconnect();
+        this.splitterPanelRO = undefined;
+
         this.childContainers.forEach(container => {
             const domContainerElement = container.getDOM();
             if(DOMRegistry.existsDOM(domContainerElement)) {
@@ -194,7 +206,11 @@ export class SplitterPanel extends Component {
         this.containerSizes[nextIndex] = payload.nextSize;
 
         this.applyChildContainerSizes();
-        // this.triggerChildContainerResize();
+    }
+
+    private adjustContainerSizesToNewDimensions() {
+        const splitterBounds = this.domSplitterPanel.getBoundsRect();
+        this.recomputeContainerSizes(splitterBounds);
     }
 
     private recomputeContainerSizes(rect: IRect) {
@@ -215,8 +231,8 @@ export class SplitterPanel extends Component {
         // Adjust the varying size accordingly
         let totalNewSize = 0;
         for(let i = 0; i < this.childContainers.length; i++) {
-            const childContainer = this.childContainers[i];
-            const originalSize = this.getVaryingSize(childContainer.getDOM());
+            // const childContainer = this.childContainers[i];
+            const originalSize = this.containerSizes[i];
             const newSize = originalSize * scaleMultiplier;
             this.containerSizes[i] = newSize;
           
@@ -229,13 +245,19 @@ export class SplitterPanel extends Component {
         let barSize = this.splitterBars[0].getBarSize();            
         let sizes = [...this.containerSizes];
 
+        const totalChildPanelSize = MathHelper.sum(sizes);
+        const barSizeRemainder = this.computeSplitterBarSizeRemainder();
+
         // Compute the CSS property value
         let propertyValueParts: string[] = [];
         for(let i = 0; i < sizes.length; i++) {
             if(i > 0) {
                 propertyValueParts.push(MathHelper.toPX(barSize));
             }
-            propertyValueParts.push(MathHelper.toPX(sizes[i]));
+            const ratio = sizes[i] / totalChildPanelSize * 100;
+            let cssPropertyValue = `calc(${ratio.toFixed(5)}% - ${barSizeRemainder})`
+            //cssPropertyValue = ratio.toFixed(5) + "%";
+            propertyValueParts.push(cssPropertyValue);
         }
         const propertyValue = propertyValueParts.join(" ");
 
@@ -243,6 +265,13 @@ export class SplitterPanel extends Component {
         this.domSplitterPanel.css("--docker-splitter-panel-sizing", propertyValue);
         // Note: Child containers may need to have this custom variable updated for measuring purposes
         // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+    }
+
+    private computeSplitterBarSizeRemainder() {
+        const barSize = this.splitterBars[0].getBarSize();
+        const barCount = this.splitterBars.length;
+        const barSizeTotal = barSize * barCount
+        return MathHelper.toPX(barSizeTotal / (barCount + 1));
     }
 
     private triggerChildContainerResize() {
