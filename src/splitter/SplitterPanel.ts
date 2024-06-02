@@ -229,14 +229,10 @@ export class SplitterPanel extends Component {
         const scaleMultiplier = targetTotalPanelSize / totalChildPanelSize;
 
         // Adjust the varying size accordingly
-        let totalNewSize = 0;
         for(let i = 0; i < this.childContainers.length; i++) {
-            // const childContainer = this.childContainers[i];
             const originalSize = this.containerSizes[i];
             const newSize = originalSize * scaleMultiplier;
             this.containerSizes[i] = newSize;
-          
-            totalNewSize += newSize;
         }
     }
 
@@ -262,8 +258,6 @@ export class SplitterPanel extends Component {
 
         // Apply the CSS property value
         this.domSplitterPanel.css("--docker-splitter-panel-sizing", propertyValue);
-        // Note: Child containers may need to have this custom variable updated for measuring purposes
-        // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
     }
 
     private computeSplitterBarSizeRemainder() {
