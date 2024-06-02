@@ -56,6 +56,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
     protected state: PanelStateMachine;
 
+    private previousContentZIndex: number;
     private _loadedSize: ISize;
 
     constructor(
@@ -275,6 +276,17 @@ export class PanelContainer extends Component implements IDockContainer {
         this.state.updatePanelState();
     }
 
+    onDraggingStarted() {
+        this.previousContentZIndex = this.getContentFrameDOM().getZIndex();
+        const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
+        this.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
+    }
+
+    onDraggingEnded() {
+        this.getContentFrameDOM()
+            .removeClass("DockerTS-ContentFrame--Dragging")
+            .zIndex(this.previousContentZIndex);
+    }
 
     /**
      * Misc Methods

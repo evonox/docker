@@ -88,12 +88,12 @@ export class Dialog implements IEventEmitter {
         this.bringToFront();
 
         this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
-        this.lastContextZIndex = this.panel.getContentFrameDOM().getZIndex();
-
         const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
         DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
-        this.panel.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
-        
+
+        this.panel.onDraggingStarted();
+
+        // TODO: RENAME SENDER TO DIALOG
         this.eventManager.triggerEvent("onDragStart", {sender: this, event});
     }
 
@@ -104,8 +104,7 @@ export class Dialog implements IEventEmitter {
 
     private handleDragEndEvent(event: MouseEvent) {
         DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
-        this.panel.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging").zIndex(this.lastContextZIndex);
-
+        this.panel.onDraggingEnded();
         this.eventManager.triggerEvent("onDragStop", {sender: this, event});
         this.bringToFront();
     }
