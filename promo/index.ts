@@ -51,6 +51,7 @@ dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
             domRootElement.style.height = "100%";
     
             try {
+                ace.config.set("loadWorkerFromBlob", false);
                 var editor = ace.edit(domRootElement);
                 editor.setTheme("ace/theme/theme");
                 editor.session.setMode(`ace/mode/${documentMode}`);               
