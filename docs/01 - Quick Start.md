@@ -23,9 +23,22 @@ First of all, you need to create and an empty HTML page template that looks simi
     </body>
 </html>
 ```
-In the figure above we create an empty **main ** element which will be the container for our DockerTS Library.
+In the figure above we create an empty **main** element which will be the container for our DockerTS Library.
 
 > Do not forget to remove user agent default CSS styles like paddings and margins from the elements 
 > as given in the **style** tag. It is also important to include the height property to make the elements
 > the same height as the browser window.
 
+Next, we need to tell Webpack that it should use our new HTML page. We need to adjust **webpack.config.js** file as follows:
+```javascript
+    /* ..... */
+
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: 'Testing Project',
+            template: path.resolve("./path/to/index.html")
+        }),
+    ],
+
+    /* ..... */
+```
