@@ -105,8 +105,9 @@ export class Dialog implements IEventEmitter {
     private handleDragEndEvent(event: MouseEvent) {
         DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
         this.panel.onDraggingEnded();
-        this.eventManager.triggerEvent("onDragStop", {sender: this, event});
+        console.log(" --- ON DRAG ENDED ---");
         this.bringToFront();
+        this.eventManager.triggerEvent("onDragStop", {sender: this, event});
     }
 
     getZIndex(): number {

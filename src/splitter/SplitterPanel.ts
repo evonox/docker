@@ -9,7 +9,6 @@ import "./SplitterPanel.css";
 import { MathHelper } from "../utils/math-helper";
 import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
-import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { DOMRegistry } from "../utils/DOMRegistry";
 
 export class SplitterPanel extends Component {
@@ -107,6 +106,7 @@ export class SplitterPanel extends Component {
 
         this.splitterBars.forEach(bar => bar.dispose());
         this.splitterBars = [];
+        this.containerSizes = [];
     }
 
     /**
@@ -122,12 +122,22 @@ export class SplitterPanel extends Component {
         const isContainerEqual = ArrayUtils.isArrayEqual(children, this.childContainers);
         if(isContainerEqual && ! relayoutEvenIfEqual)
             return;
-        
+
         children.forEach(child => child.setHeaderVisibility(true));
+
+        let previousSizes = [...this.containerSizes];
+        if(children.length !== this.childContainers.length ) {
+            previousSizes = undefined;
+        }
 
         this.removeFromDOM();
         this.childContainers = children;
-        this.constructSplitterDOMInternals();
+        this.constructSplitterDOMInternals(); 
+
+        if(previousSizes !== undefined) {
+            this.containerSizes = previousSizes;
+            this.applyChildContainerSizes();   
+        }
 
         this.invalidate();
     }
@@ -144,6 +154,8 @@ export class SplitterPanel extends Component {
         const index = this.childContainers.indexOf(container);
         if(index < 0)
             throw new Error("ERROR: Container is not member of splitter panel");
+
+        console.log("---- SET CONTAINER RATIO ----");
 
         const ratios = this.getRatios();
         ratios[index] = ratio;

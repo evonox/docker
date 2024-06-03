@@ -51,6 +51,13 @@ export class FloatingState extends PanelStateBase {
 
     public leaveState(): void {
        this.stopSizeObservation();
+
+       const domContentFrame = this.panel.getContentFrameDOM();
+       domContentFrame.zIndex("0");
+       this.panel.updateLayoutState();
+       this.panel.updateContainerState();
+
+       console.log("---- EXIT STATE ---");
     }
 
     public dispose(): void {

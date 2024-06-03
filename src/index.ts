@@ -200,6 +200,7 @@ async function performDocking() {
     try {
         const containerOne = await dockManager.createPanel("panel1");
         const containerTwo = await dockManager.createPanel("panel2");
+
         const containerThree = await dockManager.createPanel("panel3", {key: "1"});
         const containerThree1 = await dockManager.createPanel("panel3", {key: "2"});
         const containerThree2 = await dockManager.createPanel("panel3", {key: "3"});

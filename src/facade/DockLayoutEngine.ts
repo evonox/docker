@@ -189,17 +189,35 @@ export class DockLayoutEngine {
         const containerType = this.mapOrientationToContainerType(orientation);
 
         if(referenceNode === model.rootNode) {
-            if(insertBeforeReference) {
-                compositeContainer = this.createDockContainer(containerType, newNode, referenceNode);
-                compositeNode = new DockNode(compositeContainer);
-                compositeNode.addChild(newNode);
-                compositeNode.addChild(referenceNode);
-            } else {
-                compositeContainer = this.createDockContainer(containerType, referenceNode, newNode);
-                compositeNode = new DockNode(compositeContainer);
-                compositeNode.addChild(referenceNode);
-                compositeNode.addChild(newNode);
-            }
+            // if(containerType === referenceNode.container.getContainerType()) {
+            //     referenceParent = referenceNode.parent;
+            //     console.dir(referenceParent);
+            //     if(insertBeforeReference) {
+            //         referenceParent.addChildBefore(referenceNode, newNode);
+            //     } else {
+            //         referenceParent.addChildAfter(referenceNode, newNode);
+            //     }
+
+            //     this.dockManager.rebuildLayout(this.dockManager.getModelContext().model.rootNode);
+            //     compositeNode.container.setActiveChild(newNode.container);
+            //     this.dockManager.invalidate();
+            //     this.dockManager.notifyOnDock(newNode);
+            //     return;
+            //     referenceParent.performLayout(false);
+            //     referenceParent.container.setActiveChild(newNode.container);  
+            // } else {
+                if(insertBeforeReference) {
+                    compositeContainer = this.createDockContainer(containerType, newNode, referenceNode);
+                    compositeNode = new DockNode(compositeContainer);
+                    compositeNode.addChild(newNode);
+                    compositeNode.addChild(referenceNode);
+                } else {
+                    compositeContainer = this.createDockContainer(containerType, referenceNode, newNode);
+                    compositeNode = new DockNode(compositeContainer);
+                    compositeNode.addChild(referenceNode);
+                    compositeNode.addChild(newNode);
+                }
+            // }
 
             this.dockManager.setRootNode(compositeNode);
             this.dockManager.rebuildLayout(this.dockManager.getModelContext().model.rootNode);
@@ -247,6 +265,7 @@ export class DockLayoutEngine {
             } else {
                 referenceParent.addChildAfter(referenceNode, newNode);
             }
+            console.log("RELAYOUTING")
             referenceParent.performLayout(false);
             referenceParent.container.setActiveChild(newNode.container);
         }
@@ -317,7 +336,7 @@ export class DockLayoutEngine {
             }
 
             // Compute ratio of the new panel
-            const splitterBarSize = 5; // TODO: GET FROM THE DOCKER CONFIGURATION 
+            const splitterBarSize = 2; // TODO: GET FROM THE DOCKER CONFIGURATION 
             let targetPanelSize = 0;
             let targetPanelStart = 0;
             if(direction === OrientationKind.Row || direction === OrientationKind.Column) {
@@ -371,7 +390,7 @@ export class DockLayoutEngine {
         }
     }
 
-    private getVaryingDimension(container: IDockContainer, direction: OrientationKind): number {
+    getVaryingDimension(container: IDockContainer, direction: OrientationKind): number {
         if(direction === OrientationKind.Row) {
             return container.getWidth();
         } else if(direction === OrientationKind.Column) {

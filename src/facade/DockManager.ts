@@ -16,7 +16,7 @@ import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
-import { ContainerType } from "../common/enumerations";
+import { ContainerType, OrientationKind } from "../common/enumerations";
 import { IDockContainer } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
@@ -434,10 +434,13 @@ export class DockManager {
         // Get original ratios and splitter - for further computations
         let ratios: number[] = null;
         let oldSplitter: SplitterDockContainer;
-        if(referenceNode.parent && referenceNode.parent.container) {
+        if(referenceNode.parent && referenceNode.parent.container.getContainerType() !== ContainerType.FillLayout) {
             oldSplitter = referenceNode.parent.container as SplitterDockContainer;
-            ratios = oldSplitter.getRatios();
+            ratios = oldSplitter.getRatios();   
         }
+
+        // TODO: ORIENTATION
+        const dockBounds = this.layoutEngine.getDockBounds(referenceNode, panel, OrientationKind.Row, dockedToPrevious);
 
         layoutFn(referenceNode, newNode);
 
@@ -448,7 +451,12 @@ export class DockManager {
                 newNode.parent.container.getContainerType() === ContainerType.RowLayout
             )
         ) {
+            // TODO: ORIENTATION
             const splitter = newNode.parent.container as SplitterDockContainer;
+            const size = this.layoutEngine.getVaryingDimension(splitter, OrientationKind.Row);
+            splitter.setContainerRatio(panel, dockBounds.w / size);
+            return;
+
             if(ratios && splitter === oldSplitter) {
                 if(dockedToPrevious) {
                     for(let i = 0; i < ratios.length; i++) {

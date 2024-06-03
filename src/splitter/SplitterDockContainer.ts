@@ -56,7 +56,7 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.loadedSize = { w: state.width, h: state.height };
     }
 
-    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean = false)  {
+    performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean)  {
         this.childContainers = children;
         this.splitterPanel.performLayout(children, relayoutEvenIfEqual);
     }
