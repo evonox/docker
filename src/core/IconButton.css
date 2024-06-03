@@ -3,6 +3,7 @@
     width: 1em;
     height: 1em;
 
+    color: var(--docker-ts-primary-on-color);
     fill: var(--docker-ts-primary-on-color);
     stroke: var(--docker-ts-primary-on-color);
 
@@ -22,6 +23,8 @@
 .IconButton:hover {
     fill: var(--docker-ts-hover-button-color);
     stroke: var(--docker-ts-hover-button-color);
+    color: var(--docker-ts-hover-button-color);
+
 }
 
 .IconButton.IconButton--Hidden {
