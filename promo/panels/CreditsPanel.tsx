@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createRoot } from "react-dom/client";
+import { Root, createRoot } from "react-dom/client";
 import { DockManager } from "../../src/facade/DockManager";
 import { IPanelAPI } from "../../src/common/panel-api";
 
@@ -13,6 +13,8 @@ function CreditsContent() {
 
 export const CreditsFactoryFn = (dockManager: DockManager): IPanelAPI => {
 
+    let root: Root;
+
     return {
         initialize: async (api) => {
             // Set the settings
@@ -22,9 +24,13 @@ export const CreditsFactoryFn = (dockManager: DockManager): IPanelAPI => {
             // Render React Component
             const domRoot = document.createElement("div");
             domRoot.style.height = "100%";
-            const root = createRoot(domRoot);
+            root = createRoot(domRoot);
             root.render(<CreditsContent />);
             return domRoot;
+        },
+        onClose: async () => {
+            root.unmount();
+            root = undefined;
         }
     }
 
