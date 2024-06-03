@@ -1,2 +1,2 @@
-# HOWTO - Notification Subsystem
+# HOW-TO - Notification Subsystem
 

@@ -1,4 +1,4 @@
-# HOWTO: Custom Panel Header Buttons
+# HOW-TO: Custom Panel Header Buttons
 
 It is possible to add your custom buttons to the panel header. It can be easily done using the
 panel state API as follows.
