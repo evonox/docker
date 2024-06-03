@@ -49,6 +49,10 @@ export class TabHost extends Component {
         this.tabPages.forEach(page => page.setMaximizationEnabled(flag));
     }
 
+    setEnableTabReordering(flag: boolean) {
+        this.tabStrip.enabledTabReordering(flag);
+    }
+
     setTabOrientation(tabOrientation: TabOrientation) {
         this.tabStripDirection = tabOrientation;
         // TODO: DESTROY INTERNALS

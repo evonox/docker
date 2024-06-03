@@ -68,6 +68,7 @@ export class TabbedPanelContainer extends PanelContainer {
         // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
         this.tabHost.setEnableUndock(false);
         this.tabHost.setEnableMaximization(false);
+        this.tabHost.setEnableTabReordering(false);
     }
 
     protected onInitialRender(): HTMLElement {

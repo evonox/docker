@@ -10,6 +10,7 @@ import { TabDualOperation } from "../operations/TabDualOperation";
 import { TabReorderOperation } from "../operations/TabReorderOperation";
 import { DOM } from "../utils/DOM";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
+import { EventHelper } from "../utils/event-helper";
 import { TabHandle } from "./TabHandle";
 import { TabHost } from "./TabHost";
 
@@ -34,6 +35,7 @@ export class TabHostStrip extends Component {
 
     private resizeObserver: ResizeObserver;
 
+    private _tabReorderingEnabled = true;
     private isButtonBarVisible = false;
 
     constructor(
@@ -48,6 +50,15 @@ export class TabHostStrip extends Component {
     getTabHost(): TabHost {
         return this.tabHost;
     }
+
+    isTabReorderingEnabled(): boolean {
+        return this._tabReorderingEnabled;
+    }
+
+    enabledTabReordering(flag: boolean) {
+        this._tabReorderingEnabled = flag;
+    }
+
 
     attachTabHandle(tabHandle: TabHandle) {
         this.tabHandles.push(tabHandle);
@@ -207,6 +218,11 @@ export class TabHostStrip extends Component {
      * Starts the tab ordering request with the possibility to change into Undock Panel Request
      */
     private handleTabOrderingRequest({event, tabHandle}: any) {
+        if(! this._tabReorderingEnabled) {
+            EventHelper.suppressEvent(event);
+            return;
+        }
+        
         const tabDualOperation = new TabDualOperation(
             this.dockManager, this, tabHandle
         );
