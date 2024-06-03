@@ -95,12 +95,20 @@ export class TabHostStrip extends Component {
             .css("visibility", "hidden")
             .appendChild(this.buttonBar.getDOM()).appendTo(this.domTabStrip);
 
-        this.buttonBar.on("onClicked", ({actionName, event}) => {
+        this.buttonBar.on("onPressed", ({actionName, event}) => {
             if(actionName === TABSTRIP_SCROLL_LEFT) {
-                this.handleScrollLeft();
+                this.handleBeginScrollingToStart();
             } else if(actionName === TABSTRIP_SCROLL_RIGHT) {
-                this.handleScrollRight();
-            } else if(actionName === TABSTRIP_SHOW_MENU) {
+                this.handleBeginScrollingToEnd();
+            }
+        });
+        this.buttonBar.on("onReleased", ({actionName, event}) => {
+            if(actionName === TABSTRIP_SCROLL_LEFT || actionName === TABSTRIP_SCROLL_RIGHT) {
+                this.handleStopScrolling();
+            }
+        });
+        this.buttonBar.on("onClicked", ({actionName, event}) => {
+            if(actionName === TABSTRIP_SHOW_MENU) {
                 this.handleShowTabStripPopup(event);
             }
         });
@@ -136,15 +144,41 @@ export class TabHostStrip extends Component {
         }
     }
 
-    private handleScrollLeft() {
-        const scrollOffset = this.dockManager.config.tabStripScrollOffset;
-        this.domTabHandleContainer.get().scrollBy({left: -scrollOffset, top: 0, behavior: "smooth"})
+    /**
+     * TabStrip Smooth Scrolling 
+     */
+    
+    private isIncrementScroll: boolean;
+    private handleRAFScroll: number;
+    private readonly SCROLL_DELTA = 2;
+
+    private handleBeginScrollingToStart() {
+        this.isIncrementScroll = false;
+        this.handleRAFScroll = window.requestAnimationFrame(() => this.handleScrollingTick());
     }
 
-    private handleScrollRight() {
-        const scrollOffset = this.dockManager.config.tabStripScrollOffset;
-        this.domTabHandleContainer.get().scrollBy({left: scrollOffset, top: 0, behavior: "smooth"})
+    private handleBeginScrollingToEnd() {
+        this.isIncrementScroll = true;
+        this.handleRAFScroll = window.requestAnimationFrame(() => this.handleScrollingTick());
     }
+
+    private handleStopScrolling() {
+        window.cancelAnimationFrame(this.handleRAFScroll);
+    }
+
+    private handleScrollingTick() {
+        const scrollOffset = this.isIncrementScroll ? this.SCROLL_DELTA : -this.SCROLL_DELTA;
+        if(this.orientation === TabOrientation.Top || this.orientation === TabOrientation.Bottom) {            
+            this.domTabHandleContainer.get().scrollBy({left: scrollOffset, top: 0, behavior: "instant"})
+        } else {
+            this.domTabHandleContainer.get().scrollBy({left: 0, top: scrollOffset, behavior: "instant"})
+        }
+        this.handleRAFScroll = window.requestAnimationFrame(() => this.handleScrollingTick());
+    }
+
+    /**
+     * Context Menu Handling
+     */
 
     private handleShowTabStripPopup(event: MouseEvent) {
         // Construct Context Menu 
@@ -170,11 +204,9 @@ export class TabHostStrip extends Component {
     }
 
     /**
-     * Starts the tab ordering request
+     * Starts the tab ordering request with the possibility to change into Undock Panel Request
      */
     private handleTabOrderingRequest({event, tabHandle}: any) {
-
-
         const tabDualOperation = new TabDualOperation(
             this.dockManager, this, tabHandle
         );

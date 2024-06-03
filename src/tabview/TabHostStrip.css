@@ -36,6 +36,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;   
+    justify-content: end;
 
     padding-left: 10px;
 
