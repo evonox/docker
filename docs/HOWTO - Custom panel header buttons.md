@@ -89,7 +89,7 @@ At the end I summarize the default display orders of the system buttons. It migh
 important if you have the intention to place your custom button in the middle of them.
 
 | System Header Button Name | Default Display Order |
------------------------------------------------------
+|---------------------------|-----------------------|
 | Collapse Button           | 5000                  |
 | Expand Button             | 6000                  |
 | Minimize Button           | 7000                  |
