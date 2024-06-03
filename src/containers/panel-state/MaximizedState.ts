@@ -1,6 +1,6 @@
 import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
 import { DOMUpdateInitiator } from "../../utils/DOMUpdateInitiator";
@@ -17,6 +17,7 @@ export class MaximizedState extends PanelStateBase {
         const restoreState = this.config.get("restoreState");
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, restoreState === PanelContainerState.Floating);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, true);
+        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, false);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
 

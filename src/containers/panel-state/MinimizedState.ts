@@ -1,6 +1,6 @@
 import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
 import { AnimationHelper } from "../../utils/animation-helper";
@@ -13,6 +13,7 @@ export class MinimizedState extends PanelStateBase {
 
     public async enterState(initialState: boolean): Promise<void> {
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
+        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, true);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, true);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);

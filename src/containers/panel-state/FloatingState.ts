@@ -1,6 +1,6 @@
 import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { DOM } from "../../utils/DOM";
@@ -40,6 +40,7 @@ export class FloatingState extends PanelStateBase {
         }
 
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, true);
+        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, true);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
