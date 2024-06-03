@@ -131,7 +131,9 @@ export class FloatingState extends PanelStateBase {
         this.config.set("originalRect", rect);
 
         const minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
+        domContentFrame.addClass("DockerTS-ContentFrame--Animating");
         await AnimationHelper.animateMinimize(domContentFrame.get(), minimizedFreeSlot);
+        domContentFrame.removeClass("DockerTS-ContentFrame--Animating");
         domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
         
         return true;

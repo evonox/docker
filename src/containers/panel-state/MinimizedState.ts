@@ -58,7 +58,9 @@ export class MinimizedState extends PanelStateBase {
             .removeClass("DockerTS-ContentFrame--Minimized")
             .css("right", "");
 
+        domContentFrame.addClass("DockerTS-ContentFrame--Animating");
         await AnimationHelper.animateRestore(domContentFrame.get(), originalRect);
+        domContentFrame.removeClass("DockerTS-ContentFrame--Animating");
 
         const dialog: Dialog = this.config.get("panelDialog");
         dialog.show();
