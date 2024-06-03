@@ -60,8 +60,13 @@
     opacity: 0.85;
 }
 
+.DockerTS-ContentFrame--Animating {
+    /* CSS for optical separation of panel and the rest of the content */
+    outline: 1px solid #888; 
+}
+
 .DockerTS-ContentFrame.DockerTS-ContentFrame--NoHeader {
-    grid-template-rows: 100%;
+    grid-template-rows: 0 1fr;
 }
 
 .DockerTS-ContentFrame.DockerTS-ContentFrame--Minimized {

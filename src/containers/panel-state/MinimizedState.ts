@@ -11,7 +11,7 @@ export class MinimizedState extends PanelStateBase {
 
     private minimizedSlotId = 0;
 
-    public enterState(): void {
+    public async enterState(initialState: boolean): Promise<void> {
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, true);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
@@ -20,7 +20,7 @@ export class MinimizedState extends PanelStateBase {
         this.minimizedSlotId = this.dockManager.requestMinimizeSlot();
     }
 
-    public leaveState(): void {
+    public async leaveState(): Promise<void> {
         this.dockManager.releaseMinimizeSlot(this.minimizedSlotId);
     }
 

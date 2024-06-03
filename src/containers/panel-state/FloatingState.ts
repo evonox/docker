@@ -23,7 +23,7 @@ export class FloatingState extends PanelStateBase {
         super(dockManager, panel, config);
     }
 
-    public enterState(): void {
+    public async enterState(): Promise<void> {
         if(this.dialog === undefined) {
             this.dialog = this.config.get("panelDialog");
         }
@@ -49,15 +49,15 @@ export class FloatingState extends PanelStateBase {
         this.dialog.bringToFront();
     }
 
-    public leaveState(): void {
+    public async leaveState(): Promise<void> {
        this.stopSizeObservation();
 
-       const domContentFrame = this.panel.getContentFrameDOM();
-       domContentFrame.zIndex("0");
-       this.panel.updateLayoutState();
+        // Set zIndex to DockedState value
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.zIndex("1");
+        // To update zIndex values in the nested panels of TabbedPanelContainer
+       this.panel.updateLayoutState(); 
        this.panel.updateContainerState();
-
-       console.log("---- EXIT STATE ---");
     }
 
     public dispose(): void {
@@ -101,20 +101,16 @@ export class FloatingState extends PanelStateBase {
         this.config.set("lastFloatingRect", rect);
         this.config.set("originalRect", rect);
 
-        const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
+        // const domContentFrame = this.panel.getContentFrameDOM();
+        // domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
 
-        const viewportRect = this.dockManager.getContainerBoundingRect();
-        if(this.isCollapsed) {
-            const domContent = this.panel.getContentContainerDOM();
-            domContent.css("opacity", "1");
-        }
+        // const viewportRect = this.dockManager.getContainerBoundingRect();
 
-        this.panel.updateLayoutState();
+        // // this.panel.updateLayoutState();
 
-        await AnimationHelper.animateMaximize(domContentFrame.get(), {
-            x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
-        });
+        // await AnimationHelper.animateMaximize(domContentFrame.get(), {
+        //     x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
+        // });
         
 
         return true;

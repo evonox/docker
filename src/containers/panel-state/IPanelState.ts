@@ -30,6 +30,6 @@ export interface IPanelStateAPI {
  */
 export interface IGenericPanelState extends IPanelStateAPI {
     // Enter / Leave State methods for initialization and clenaup
-    enterState(): void;
-    leaveState(): void;
+    enterState(initialState: boolean): Promise<void>;
+    leaveState(): Promise<void>;
 }

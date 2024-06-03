@@ -29,7 +29,7 @@ export class PanelStateMachine implements IPanelStateAPI {
     ) {
         this.containerState = initialState;
         this.currentState = this.createStateByType(initialState);
-        this.currentState.enterState();
+        this.currentState.enterState(true);
     }
 
     getCurrentState(): PanelContainerState {
@@ -51,7 +51,7 @@ export class PanelStateMachine implements IPanelStateAPI {
         const isAllowed = await this.currentState.dockPanel();
         if(isAllowed) {
             delete this.dialog;
-            this.changeStateTo(PanelContainerState.Docked);
+            await this.changeStateTo(PanelContainerState.Docked);
         }
         return isAllowed;
     }
@@ -60,7 +60,7 @@ export class PanelStateMachine implements IPanelStateAPI {
         const isAllowed = await this.currentState.floatPanel(dialog);
         if(isAllowed) {
             this.dialog = dialog;
-            this.changeStateTo(PanelContainerState.Floating);
+            await this.changeStateTo(PanelContainerState.Floating);
         }
         return isAllowed;
     }
@@ -69,7 +69,7 @@ export class PanelStateMachine implements IPanelStateAPI {
         const isAllowed = await this.currentState.minimize();
         if(isAllowed) {
             delete this.dialog;
-            this.changeStateTo(PanelContainerState.Minimized);           
+            await this.changeStateTo(PanelContainerState.Minimized);           
         }
         return isAllowed;
     }
@@ -78,7 +78,7 @@ export class PanelStateMachine implements IPanelStateAPI {
         const isAllowed = await this.currentState.maximize();
         if(isAllowed) {
             delete this.dialog;
-            this.changeStateTo(PanelContainerState.Maximized);
+            await this.changeStateTo(PanelContainerState.Maximized);
         }
         return isAllowed;
     }
@@ -86,7 +86,7 @@ export class PanelStateMachine implements IPanelStateAPI {
     async restore(): Promise<boolean> {
         const isAllowed = await this.currentState.restore();
         if(isAllowed) {
-            this.changeStateTo(this.config.get("restoreState", PanelContainerState.Docked));
+            await this.changeStateTo(this.config.get("restoreState", PanelContainerState.Docked));
         }
         return isAllowed;
     }
@@ -113,11 +113,11 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     // Generic private method to change state
-    private changeStateTo(state: PanelContainerState) {
-        this.currentState.leaveState();
+    private async changeStateTo(state: PanelContainerState): Promise<void> {
+        await this.currentState.leaveState();
         this.containerState = state;
         this.currentState = this.createStateByType(state);
-        this.currentState.enterState();
+        await this.currentState.enterState(false);
     }
 
     // State factory method

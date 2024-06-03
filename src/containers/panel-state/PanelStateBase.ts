@@ -25,8 +25,8 @@ export abstract class PanelStateBase implements IGenericPanelState {
             1000 / this.RESIZE_FRAME_RATE, {leading: true, trailing: true});
     }
 
-    enterState(): void {}
-    leaveState(): void {}
+    async enterState(initialState: boolean): Promise<void> {}
+    async leaveState(): Promise<void> {}
     dispose(): void {}
 
     // Transition State methods - by default return "false" - means that given transition is not allowed

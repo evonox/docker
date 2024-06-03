@@ -165,10 +165,12 @@ export class PanelContainer extends Component implements IDockContainer {
 
     setHeaderVisibility(visible: boolean): void {
         if(visible) {
-            this.domFrameHeader.show();
+            this.domFrameHeader.css("visibility", "");
+            // this.domFrameHeader.show();
             this.domContentFrame.removeClass("DockerTS-ContentFrame--NoHeader");
         } else {
-            this.domFrameHeader.hide();
+            this.domFrameHeader.css("visibility", "collapse");
+            // this.domFrameHeader.hide();
             this.domContentFrame.addClass("DockerTS-ContentFrame--NoHeader");
         }
     }
@@ -363,7 +365,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domContentFrame = DOM.create("div").addClass("DockerTS-ContentFrame");
         // Create the panel header
         this.domFrameHeader = DOM.create("div").addClass("DockerTS-FrameHeader")
-            .hide().appendTo(this.domContentFrame);
+            .appendTo(this.domContentFrame);
         this.domTitle = DOM.create("div").addClass("DockerTS-HeaderTitleBar");
         this.domTitleText = DOM.create("div");
 
@@ -395,6 +397,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
         this.state = new PanelStateMachine(this.dockManager, this, PanelContainerState.Docked);
 
+        this.setHeaderVisibility(false);
         this.updateTitle();
         this.updateContainerState();
         this.updateLayoutState();

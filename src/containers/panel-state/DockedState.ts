@@ -12,7 +12,7 @@ export class DockedState extends PanelStateBase {
 
     private panelPlaceholderRO: ResizeObserver = undefined;
 
-    public enterState(): void {
+    public async enterState(initialState: boolean): Promise<void> {
         this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
@@ -21,7 +21,7 @@ export class DockedState extends PanelStateBase {
         this.startSizeObservation();
     }
 
-    public leaveState(): void {
+    public async leaveState(): Promise<void> {
         this.stopSizeObservation();
     }
 
@@ -65,28 +65,28 @@ export class DockedState extends PanelStateBase {
         };
         this.config.set("originalRect", rect);
 
-        const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+        // const domContentFrame = this.panel.getContentFrameDOM();
+        // domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
 
-        this.panel.updateLayoutState();
+        // this.panel.updateLayoutState();
         
-        const viewportRect = this.dockManager.getContainerBoundingRect();
-        if(this.panel.isHeaderVisible() === false) {
-            const domFrameHeader = this.panel.getFrameHeaderDOM().get();
-            this.panel.setHeaderVisibility(true);
-            // const height = DOM.from(domFrameHeader).getHeight();
-            const height = domFrameHeader.offsetHeight;
-            DOM.from(domFrameHeader).height(0);
-            await AnimationHelper.animateMaximizeNoHeader(domFrame, domFrameHeader, height, {
-                x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
-            });
-            DOM.from(domFrameHeader).height("");
+        // const viewportRect = this.dockManager.getContainerBoundingRect();
+        // if(this.panel.isHeaderVisible() === false) {
+        //     const domFrameHeader = this.panel.getFrameHeaderDOM().get();
+        //     this.panel.setHeaderVisibility(true);
+        //     // const height = DOM.from(domFrameHeader).getHeight();
+        //     const height = domFrameHeader.offsetHeight;
+        //     DOM.from(domFrameHeader).height(0);
+        //     await AnimationHelper.animateMaximizeNoHeader(domFrame, domFrameHeader, height, {
+        //         x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
+        //     });
+        //     DOM.from(domFrameHeader).height("");
 
-        } else {
-            await AnimationHelper.animateMaximize(this.panel.getContentFrameDOM().get(), {
-                x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
-            });    
-        }       
+        // } else {
+        //     await AnimationHelper.animateMaximize(this.panel.getContentFrameDOM().get(), {
+        //         x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
+        //     });    
+        // }       
 
         return true;
     }

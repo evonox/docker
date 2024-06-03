@@ -86,7 +86,6 @@ export class Dialog implements IEventEmitter {
 
     private handleDragStartEvent(event: MouseEvent) {
         this.bringToFront();
-
         this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
         const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
         DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
@@ -165,6 +164,9 @@ export class Dialog implements IEventEmitter {
         this.resizable.dispose();
 
         this.dockManager.getModelContext().removeDialog(this);
+        // TODO: DEBUG - MOVE SOMEWHERE
+        this.panel.getContentFrameDOM().zIndex("1");
+        this.panel.updateLayoutState();
     }
 
     resize(rect: IRect) {
