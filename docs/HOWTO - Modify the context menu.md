@@ -1,2 +1,2 @@
-# HOW-TO: Modifying the context menu
+# HOW-TO: Modifying the Context Menu
 
