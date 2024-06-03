@@ -44,6 +44,8 @@ export class PanelContainer extends Component implements IDockContainer {
 
     private buttonBar: PanelButtonBar;
 
+    private _isDefaultContextMenuEnabled = true;
+
 
     // Icon & Title State
     private _iconHtml: string = "";
@@ -174,6 +176,14 @@ export class PanelContainer extends Component implements IDockContainer {
             // this.domFrameHeader.hide();
             this.domContentFrame.addClass("DockerTS-ContentFrame--NoHeader");
         }
+    }
+
+    enableDefaultContextMenu(flag: boolean) {
+        this._isDefaultContextMenuEnabled = flag;
+    }
+
+    isDefaultContextMenuEnabled(): boolean {
+        return this._isDefaultContextMenuEnabled;
     }
 
     getContainerType(): ContainerType {
@@ -561,7 +571,13 @@ export class PanelContainer extends Component implements IDockContainer {
     private handleContextMenuClick(event: MouseEvent) {
         event.preventDefault();
 
-        const contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this);
+        let contextMenuConfig;
+        if(this._isDefaultContextMenuEnabled) {
+            contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this);
+        } else {
+            contextMenuConfig = new ContextMenuConfig();
+        }
+
         this.api.onQueryContextMenu?.(contextMenuConfig);
         if(contextMenuConfig.getMenuItems().length === 0)
             return;

@@ -36,6 +36,8 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.performLayout(this.childContainers, false);
         this.updateContainerState();
 
+        container.enableDefaultContextMenu(false);
+
         // Redirecting the onFocused event
         container.on("onFocused", () => {
             this.triggerEvent("onFocused");
@@ -47,6 +49,7 @@ export class TabbedPanelContainer extends PanelContainer {
         container.off("onFocused");
         ArrayUtils.removeItem(this.childContainers, container);
         this.tabHost.performLayout(this.childContainers, false);
+        container.enableDefaultContextMenu(true);
         this.updateContainerState();
     }
 

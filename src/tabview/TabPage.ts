@@ -156,7 +156,13 @@ export class TabPage extends Component {
         event.preventDefault();
 
         // Request container to provide the context menu definition
-        const contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this.container);
+        let contextMenuConfig;
+        if(this.container.isDefaultContextMenuEnabled()) {
+            contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this.container);
+        } else {
+            contextMenuConfig = new ContextMenuConfig();
+        }
+
         this.container.onQueryContextMenu?.(contextMenuConfig);
         if(contextMenuConfig.getMenuItems().length === 0)
             return;
