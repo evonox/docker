@@ -21,6 +21,9 @@ dockManager.registerPanelType("panel1", "singleton", (dockManager) => {
                 actionName: "AddDocument",
                 visible: true
             });
+            api.showHeaderButton("AddDocument", false);
+            api.removeHeaderButton("AddDocument");
+            
             const domElement = document.createElement("h1");
             domElement.innerText = "DockerTS Panel One";
             api.setPanelFAIcon("fa fa-user");
