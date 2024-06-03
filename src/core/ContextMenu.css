@@ -38,7 +38,20 @@
     align-items: center;
     justify-content: left;
     min-width: 1.25rem;
+
+    width: 1.5em;
+    height: 1em;
+
+    fill: var(--docker-ts-primary-on-color);
+    stroke: var(--docker-ts-primary-on-color);
+
 }
+
+.DockerTS-MenuItem__Icon svg {
+    width: 1em;
+    height: 1em;
+}
+
 
 .DockerTS-MenuItem:hover {
     color: var(--docker-ts-primary-on-color);

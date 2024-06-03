@@ -52,6 +52,10 @@ export class ButtonBar extends Component {
         this.getIconButtonByAction(actionName).visible = false;
     }
 
+    isActionAllowed(actionName: string) {
+        return this.getIconButtonByAction(actionName).visible === true;
+    }
+
     protected onInitialized(): void {}
 
     protected onDisposed(): void {

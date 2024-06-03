@@ -14,11 +14,12 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, isPanelDefaultAction } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
+import { ContextMenuFactory } from "./ContextMenuFactory";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -329,7 +330,11 @@ export class PanelContainer extends Component implements IDockContainer {
         }
     }
 
-    private handleButtonAction(actionName: string) {
+    isActionAllowed(actionName: string): boolean {
+        return this.buttonBar.isActionAllowed(actionName);
+    }
+
+    handleDefaultPanelAction(actionName: string) {
         if(actionName === PANEL_ACTION_COLLAPSE) {
             this.collapsePanel();
         } else if(actionName === PANEL_ACTION_EXPAND) {
@@ -371,7 +376,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
         // Create the Header Button Bar
         this.buttonBar = new PanelButtonBar();
-        this.buttonBar.on("onAction", this.handleButtonAction.bind(this));
+        this.buttonBar.on("onAction", this.handleDefaultPanelAction.bind(this));
 
         this.domFrameHeader.appendChild(this.domTitle);
         this.domFrameHeader.appendChild(this.buttonBar.getDOM());
@@ -556,7 +561,7 @@ export class PanelContainer extends Component implements IDockContainer {
     private handleContextMenuClick(event: MouseEvent) {
         event.preventDefault();
 
-        const contextMenuConfig = new ContextMenuConfig();
+        const contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this);
         this.api.onQueryContextMenu?.(contextMenuConfig);
         if(contextMenuConfig.getMenuItems().length === 0)
             return;
@@ -564,7 +569,11 @@ export class PanelContainer extends Component implements IDockContainer {
         const zIndexContextMenu = this.dockManager.config.zIndexes.zIndexContextMenu;
         const domContextMenu = new ContextMenu(contextMenuConfig);
         domContextMenu.on("onAction", (actionName) => {
-            this.api.onActionInvoked?.(actionName);
+            if(isPanelDefaultAction(actionName)) {
+                this.handleDefaultPanelAction(actionName);
+            } else {
+                this.api.onActionInvoked?.(actionName);
+            }
         });
         domContextMenu.show(event, zIndexContextMenu);
     }

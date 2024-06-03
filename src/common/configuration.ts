@@ -17,6 +17,16 @@ export interface IDockConfig {
     defaultMinWidth?: number,
     defaultMinHeight?: number;
     dragAndDropFrameRate?: number;
+    labels?: {
+        collapseLabel?: string;
+        expandLabel?: string;
+        closeLabel?: string;
+        closeAllLabel?: string;
+        closeOthersLabel?: string;
+        minimizeLabel?: string;
+        maximizeLabel?: string;
+        restoreLabel?: string;
+    },
     zIndexes?: {
         zIndexWheelItem?: number;
         zIndexCounter?: number;
@@ -32,6 +42,16 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    labels: {
+        collapseLabel: "Collapse Panel",
+        expandLabel: "Expand Panel",
+        closeLabel: "Close Panel",
+        closeAllLabel: "Close All",
+        closeOthersLabel: "Close Others",
+        minimizeLabel: "Minimize Panel",
+        maximizeLabel: "Maximize Panel",
+        restoreLabel: "Restore Panel"
+    },
     minimumDefaultWidth: 400,
     minimumDefaultHeight: 200,
     defaultPanelSizeMagnitude: 1.5,

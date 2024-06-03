@@ -8,6 +8,8 @@ import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { DockManager } from "../facade/DockManager";
 import { ContextMenu } from "../core/ContextMenu";
 import { SelectionState, TabOrientation } from "../common/enumerations";
+import { ContextMenuFactory } from "../containers/ContextMenuFactory";
+import { isPanelDefaultAction } from "../core/panel-default-buttons";
 
 /**
  * TabPage - component for a single tab inside Document Manager, TabbedPanelContainer or FillDockContainer
@@ -154,7 +156,7 @@ export class TabPage extends Component {
         event.preventDefault();
 
         // Request container to provide the context menu definition
-        const contextMenuConfig = new ContextMenuConfig();
+        const contextMenuConfig = ContextMenuFactory.createDefaultContextMenu(this.container);
         this.container.onQueryContextMenu?.(contextMenuConfig);
         if(contextMenuConfig.getMenuItems().length === 0)
             return;
@@ -163,7 +165,11 @@ export class TabPage extends Component {
         const zIndexContextMenu = this.dockManager.config.zIndexes.zIndexContextMenu;
         const domContextMenu = new ContextMenu(contextMenuConfig);
         domContextMenu.on("onAction", (actionName) => {
-            this.container.handleContextMenuAction(actionName);
+            if(isPanelDefaultAction(actionName)) {
+                this.container.handleDefaultPanelAction(actionName);
+            } else {
+                this.container.handleContextMenuAction(actionName);
+            }
         });
         domContextMenu.show(event, zIndexContextMenu);
     }
