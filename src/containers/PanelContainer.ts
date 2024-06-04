@@ -558,6 +558,7 @@ export class PanelContainer extends Component implements IDockContainer {
                         x: initialPosition.x - headerBounds.x,
                         y: initialPosition.y - headerBounds.y
                     };
+        
                     dialog = await this.requestUndockToDialog(event, dragOffset);
                     this.triggerEvent("onDockingDragStart", event);
                 } else {

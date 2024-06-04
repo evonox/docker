@@ -53,10 +53,8 @@ export class TabHost extends Component {
         this.tabStrip.enabledTabReordering(flag);
     }
 
-    setTabOrientation(tabOrientation: TabOrientation) {
-        this.tabStripDirection = tabOrientation;
-        // TODO: DESTROY INTERNALS
-        // TODO: RE-CONSTRUCT INTERNALS
+    getTabOrientation() {
+        return this.tabStripDirection;
     }
 
     getSelectedTab(): TabPage | undefined {

@@ -4,6 +4,7 @@ import "./index.css";
 import { IPanelAPI, IPanelStateAPI } from "./common/panel-api";
 import { DOM } from "./utils/DOM";
 import { DebugHelper } from "./utils/DebugHelper";
+import { TabOrientation } from "./common/enumerations";
 
 DebugHelper.enableOptimizations(false);
 
@@ -227,6 +228,9 @@ async function performDocking() {
         tabbedContainer.addContainer(containerThree1);
         tabbedContainer.addContainer(containerThree2);
         tabbedContainer.addContainer(containerThree3);
+        setTimeout(() => {
+            tabbedContainer.setTabOrientation(TabOrientation.Right);
+        }, 5000);
 
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);

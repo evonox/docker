@@ -91,6 +91,14 @@ export class Dialog implements IEventEmitter {
         const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
         DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
 
+        // Adjust the position of dialog if the drag handle offset is out of bounds
+        const dialogBounds = DOM.from(this.getDialogFrameDOM()).getBoundsRect();
+        if(event.pageX > dialogBounds.x + dialogBounds.w * 0.75) {
+            const positionX = event.pageX - dialogBounds.w * 0.75;
+            const position = this.getPosition();
+            this.setPosition(positionX, position.y);
+        }
+
         this.panel.onDraggingStarted();
 
         // TODO: RENAME SENDER TO DIALOG

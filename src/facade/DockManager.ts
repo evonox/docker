@@ -667,15 +667,7 @@ export class DockManager {
         //     dialog.resize(lastDialogSize.w, lastDialogSize.h);
         // }
 
-        // TODO: WHAT IS THE REASON FOR THIS DIALOG PLACING??? 
-        // TODO: REFACTOR TO A SPECIAL METHOD, USED TWICE AT LEAST
         if(event != null) {
-            const dialogWidth = dialog.getPanel().getWidth();
-            // if(dragOffset.x > dialogWidth) {
-            //     dragOffset.x = 0.75 * dialogWidth;
-            // }
-            console.dir("SETTING DIALOG POSITION");
-            console.dir(dragOffset);
             dialog.setPosition(event.pageX - dragOffset.x, event.pageY - dragOffset.y);
             // TODO: INVOKE onMouseMove on Draggable - FIND BETTER WAY THEN INVOKE MOUSE MOVE HANDLER
         }

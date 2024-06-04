@@ -27,7 +27,21 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     setTabOrientation(orientation: TabOrientation) {
-        this.tabHost.setTabOrientation(orientation);
+        if(this.tabHost.getTabOrientation() !== orientation) {
+            // Destroy TabHost
+            this.tabHost.dispose();
+            this.tabHost = new TabHost(this.getDockManager(), orientation);
+            // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
+            this.tabHost.setEnableUndock(false);
+            this.tabHost.setEnableMaximization(false);
+            this.tabHost.setEnableTabReordering(false);
+            // Perform Layout
+            this.tabHost.performLayout(this.childContainers, false);
+            // Append the TabHost to the panel
+            const domTabHost = this.tabHost.getDOM();
+            DOM.from(domTabHost).height("100%");
+            this.setContentElement(domTabHost);  
+        }
     }
 
     addContainer(container: PanelContainer) {
