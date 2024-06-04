@@ -99,13 +99,20 @@ export class DOM<T extends HTMLElement> {
      */
 
     private styleMap: Map<string, string> = new Map<string, string>();
+    private isStyleCacheEnabled = true;
 
-    getCss(name: string): string {
-        if(this.styleMap.has(name)) {
-            return this.styleMap.get(name);
+    enableStyleCache(flag: boolean) {
+        this.isStyleCacheEnabled = flag;
+    }
+    
+    getCss(name: string): string {       
+        if(this.styleMap.has(name) && this.isStyleCacheEnabled) {
+            return this.styleMap.get(name);   
         } else {
             const cssValue = this.element.style.getPropertyValue(name);
-            this.styleMap.set(name, cssValue);
+            if(cssValue !== "") {
+                this.styleMap.set(name, cssValue);
+            }
             return cssValue;
         }
     }
@@ -114,7 +121,7 @@ export class DOM<T extends HTMLElement> {
         if(this.styleMap.has(propertyName) && this.styleMap.get(propertyName) === propertyValue)
             return this;
 
-        if(propertyValue.trim() === "") {
+        if(propertyValue === undefined || propertyValue === null || propertyValue.trim() === "") {
             this.styleMap.delete(propertyName);
         } else {
             this.styleMap.set(propertyName, propertyValue);
@@ -123,8 +130,6 @@ export class DOM<T extends HTMLElement> {
         DOMUpdateInitiator.requestDOMUpdate(() => {
             this.element.style.setProperty(propertyName, propertyValue);
         });
-        // TODO: DEBUG            
-        // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
 
         return this;
     }
@@ -352,10 +357,14 @@ export class DOM<T extends HTMLElement> {
 
 
     zIndex(value: number | string): DOM<T> {
-        if(value === "") {
-            this.css("z-index", "");
+        if(typeof value === "number") {
+            return this.css("z-index", String(value));
         } else {
-            this.css("z-index",  String(value));
+            if(value === "") {
+                this.css("z-index", "");
+            } else {
+                this.css("z-index",  String(value));
+            }   
         }
         return this;
     }

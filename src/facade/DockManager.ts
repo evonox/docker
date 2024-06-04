@@ -346,6 +346,14 @@ export class DockManager {
         };
     }
 
+    isToplevelDialog(dialog: Dialog): boolean {
+        return this.context.model.isLastDialog(dialog);
+    }
+
+    moveDialogToTop(dialog: Dialog): void {
+        this.context.model.moveDialogToEnd(dialog);
+    }
+
     private recomputeMinimizedSlotsCSS() {
         // Set the window width
         const windowWidth = this.config.minimizedWindowWidth;

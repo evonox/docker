@@ -10,7 +10,6 @@ import { IPoint, IRect } from "../common/dimensions";
 import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 import "./Dialog.css";
-import { DebugHelper } from "../utils/DebugHelper";
 
 export class Dialog implements IEventEmitter {
 
@@ -28,7 +27,6 @@ export class Dialog implements IEventEmitter {
     private eventManager = new ComponentEventManager();
 
     private lastDialogZIndex: number;
-    private lastContextZIndex: number;
 
     constructor(
         private dockManager: DockManager,
@@ -81,6 +79,8 @@ export class Dialog implements IEventEmitter {
         this.draggable.on("onDraggableDragStop", this.handleDragEndEvent);
        
         // Bring the dialog to the front
+        this.assignNewZIndex();
+        this.dockManager.setActivePanel(this.panel);
         this.bringToFront();
     }
 
@@ -104,7 +104,6 @@ export class Dialog implements IEventEmitter {
     private handleDragEndEvent(event: MouseEvent) {
         DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
         this.panel.onDraggingEnded();
-        console.log(" --- ON DRAG ENDED ---");
         this.bringToFront();
         this.eventManager.triggerEvent("onDragStop", {sender: this, event});
     }
@@ -129,7 +128,7 @@ export class Dialog implements IEventEmitter {
     }
 
     show() {
-        this.domDialog.css("zIndex", this.dockManager.genNextDialogZIndex().toString()).css("display", "");
+        this.domDialog.css("display", "");
         // TODO: ELEMENT CONTAINER Z-INDEX???
         if(this.isHidden) {
             this.isHidden = false;
@@ -138,7 +137,7 @@ export class Dialog implements IEventEmitter {
     }
 
     hide() {
-        this.domDialog.css("zIndex", "0").css("display", "none");
+        this.domDialog.css("display", "none");
         if(! this.isHidden) {
             this.isHidden = true;
             // TODO: NOTIFY DOCKER MANAGER
@@ -175,9 +174,17 @@ export class Dialog implements IEventEmitter {
     }
 
     bringToFront() {
+        // if(this.dockManager.isToplevelDialog(this))
+        //     return;
+        // this.dockManager.moveDialogToTop(this);
+
+        this.assignNewZIndex();
+        this.dockManager.setActivePanel(this.panel);
+    }
+
+    private assignNewZIndex() {
         const nextZIndex = this.dockManager.genNextDialogZIndex();
         this.domDialog.zIndex(nextZIndex);
-        this.dockManager.setActivePanel(this.panel);
         // TODO: UNIFY UPDATE STATE
         this.panel.updateLayoutState();
         this.panel.updateContainerState();
@@ -200,12 +207,14 @@ export class Dialog implements IEventEmitter {
     }
 
     private handleOnCollapse() {
+        this.bringToFront();
         this.lastExpanedSize = this.domDialog.getHeight();
         const bounds = this.panel.getHeaderElement().getBoundingClientRect();
         this.domDialog.height(bounds.height);
     }
 
     private handleOnExpand() {
+        this.bringToFront();
         this.domDialog.height(this.lastExpanedSize);
     }
 
