@@ -2,10 +2,14 @@ import { IPanelStateAPI } from "../src/common/panel-api";
 import { DockManager } from "../src/facade/DockManager"
 import "../src/index.css";
 
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+
+
 // import { initBabylonDemo } from "./babylon-demo";
 import { startBabylonDemo } from "./babylon-engine";
 import { createDemoScene } from "./demo-scene";
 import { CreditsFactoryFn } from "./panels/CreditsPanel";
+import { DockModelViewFactoryFn } from "./panels/DockModelView";
 import { BarChartFactoryFn, DoughnutChartFactoryFn, LineChartFactoryFn, PieChartFactoryFn, StackedChartFactoryFn } from "./panels/chart-panels";
 import { createVillageScene } from "./village-demo";
 
@@ -35,6 +39,8 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
 });
 
 dockManager.registerPanelType("creditsView", "singleton", CreditsFactoryFn);
+
+dockManager.registerPanelType("dockModelView", "singleton", DockModelViewFactoryFn);
 
 dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
 
@@ -86,6 +92,7 @@ async function performDocking() {
     try {
         const babylonJSPanel = await dockManager.createPanel("babylonJS");
         const creditsPanel = await dockManager.createPanel("creditsView");
+        const dockModelPanel = await dockManager.createPanel("dockModelView");
 
         // Create TabbedPanelContainer for Charts
         const chartView = await dockManager.createTabbedPanel("chartView");
@@ -129,6 +136,7 @@ async function performDocking() {
         dockManager.dockLeft(documentNode, babylonJSPanel, 0.4);
         const nodeCredits = dockManager.dockDown(documentNode, creditsPanel, 0.35);
         dockManager.dockFill(nodeCredits, chartView);
+        dockManager.dockRight(documentNode, dockModelPanel, 0.28);
     }
     catch(err) {
         console.dir(err);
