@@ -1,6 +1,7 @@
 import { IRect, ISize } from "../common/dimensions";
 import { DOMRegistry } from "./DOMRegistry";
 import { DOMUpdateInitiator } from "./DOMUpdateInitiator";
+import { DebugHelper } from "./DebugHelper";
 import { MathHelper } from "./math-helper";
 import { RectHelper } from "./rect-helper";
 
@@ -27,32 +28,40 @@ export class DOM<T extends HTMLElement> {
      */
 
     hasClass(name: string): boolean {
-        return this.cssClasses.has(name);
+        if(DebugHelper.isClassListCacheEnabled()) {
+            return this.cssClasses.has(name);
+        } else {
+            return this.element.classList.contains(name);
+        }
     }
 
     addClass(name: string): DOM<T> {
-        if(this.cssClasses.has(name) === false) {
-            this.cssClasses.add(name);
+        if(DebugHelper.isClassListCacheEnabled()) {
+            if(this.cssClasses.has(name) === false) {
+                this.cssClasses.add(name);
 
-            DOMUpdateInitiator.requestDOMUpdate(() => {
-                this.element.classList.add(name);
-            });
-            // TODO: DEBUG            
-            // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
+                DOMUpdateInitiator.requestDOMUpdate(() => {
+                    this.element.classList.add(name);
+                });
+            }
+        } else {
+            this.element.classList.add(name);
         }
         return this;
     }
 
     removeClass(name: string): DOM<T> {
-        if(this.cssClasses.has(name) === true) {
-            this.cssClasses.delete(name);
+        if(DebugHelper.isClassListCacheEnabled()) {
+            if(this.cssClasses.has(name) === true) {
+                this.cssClasses.delete(name);
 
-            DOMUpdateInitiator.requestDOMUpdate(() => {
-                this.element.classList.remove(name);
-            });
-            // TODO: DEBUG            
-            // DOMUpdateInitiator.forceEnqueuedDOMUpdates();
-        }        
+                DOMUpdateInitiator.requestDOMUpdate(() => {
+                    this.element.classList.remove(name);
+                });
+            }
+        } else {
+            this.element.classList.remove(name);
+        }    
         return this;
     }
 
@@ -99,37 +108,40 @@ export class DOM<T extends HTMLElement> {
      */
 
     private styleMap: Map<string, string> = new Map<string, string>();
-    private isStyleCacheEnabled = true;
-
-    enableStyleCache(flag: boolean) {
-        this.isStyleCacheEnabled = flag;
-    }
     
-    getCss(name: string): string {       
-        if(this.styleMap.has(name) && this.isStyleCacheEnabled) {
-            return this.styleMap.get(name);   
+    getCss(name: string): string {
+        if(DebugHelper.isCSSStyleCacheEnabled()) {
+            if(this.styleMap.has(name) ) {
+                return this.styleMap.get(name);   
+            } else {
+                const cssValue = this.element.style.getPropertyValue(name);
+                if(cssValue !== "") {
+                    this.styleMap.set(name, cssValue);
+                }
+                return cssValue;
+            }   
         } else {
-            const cssValue = this.element.style.getPropertyValue(name);
-            if(cssValue !== "") {
-                this.styleMap.set(name, cssValue);
-            }
-            return cssValue;
+            return this.element.style.getPropertyValue(name);
         }
     }
 
     css(propertyName: string, propertyValue: string): DOM<T> {
-        if(this.styleMap.has(propertyName) && this.styleMap.get(propertyName) === propertyValue)
-            return this;
+        if(DebugHelper.isCSSStyleCacheEnabled()) {
+            if(this.styleMap.has(propertyName) && this.styleMap.get(propertyName) === propertyValue)
+                return this;
 
-        if(propertyValue === undefined || propertyValue === null || propertyValue.trim() === "") {
-            this.styleMap.delete(propertyName);
+            if(propertyValue === undefined || propertyValue === null || propertyValue.trim() === "") {
+                this.styleMap.delete(propertyName);
+            } else {
+                this.styleMap.set(propertyName, propertyValue);
+            }
+
+            DOMUpdateInitiator.requestDOMUpdate(() => {
+                this.element.style.setProperty(propertyName, propertyValue);
+            });
         } else {
-            this.styleMap.set(propertyName, propertyValue);
-        }
-
-        DOMUpdateInitiator.requestDOMUpdate(() => {
             this.element.style.setProperty(propertyName, propertyValue);
-        });
+        }
 
         return this;
     }
@@ -145,7 +157,7 @@ export class DOM<T extends HTMLElement> {
     }
 
     getLeft(): number {
-        if(this.isBoundsCachingOn === false) {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
             return this.getBoundingClientRect().left;
         } else if(this.styleMap.has("left") === false)  {
             this.storeBoundsToCache();
@@ -156,7 +168,7 @@ export class DOM<T extends HTMLElement> {
     }
 
     getTop(): number {
-        if(this.isBoundsCachingOn === false) {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
             return this.getBoundingClientRect().top;
         } else if(this.styleMap.has("top") === false) {
             this.storeBoundsToCache();
@@ -167,7 +179,7 @@ export class DOM<T extends HTMLElement> {
     }
 
     getWidth(): number {
-        if(this.isBoundsCachingOn === false) {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
             return this.getBoundingClientRect().width;
         } else if(this.styleMap.has("width") === false) {
             this.storeBoundsToCache();
@@ -178,7 +190,7 @@ export class DOM<T extends HTMLElement> {
     }
 
     getHeight(): number {
-        if(this.isBoundsCachingOn === false) {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
             return this.getBoundingClientRect().height;
         } else if(this.styleMap.has("height") === false) {
             this.storeBoundsToCache();
@@ -290,16 +302,16 @@ export class DOM<T extends HTMLElement> {
     private storeBoundsToCache() {
         let bounds = RectHelper.fromDOMRect(this.element.getBoundingClientRect());
         bounds = RectHelper.floor(bounds);
-        if(this.styleMap.has("left") === false) {
+        if(this.styleMap.has("left") === false && DebugHelper.isCSSStyleCacheEnabled()) {
             this.styleMap.set("left", `${bounds.x}px`);
         }
-        if(this.styleMap.has("top") === false) {
+        if(this.styleMap.has("top") === false && DebugHelper.isCSSStyleCacheEnabled()) {
             this.styleMap.set("top", `${bounds.y}px`);
         }
-        if(this.styleMap.has("width") === false) {
+        if(this.styleMap.has("width") === false && DebugHelper.isCSSStyleCacheEnabled()) {
             this.styleMap.set("width", `${bounds.w}px`);
         }
-        if(this.styleMap.has("height") === false) {
+        if(this.styleMap.has("height") === false && DebugHelper.isCSSStyleCacheEnabled()) {
             this.styleMap.set("height", `${bounds.h}px`);
         }
     }

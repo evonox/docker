@@ -1,4 +1,5 @@
 import { Component } from "../framework/Component";
+import { DebugHelper } from "./DebugHelper";
 
 /**
  * Central DOM Update Initiator
@@ -94,18 +95,26 @@ export class DOMUpdateInitiator {
      */
 
     static requestDOMUpdate(handler: () => void) {
-        this.domUpdateHandlers.push(handler);
-        if(this.isUpdatedRequested === false) {
-            this.requestNextUpdateTick();
+        if(DebugHelper.isDOMQueuedUpdatesEnabled()) {
+            this.domUpdateHandlers.push(handler);
+            if(this.isUpdatedRequested === false) {
+                this.requestNextUpdateTick();
+            }   
+        } else {
+            handler();
         }
     }
 
     static requestComponentUpdate(component: Component) {
-        this.componentUpdateHandlers.push(() => {
+        if(DebugHelper.isDOMQueuedUpdatesEnabled()) {
+            this.componentUpdateHandlers.push(() => {
+                component.updateComponent();
+            })
+            if(this.isUpdatedRequested === false) {
+                this.requestNextUpdateTick();
+            }   
+        } else {
             component.updateComponent();
-        })
-        if(this.isUpdatedRequested === false) {
-            this.requestNextUpdateTick();
         }
     }
 }

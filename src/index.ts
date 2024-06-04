@@ -3,6 +3,9 @@ import { DockManager } from "./facade/DockManager"
 import "./index.css";
 import { IPanelAPI, IPanelStateAPI } from "./common/panel-api";
 import { DOM } from "./utils/DOM";
+import { DebugHelper } from "./utils/DebugHelper";
+
+DebugHelper.enableOptimizations(false);
 
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
