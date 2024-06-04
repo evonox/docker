@@ -1,5 +1,8 @@
 
 .DockerTS-FillDockContainer {
     display: grid;
-    background: red;
+}
+
+.DockerTS-DocumentManager {
+    background-color: var(--docker-ts-document-manager-background);
 }

@@ -1,5 +1,6 @@
 import { TabOrientation } from "../common/enumerations";
 import { DockManager } from "../facade/DockManager";
+import { DOM } from "../utils/DOM";
 import { FillDockContainer } from "./FillDockContainer";
 
 /**
@@ -9,6 +10,7 @@ export class DocumentManagerContainer extends FillDockContainer {
 
     constructor(dockManager: DockManager) {
         super(dockManager, TabOrientation.Top);
+        DOM.from(this.getDOM()).addClass("DockerTS-DocumentManager");
     }
 
     getMinimumChildNodeCount(): number {

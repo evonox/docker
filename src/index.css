@@ -17,6 +17,8 @@
     --docker-ts-resize-handle-hover-color: #4F5B70;
 
     --docker-ts-tabstrip-background: #B2C1D6;
+
+    --docker-ts-document-manager-background: #B2C1D6;
 }
 
 .DockerTS--DisableSelection {
