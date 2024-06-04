@@ -173,7 +173,6 @@ export class TabbedPanelContainer extends PanelContainer {
             for(const childContainer of this.childContainers) {
                 await childContainer.performClose();
             }
-            
             await super.close();
         }
         return canClose;
