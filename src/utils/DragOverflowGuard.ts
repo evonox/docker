@@ -13,6 +13,10 @@ export class DragOverflowGuard {
         this.isInOverflow = false;
     }
 
+    getOverflowDirection() {
+        return this.overflowDirection;
+    }
+
     startDragOverflow(coordinate: number, direction: OverflowDirection) {
         if(this.isInOverflow === true)
             return;

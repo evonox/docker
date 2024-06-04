@@ -194,59 +194,84 @@ export class ResizableContainer implements IDockContainer {
     }
 
     private performDrag(handle: ResizeHandle, currentPos: IPoint, dx: number, dy: number) {
-        const rect = DOM.from(this.topElement).getBoundsRect();
-        //const rect: IRect = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
+        let rect = DOM.from(this.topElement).getBoundsRect();
         rect.w = this.delegate.getWidth();
         rect.h = this.delegate.getHeight();
 
-        if(handle.north()) this.resizeNorth(currentPos, dy, rect);
-        if(handle.south()) this.resizeSouth(currentPos, dy, rect);
-        if(handle.west()) this.resizeWest(currentPos, dx, rect);
-        if(handle.east()) this.resizeEast(currentPos, dx, rect);
+        this.checkedX = false;
+        this.checkedY = false;
+
+        if(handle.north()) rect = this.resizeNorth(currentPos, dy, rect);
+        if(handle.south()) rect = this.resizeSouth(currentPos, dy, rect);
+        if(handle.west()) rect = this.resizeWest(currentPos, dx, rect);
+        if(handle.east()) rect = this.resizeEast(currentPos, dx, rect);
+
+        this.eventManager.triggerEvent("onDialogResized", rect);
     }
 
     private resizeNorth(currentPos: IPoint, delta: number, bounds: IRect) {
-        this.resizeContainer(currentPos, bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
+        return this.resizeContainer(currentPos, bounds, {dx: 0, dy: delta, dw: 0, dh: -delta});
     }
 
     private resizeSouth(currentPos: IPoint, delta: number, bounds: IRect) {
-        this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
+        return this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: 0, dh: delta});       
     }
 
     private resizeEast(currentPos: IPoint, delta: number, bounds: IRect) {
-        this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
+        return this.resizeContainer(currentPos, bounds, {dx: 0, dy: 0, dw: delta, dh: 0});             
     }
 
     private resizeWest(currentPos: IPoint, delta: number, bounds: IRect) {
-        this.resizeContainer(currentPos, bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
+        return this.resizeContainer(currentPos, bounds, {dx: delta, dy: 0, dw: -delta, dh: 0});             
     }
 
-    private resizeContainer(currentPos: IPoint, bounds: IRect, delta: IDeltaRect) {
-        this.checkedX = false;
-        this.constrainByDragOverflows(currentPos, bounds, delta);
-        this.constrainContainerRect(currentPos, bounds, delta);
+    private resizeContainer(currentPos: IPoint, bounds: IRect, delta: IDeltaRect): IRect {
 
+        this.constrainByDragOverflows(currentPos, {...bounds}, delta);
+        this.constrainContainerRect(currentPos, {...bounds}, delta);
+        
         bounds = RectHelper.appendDelta(bounds, delta);
-        this.eventManager.triggerEvent("onDialogResized", bounds);
+        return bounds;
     }
 
     private checkedX: boolean = false;
+    private checkedY: boolean = false;
 
     private constrainByDragOverflows(currentPos: IPoint, bounds: IRect, delta: IDeltaRect)  {
-        const overflowStateX = this.dragOverflowGuardX.isInDragOverflow(currentPos.x);
-        if(overflowStateX === DragOverflowState.InOverflowState) {
-            delta.dw = 0;
-            if(delta.dx !== 0) {
+        if(delta.dw !== 0) {
+            const overflowStateX = this.dragOverflowGuardX.isInDragOverflow(currentPos.x);
+            if(overflowStateX === DragOverflowState.InOverflowState) {
+                delta.dw = 0;
                 delta.dx = 0;
-            }
-            this.checkedX = true;
-        } else if(overflowStateX === DragOverflowState.OverflowStateTerminated) {
-            delta.dw = this.dragOverflowGuardX.adjustDeltaAfterOverflow(delta.dx, currentPos.x);
-            if(delta.dx !== 0) {
-                delta.dx = -delta.dw;
-            }
-            this.dragOverflowGuardX.reset();
-            this.checkedX = true;
+                this.checkedX = true;
+            } else if(overflowStateX === DragOverflowState.OverflowStateTerminated) {
+                if(this.dragOverflowGuardX.getOverflowDirection() === OverflowDirection.Decrementing) {
+                    delta.dw = this.dragOverflowGuardX.adjustDeltaAfterOverflow(delta.dw, currentPos.x);
+                } else {
+                    delta.dx = this.dragOverflowGuardX.adjustDeltaAfterOverflow(delta.dx, currentPos.x);
+                    delta.dw = - delta.dx;
+                }
+                this.dragOverflowGuardX.reset();
+                this.checkedX = true;
+            }   
+        }
+
+        if(delta.dh !== 0) {
+            const overflowStateY = this.dragOverflowGuardY.isInDragOverflow(currentPos.y);
+            if(overflowStateY === DragOverflowState.InOverflowState) {
+                delta.dh = 0;
+                delta.dy = 0;
+                this.checkedY = true;
+            } else if(overflowStateY === DragOverflowState.OverflowStateTerminated) {
+                if(this.dragOverflowGuardY.getOverflowDirection() === OverflowDirection.Decrementing) {
+                    delta.dh = this.dragOverflowGuardY.adjustDeltaAfterOverflow(delta.dh, currentPos.y);
+                } else {
+                    delta.dy = this.dragOverflowGuardY.adjustDeltaAfterOverflow(delta.dy, currentPos.y);
+                    delta.dh = - delta.dy;
+                }
+                this.dragOverflowGuardY.reset();
+                this.checkedY = true;
+            }   
         }
     }
 
@@ -260,16 +285,21 @@ export class ResizableContainer implements IDockContainer {
                 delta.dx = - delta.dw;
             }
 
-            const guardedCoordinate = this.lastMousePos.x + delta.dw;
             const direction = currentPos.x > this.lastMousePos.x ? OverflowDirection.Incrementing : OverflowDirection.Decrementing;
+            const guardedCoordinate = direction === OverflowDirection.Decrementing ? 
+                this.lastMousePos.x + delta.dw : this.lastMousePos.x + delta.dx;
             this.dragOverflowGuardX.startDragOverflow(guardedCoordinate, direction);
-
         }
-        if(bounds.h < minHeight) {
+        if(newBounds.h < minHeight && this.checkedY === false) {
+            delta.dh = minHeight - bounds.h;
             if(delta.dy !== 0) {
-                bounds.y -= minHeight - bounds.h;
+                delta.dy = - delta.dh;
             }
-            bounds.h = minHeight;
+
+            const direction = currentPos.y > this.lastMousePos.y ? OverflowDirection.Incrementing : OverflowDirection.Decrementing;
+            const guardedCoordinate = direction === OverflowDirection.Decrementing ? 
+                this.lastMousePos.y + delta.dh : this.lastMousePos.y + delta.dy;
+            this.dragOverflowGuardY.startDragOverflow(guardedCoordinate, direction);
         }
     }
 
