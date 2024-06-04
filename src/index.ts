@@ -51,6 +51,12 @@ dockManager.registerPanelType("panel1", "singleton", (dockManager) => {
                 panelApi.channel("CHANNEL").notify("Focus");
             }
             console.log(`ACTION INVOKED: ${actionName}`);
+        },
+        canClose: async () => {
+            return new Promise<boolean>((resolve) => {
+                const result = window.confirm("Can close this panel?");
+                resolve(result);
+            });
         }
 
     }
