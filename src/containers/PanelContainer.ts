@@ -14,7 +14,7 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, isPanelDefaultAction } from "../core/panel-default-buttons";
+import { PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, isPanelDefaultAction } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
@@ -360,11 +360,13 @@ export class PanelContainer extends Component implements IDockContainer {
             this.restorePanel();
         } else if(actionName === PANEL_ACTION_MINIMIZE) {
             this.minimizePanel();
+        } else if(actionName === PANEL_ACTION_CLOSE) {
+            this.close();
         }
     }
 
     /**
-     * Framework Component Callbacks
+     * Component Life-Cycle Methods
      */
 
     protected onInitialized(): void {
@@ -466,7 +468,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     /**
-     * Dock & Undock Facilities - TO BE DONE
+     * Dock & Undock Facilities
      */
 
     canUndock(flag?: boolean): boolean {
@@ -494,7 +496,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     /**
-     * Closing Facilities - TODO: TO BE DONE
+     * Closing Facilities
      */
 
     async close(): Promise<boolean> {
@@ -503,27 +505,26 @@ export class PanelContainer extends Component implements IDockContainer {
             return false;
         }
         
-        await this.api.onClose?.();
-        this.closeInternal();
+        this.performClose();
 
         return true;
     }
 
-    private async closeInternal() {
-        this.domContentContainer.removeFromDOM();
-        // TODO: FLOATING DIALOG SHOULD CLOSE
+    async performClose(shouldRequestClone: boolean = true) {
+        // Invoke API if present for instance to unmount React component
+        await this.api.onClose?.();
+        // Trigger for dialog close
         this.triggerEvent("onClose");
-        // TODO: TRY AND CATCH IN THE TRIGGER EVENT AND API CALLS?
-        this.dockManager.notifyOnClosePanel(this);
-        this.performClose();
-    }
-    
-    // TODO: REWORK
-    private performClose() {
-        //this.domContentWrapper.css("display", "block");
-        this.domContentContainer.css("display", "none");
-        this.domPanelPlaceholder.css("position", "");
-        this.dockManager.requestClose(this);
+        // Relayout the DockManager after closing the panel
+        if(shouldRequestClone) {
+            this.dockManager.requestClose(this);
+        }
+        // Remove the DOM ndoes
+        this.domContent.remove();
+        this.domContentHost.removeFromDOM();
+        this.domContentFrame.removeFromDOM();
+        // Do final destroy
+        this.destroy();
     }
 
     destroy() {

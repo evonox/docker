@@ -107,8 +107,11 @@ export class DockLayoutEngine {
 
     close(node: DockNode) {
         const parentNode = node?.parent;
-        if(! parentNode)
-            throw new Error("Node with no parent");
+        if(! parentNode) {
+            // Note: Container might be in the dialog or tabbed panel container
+            // No relayouting needed
+            return;
+        }
 
         let activeTabClosed = false;
         if(parentNode.getChildCount() > 0) {

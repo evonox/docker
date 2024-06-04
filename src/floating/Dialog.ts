@@ -72,6 +72,7 @@ export class Dialog implements IEventEmitter {
         this.panel.on("onFocused", this.handleOnFocus.bind(this));
         this.panel.on("onExpanded", this.handleOnExpand.bind(this));
         this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
+        this.panel.on("onClose", this.handleOnClose.bind(this));
 
         // Bind Component Events - Dragging Facilities
         this.draggable.on("onDraggableDragStart", this.handleDragStartEvent);
@@ -155,6 +156,10 @@ export class Dialog implements IEventEmitter {
     }
 
     destroy() {
+        // TODO: MOVE TO PANEL CONTAINER HANDLER FOR STOP FLOATING STATE - MAYBE FLOAT STATE 
+        this.panel.getContentFrameDOM().zIndex("1");
+        // this.panel.updateLayoutState();
+
         this.mouseDownEvent.unbind();
         this.eventManager.disposeAll();
 
@@ -163,9 +168,6 @@ export class Dialog implements IEventEmitter {
         this.resizable.dispose();
 
         this.dockManager.getModelContext().removeDialog(this);
-        // TODO: DEBUG - MOVE SOMEWHERE
-        this.panel.getContentFrameDOM().zIndex("1");
-        this.panel.updateLayoutState();
     }
 
     resize(rect: IRect) {
@@ -216,6 +218,10 @@ export class Dialog implements IEventEmitter {
     private handleOnExpand() {
         this.bringToFront();
         this.domDialog.height(this.lastExpanedSize);
+    }
+
+    private handleOnClose() {
+        this.destroy();
     }
 
     private resizePanelByDialog() {

@@ -152,4 +152,16 @@ export class TabbedPanelContainer extends PanelContainer {
         super.onDraggingEnded();
         this.childContainers.forEach(child => child.onDraggingEnded());
     }
+
+    async close(): Promise<boolean> {
+        const canClose = await this.getAPI().canClose?.() ?? true;
+        if(canClose) {
+            for(const childContainer of this.childContainers) {
+                await childContainer.performClose();
+            }
+            
+            await super.close();
+        }
+        return canClose;
+    }
 }
