@@ -30,7 +30,6 @@ dockManager.registerPanelType("panel1", "singleton", (dockManager) => {
             api.setPanelTitle("Panel Number 1");
             return domElement;
         },
-        getMinHeight: () => 125,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
@@ -71,7 +70,6 @@ dockManager.registerPanelType("panel2", "singleton", (dockManager) => {
             api.channel().subscribe("Focus", () => api.activate());
             return domElement;
         },
-        getMinWidth: () => 500,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
@@ -113,7 +111,8 @@ dockManager.registerPanelType("panel4", "singleton", (dockManager) => {
             api.channel("CHANNEL").subscribe("Focus", () => api.activate());
             return domElement;
         },
-        getMinWidth: () => 100,
+        getMinWidth: () => 300,
+        getMinHeight: () => 200,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
@@ -141,8 +140,6 @@ dockManager.registerPanelType("panel5", "singleton", (dockManager) => {
             api.setPanelTitle("Bottom View");
             return domElement;
         },
-        getMinWidth: () => 300,
-        getMinHeight: () => 150,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
@@ -169,8 +166,6 @@ dockManager.registerPanelType("panel6", "transient", (dockManager) => {
             api.setPanelTitle("Floating Test Dialog");
             return domElement;
         },
-        getMinWidth: () => 400,
-        getMinHeight: () => 100,
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,

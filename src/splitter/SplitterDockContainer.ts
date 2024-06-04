@@ -109,7 +109,7 @@ export abstract class SplitterDockContainer implements IDockContainer {
         if(this.orientation === OrientationKind.Row) {
             return this.childContainers.reduce((prev, value) => {
                 return prev + value.getMinWidth();
-            }, 0);
+            }, 0) + this.splitterPanel.getTotalBarSize();
         } else {
             return this.childContainers.reduce((prev, value) => {
                 return Math.max(prev, value.getMinWidth());
@@ -125,7 +125,7 @@ export abstract class SplitterDockContainer implements IDockContainer {
         } else {
             return this.childContainers.reduce((prev, value) => {
                 return prev + value.getMinHeight();
-            }, 0);
+            }, 0) + this.splitterPanel.getTotalBarSize();
         }
     }
 

@@ -113,6 +113,10 @@ export class SplitterPanel extends Component {
      * SplitterPanel Public API
      */
 
+    getTotalBarSize() {
+        return this.splitterBars[0].getBarSize() * this.splitterBars.length;
+    }
+
     getContainerSize(container: IDockContainer) {
         const index = this.childContainers.indexOf(container);
         return this.containerSizes[index];

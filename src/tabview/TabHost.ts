@@ -80,11 +80,21 @@ export class TabHost extends Component {
     }
 
     getMinWidth(): number {
-        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinWidth()), 0);
+        let minWidth = this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinWidth()), 0);
+        if(this.tabStripDirection === TabOrientation.Left || this.tabStripDirection === TabOrientation.Right) {
+            const tabStripWidth = DOM.from(this.tabStrip.getDOM()).getOffsetRect().w;
+            minWidth += tabStripWidth;
+        }
+        return minWidth;
     }
 
     getMinHeight(): number {
-        return this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinHeight()), 0);
+        let minHeight = this.tabPages.reduce((prev, tabPage) => Math.max(prev, tabPage.getContainer().getMinHeight()), 0);
+        if(this.tabStripDirection === TabOrientation.Top || this.tabStripDirection === TabOrientation.Bottom) {
+            const tabStripHeight = DOM.from(this.tabStrip.getDOM()).getOffsetRect().h;
+            minHeight += tabStripHeight + this.domSeparator.getOffsetRect().h;
+        }
+        return minHeight;
     }
 
     updateLayoutState() {

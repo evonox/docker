@@ -234,7 +234,12 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     getMinHeight(): number {
-        return this.api.getMinHeight?.() ?? this.dockManager.config.defaultMinHeight;
+        let minHeight = this.api.getMinHeight?.() ?? this.dockManager.config.defaultMinHeight;
+        // If the panel header is visible, we need to add it up to the minimum height
+        if(this.isHeaderVisible()) {
+            minHeight += this.domFrameHeader.getOffsetRect().h;
+        }
+        return minHeight;
     }
 
     expandPanel() {
