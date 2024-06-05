@@ -41,6 +41,8 @@ export class TabbedPanelContainer extends PanelContainer {
             const domTabHost = this.tabHost.getDOM();
             DOM.from(domTabHost).height("100%");
             this.setContentElement(domTabHost);  
+            // Update the state of the panel
+            this.updateState();
         }
     }
 
@@ -51,6 +53,7 @@ export class TabbedPanelContainer extends PanelContainer {
         this.updateContainerState();
 
         container.enableDefaultContextMenu(false);
+        this.updateChildContainerZIndexes();
 
         // Redirecting the onFocused event
         container.on("onFocused", () => {
@@ -108,6 +111,15 @@ export class TabbedPanelContainer extends PanelContainer {
     updateLayoutState(): void {
         super.updateLayoutState();
         this.tabHost.updateLayoutState();
+    }
+
+    updateState(): void {
+        super.updateState();
+        this.updateChildContainerZIndexes();
+        this.childContainers.forEach(child => child.updateState());
+    }
+
+    private updateChildContainerZIndexes() {
         let zIndex = this.getContentFrameDOM().getZIndex();
         if(isNaN(zIndex)) {
             zIndex = 1;
@@ -115,6 +127,7 @@ export class TabbedPanelContainer extends PanelContainer {
         this.childContainers?.forEach(child => {
             child.getContentFrameDOM().zIndex(zIndex + 1)
         });
+
     }
 
     resize(rect: IRect): void {

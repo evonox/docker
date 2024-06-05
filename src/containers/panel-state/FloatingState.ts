@@ -9,10 +9,10 @@ import { PanelContainer } from "../PanelContainer";
 import { PanelStateBase } from "./PanelStateBase";
 import { SharedStateConfig } from "./SharedStateConfig";
 
-
+/**
+ * Floating State of the Panel Container - TODO: REVIEW THIS
+ */
 export class FloatingState extends PanelStateBase {
-
-    private dialogFrameRO: ResizeObserver = undefined;
 
     private isCollapsed: boolean;
     private lastDialogExpandedHeight: number;
@@ -23,7 +23,10 @@ export class FloatingState extends PanelStateBase {
         super(dockManager, panel, config);
     }
 
-    public async enterState(): Promise<void> {
+    public async enterState(initialState: boolean): Promise<void> {
+        await super.enterState(initialState);
+
+        // TODO: REVIEW THIS
         if(this.dialog === undefined) {
             this.dialog = this.config.get("panelDialog");
         }
@@ -39,48 +42,23 @@ export class FloatingState extends PanelStateBase {
             this.panel.getContentFrameDOM().applyRect(previousPosition);
         }
 
-        this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, true);
-        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, true);
-        this.panel.showHeaderButton(PANEL_ACTION_RESTORE, false);
-        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
-        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
-
+        this.configureButtons({
+            minimize: true, maximize: true, restore: false, expand: false, collapse: true
+        });
         this.panel.updateLayoutState();
 
-        this.dialog.bringToFront();
+        const domDialogFrame = this.dialog.getDialogFrameDOM();
+        this.observeElement(domDialogFrame, () => this.adjustPanelContentState());
     }
 
     public async leaveState(): Promise<void> {
-       this.stopSizeObservation();
-
-        // Set zIndex to DockedState value
         const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.zIndex("1");
-        // To update zIndex values in the nested panels of TabbedPanelContainer
-       this.panel.updateLayoutState(); 
-       this.panel.updateContainerState();
-    }
+        domContentFrame.zIndex(1);
+        this.panel.updateLayoutState();
 
-    public dispose(): void {
-        this.stopSizeObservation();
-    }
+        this.dialog.hide();
 
-    private startSizeObservation() {
-        this.dialogFrameRO = new ResizeObserver((entries) => {
-            this.updateLayoutState();
-        });
-
-        const domDialogFrame = this.dialog.getDialogFrameDOM();
-        this.dialogFrameRO.observe(domDialogFrame, {box: "border-box"});       
-    }
-
-    private stopSizeObservation() {
-        if(this.dialogFrameRO !== undefined) {
-            const domDialogFrame = this.dialog.getDialogFrameDOM();
-            this.dialogFrameRO.unobserve(domDialogFrame);       
-            this.dialogFrameRO.disconnect();
-            this.dialogFrameRO = undefined;   
-        }
+       await super.leaveState();
     }
 
     async dockPanel(): Promise<boolean> {
@@ -92,8 +70,6 @@ export class FloatingState extends PanelStateBase {
             await this.expand(true);
         }
 
-        this.dialog.hide();
-
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("panelDialog", this.dialog);
         this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
@@ -101,18 +77,6 @@ export class FloatingState extends PanelStateBase {
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
         this.config.set("lastFloatingRect", rect);
         this.config.set("originalRect", rect);
-
-        // const domContentFrame = this.panel.getContentFrameDOM();
-        // domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
-
-        // const viewportRect = this.dockManager.getContainerBoundingRect();
-
-        // // this.panel.updateLayoutState();
-
-        // await AnimationHelper.animateMaximize(domContentFrame.get(), {
-        //     x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
-        // });
-        
 
         return true;
     }
@@ -122,20 +86,11 @@ export class FloatingState extends PanelStateBase {
             await this.expand(true);
         }
 
-        this.dialog.hide();
-        const domContentFrame = this.panel.getContentFrameDOM();
-
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getComputedRect();
         this.config.set("lastFloatingRect", rect);
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("panelDialog", this.dialog);
         this.config.set("originalRect", rect);
-
-        const minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
-        domContentFrame.addClass("DockerTS-ContentFrame--Animating");
-        await AnimationHelper.animateMinimize(domContentFrame.get(), minimizedFreeSlot);
-        domContentFrame.removeClass("DockerTS-ContentFrame--Animating");
-        domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
         
         return true;
     }
@@ -195,28 +150,20 @@ export class FloatingState extends PanelStateBase {
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
     }
 
-
-    public updatePanelState(): void {
-        super.updatePanelState();
-       
+    updateState(): void {
         const zIndex = DOM.from(this.dialog.getDialogFrameDOM()).getZIndex();
         this.panel.getContentFrameDOM().zIndex(zIndex);
+
+        this.adjustPanelContentState();
+        super.updateState();
     }
 
-    public updateLayoutState(): void {
-        // // TODO: REWORK TO DOM HELPER getComputedRect
-        // const cssStyle = window.getComputedStyle(this.dialog.getDialogFrameDOM())
-        // this.panel.getContentFrameDOM().applyRect({
-        //     x: parseFloat(cssStyle.left),
-        //     y: parseFloat(cssStyle.top),
-        //     w: parseFloat(cssStyle.width),
-        //     h: parseFloat(cssStyle.height)
-        // });
+    private adjustPanelContentState() {
+        const rect = DOM.from(this.dialog.getDialogFrameDOM()).getBoundsRect();
+        this.panel.getContentFrameDOM().applyRect(rect);
     }
 
-
+    // TODO: IS THIS FOR ANYTHING???
     public resize(rect: IRect) {
-        const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.applyRect(rect);
     }
 }

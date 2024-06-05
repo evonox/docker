@@ -169,11 +169,9 @@ export class PanelContainer extends Component implements IDockContainer {
     setHeaderVisibility(visible: boolean): void {
         if(visible) {
             this.domFrameHeader.css("visibility", "");
-            // this.domFrameHeader.show();
             this.domContentFrame.removeClass("DockerTS-ContentFrame--NoHeader");
         } else {
             this.domFrameHeader.css("visibility", "collapse");
-            // this.domFrameHeader.hide();
             this.domContentFrame.addClass("DockerTS-ContentFrame--NoHeader");
         }
     }
@@ -286,24 +284,24 @@ export class PanelContainer extends Component implements IDockContainer {
     // PanelContainer is leaf node => no layouting logic
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {}
 
+    updateState() {
+        this.state.updateState();
+    }
+
     updateLayoutState(): void {
-        this.state.updateLayoutState();
+        this.state.updateState();
     }
 
     updateContainerState() {
-        this.state.updatePanelState();
+        this.state.updateState();
     }
 
     onDraggingStarted() {
-        this.previousContentZIndex = this.getContentFrameDOM().getZIndex();
-        const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
-        this.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging").zIndex(zIndexWheel);
+        this.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging");
     }
 
     onDraggingEnded() {
-        this.getContentFrameDOM()
-            .removeClass("DockerTS-ContentFrame--Dragging")
-            .zIndex(this.previousContentZIndex);
+        this.getContentFrameDOM().removeClass("DockerTS-ContentFrame--Dragging");
     }
 
     /**

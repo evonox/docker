@@ -1,95 +1,76 @@
 import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
-import { Dialog } from "../../floating/Dialog";
-import { DOM } from "../../utils/DOM";
-import { AnimationHelper } from "../../utils/animation-helper";
 import { PanelStateBase } from "./PanelStateBase";
 
-
+/**
+ * Minimized State of Panel Container
+ */
 export class MinimizedState extends PanelStateBase {
 
-    private minimizedSlotId = 0;
+    private minimizingSlotId = 0;
 
     public async enterState(initialState: boolean): Promise<void> {
-        this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, false);
-        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, true);
-        this.panel.showHeaderButton(PANEL_ACTION_RESTORE, true);
-        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
-        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+        await super.enterState(initialState);
+        this.configureButtons({
+            minimize: false, maximize: true, restore: true, expand: false, collapse: false
+        });
 
-        this.minimizedSlotId = this.dockManager.requestMinimizeSlot();
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
+
+        this.minimizingSlotId = this.dockManager.requestMinimizeSlot();
+        this.updateMinimizedSlotPosition();
     }
 
     public async leaveState(): Promise<void> {
-        this.dockManager.releaseMinimizeSlot(this.minimizedSlotId);
+        // Clean up applied CSS element styles
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.zIndex("").removeClass("DockerTS-ContentFrame--Minimized").css("right", "");
+        // Release the minimization slot
+        this.dockManager.releaseMinimizeSlot(this.minimizingSlotId);      
+        await super.leaveState();
     }
 
     public dispose(): void {
-        
+        this.dockManager.releaseMinimizeSlot(this.minimizingSlotId);       
+        super.dispose();
     }
 
     async maximize(): Promise<boolean> {
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("wasHeaderVisible", true);
 
-        const domContentFrame = this.panel.getContentFrameDOM();
-        // For animation purposes we need to apply to CSS positioning attributes of the current position
-        const currentRect: IRect = domContentFrame.getComputedRect();
-        domContentFrame.applyRect(currentRect);
-        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
-            .removeClass("DockerTS-ContentFrame--Minimized")
-            .css("right", "");
-
-        const viewportRect = this.dockManager.getContainerBoundingRect();
-        await AnimationHelper.animateMaximize(domContentFrame.get(), {
-            x: viewportRect.left, y: viewportRect.top, w: viewportRect.width, h: viewportRect.height
-        });
-        
-        return true;
+        this.applyCurrentRectToContentFrame();
+       return true;
     }
 
     async restore(): Promise<boolean> {
-        const originalRect: IRect = this.config.get("originalRect");
-        const domContentFrame = this.panel.getContentFrameDOM();
-        // For animation purposes we need to apply to CSS positioning attributes of the current position
-        const currentRect: IRect = domContentFrame.getComputedRect();
-        domContentFrame.applyRect(currentRect);
-        domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
-            .removeClass("DockerTS-ContentFrame--Minimized")
-            .css("right", "");
-
-        domContentFrame.addClass("DockerTS-ContentFrame--Animating");
-        await AnimationHelper.animateRestore(domContentFrame.get(), originalRect);
-        domContentFrame.removeClass("DockerTS-ContentFrame--Animating");
-
-        const dialog: Dialog = this.config.get("panelDialog");
-        dialog.show();
-        // DOM.from(dialog.getDialogFrameDOM()).applyRect(originalRect);
-    //        this.panel.getContentFrameDOM().applyRect(originalRect);
-
-
-        domContentFrame.zIndex("");
-        this.panel.setHeaderVisibility(true);
-
+        this.applyCurrentRectToContentFrame();
         return true;
     }
 
-    public updateLayoutState(): void {
-        super.updateLayoutState();
+    public updateState(): void {
+        super.updateState();
+        this.updateMinimizedSlotPosition();
+    }
 
+    private applyCurrentRectToContentFrame() {
+        // For animation purposes we need to apply to CSS positioning attributes of the current position
+        const domContentFrame = this.panel.getContentFrameDOM();
+        const currentRect: IRect = domContentFrame.getComputedRect();
+        domContentFrame.applyRect(currentRect);
+    }
+
+    private updateMinimizedSlotPosition() {
         const domContentFrame = this.panel.getContentFrameDOM();
         const domFrameHeader = this.panel.getFrameHeaderDOM();
-        const slotPropertyName = this.dockManager.getSlotCSSPropertyName(this.minimizedSlotId);
-        domContentFrame.left("").top(``).width("").height(domFrameHeader.getHeight())
+        const slotPropertyName = this.dockManager.getSlotCSSPropertyName(this.minimizingSlotId);
+
+        domContentFrame.left("").top("")
+            .width("").height(domFrameHeader.getHeight())
             .css("right", `var(${slotPropertyName})`);
     }
 
-    public updatePanelState(): void {
-        super.updatePanelState();
-    }
-
-    public resize(rect: IRect) {
-        
-    }
+    // TODO: IS THIS NEEDED???
+    public resize(rect: IRect) {}
 }

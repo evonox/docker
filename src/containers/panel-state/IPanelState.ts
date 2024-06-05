@@ -19,11 +19,9 @@ export interface IPanelStateAPI {
     expand(): Promise<boolean>;
 
     // Misc update panel state methods
-    updatePanelState(): void;
-    updateLayoutState(): void;
+    updateState(): void;
     resize(rect: IRect): void;
 }
-
 
 /**
  * Generic panel state interface

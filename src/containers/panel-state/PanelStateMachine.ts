@@ -9,6 +9,7 @@ import { IGenericPanelState, IPanelStateAPI } from "./IPanelState";
 import { MaximizedState } from "./MaximizedState";
 import { MinimizedState } from "./MinimizedState";
 import { SharedStateConfig } from "./SharedStateConfig";
+import { StateTransitionFactory } from "./StateTransitionFactory";
 
 /**
  * Facade Class - generic state machine class for a panel container
@@ -100,12 +101,8 @@ export class PanelStateMachine implements IPanelStateAPI {
         return await this.currentState.expand();
     }
 
-    updatePanelState(): void {
-        this.currentState.updatePanelState();
-    }
-
-    updateLayoutState(): void {
-        this.currentState.updateLayoutState();
+    updateState(): void {
+        this.currentState.updateState();
     }
 
     resize(rect: IRect) {
@@ -113,10 +110,18 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     // Generic private method to change state
-    private async changeStateTo(state: PanelContainerState): Promise<void> {
+    private async changeStateTo(newState: PanelContainerState): Promise<void> {
+        // Leave the state
         await this.currentState.leaveState();
-        this.containerState = state;
-        this.currentState = this.createStateByType(state);
+        
+        // Trigger the state transition
+        const transition = StateTransitionFactory.create(this.dockManager, this.panel, this.config, 
+                this.containerState, newState);
+        await transition.trigger();
+        
+        // Create and enter the new state
+        this.containerState = newState;
+        this.currentState = this.createStateByType(newState);
         await this.currentState.enterState(false);
     }
 

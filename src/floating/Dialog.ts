@@ -7,10 +7,12 @@ import { DOM } from "../utils/DOM";
 import { DraggableContainer } from "./DraggableContainer";
 import { ResizableContainer } from "./ResizableContainer";
 import { IPoint, IRect } from "../common/dimensions";
-import { MOUSE_BTN_RIGHT } from "../common/constants";
 
 import "./Dialog.css";
 
+/**
+ * Class reponsible for managing floating dialog frame for the panel container
+ */
 export class Dialog implements IEventEmitter {
 
     private domDialog: DOM<HTMLElement>;
@@ -19,6 +21,11 @@ export class Dialog implements IEventEmitter {
     private resizable: ResizableContainer;
 
     private mouseDownEvent: DOMEvent<MouseEvent>;
+
+    private subOnFocused: ComponentEventSubscription;
+    private subOnExpanded: ComponentEventSubscription;
+    private subOnCollapsed: ComponentEventSubscription;
+    private subOnClosed: ComponentEventSubscription;
 
     private position: IPoint;
     private isHidden: boolean = false;
@@ -64,44 +71,42 @@ export class Dialog implements IEventEmitter {
         this.draggable = new DraggableContainer(this.dockManager, this.panel, this.domDialog.get(), this.panel.getHeaderElement());
         this.resizable = new ResizableContainer(this.dockManager, this.draggable, this.domDialog.get());        
         this.domDialog.appendTo(this.dockManager.getContainerElement());
-        this.resizable.on("onDialogResized", this.handleResizeEvent.bind(this));
 
         // Bind the DOM events
         this.mouseDownEvent = new DOMEvent<MouseEvent>(this.domDialog.get());
         this.mouseDownEvent.bind("mousedown", this.handleMouseDown.bind(this), {capture: false});
-        this.panel.on("onFocused", this.handleOnFocus.bind(this));
-        this.panel.on("onExpanded", this.handleOnExpand.bind(this));
-        this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
-        this.panel.on("onClose", this.handleOnClose.bind(this));
+
+        // Bind Panel Events
+        this.subOnFocused = this.panel.on("onFocused", this.handleOnFocus.bind(this));
+        this.subOnExpanded = this.panel.on("onExpanded", this.handleOnExpand.bind(this));
+        this.subOnCollapsed = this.panel.on("onCollapsed", this.handleOnCollapse.bind(this));
+        this.subOnClosed = this.panel.on("onClose", this.handleOnClose.bind(this));
 
         // Bind Component Events - Dragging Facilities
         this.draggable.on("onDraggableDragStart", this.handleDragStartEvent);
         this.draggable.on("onDraggableDragMove", this.handleDragMoveEvent);
         this.draggable.on("onDraggableDragStop", this.handleDragEndEvent);
-       
+
+        // Bind Resizable Events
+        this.resizable.on("onDialogResized", this.handleResizeEvent.bind(this));
+
         // Bring the dialog to the front
         this.assignNewZIndex();
         this.dockManager.setActivePanel(this.panel);
-        this.bringToFront();
     }
 
+    /**
+     * Drag-and-drop Event Handlers
+     */
+
     private handleDragStartEvent(event: MouseEvent) {
-        this.bringToFront();
-        this.lastDialogZIndex = DOM.from(this.getDialogFrameDOM()).getZIndex();
         const zIndexWheel = this.dockManager.config.zIndexes.zIndexWheel;
         DOM.from(this.getDialogFrameDOM()).zIndex(zIndexWheel);
-
-        // Adjust the position of dialog if the drag handle offset is out of bounds
-        const dialogBounds = DOM.from(this.getDialogFrameDOM()).getBoundsRect();
-        if(event.pageX > dialogBounds.x + dialogBounds.w * 0.75) {
-            const positionX = event.pageX - dialogBounds.w * 0.75;
-            const position = this.getPosition();
-            this.setPosition(positionX, position.y);
-        }
+        this.adjustDialogDraggingPosition(event);
+        this.panel.updateState();
 
         this.panel.onDraggingStarted();
 
-        // TODO: RENAME SENDER TO DIALOG
         this.eventManager.triggerEvent("onDragStart", {sender: this, event});
     }
 
@@ -112,36 +117,55 @@ export class Dialog implements IEventEmitter {
 
     private handleDragEndEvent(event: MouseEvent) {
         DOM.from(this.getDialogFrameDOM()).zIndex(this.lastDialogZIndex);
+        this.panel.updateState();
         this.panel.onDraggingEnded();
-        this.bringToFront();
         this.eventManager.triggerEvent("onDragStop", {sender: this, event});
     }
 
+    private adjustDialogDraggingPosition(event: MouseEvent) {
+        // Adjust the position of dialog if the drag handle offset is out of bounds
+        const dialogBounds = DOM.from(this.getDialogFrameDOM()).getBoundsRect();
+        if(event.pageX > dialogBounds.x + dialogBounds.w * 0.75) {
+            const positionX = event.pageX - dialogBounds.w * 0.75;
+            const position = this.getPosition();
+            this.setPosition(positionX, position.y);
+        }
+    }
+
+    /**
+     * Public API Methods
+     */
+
     getZIndex(): number {
-        return parseInt(this.domDialog.getCss("zIndex"));
+        return this.domDialog.getZIndex();
     }
 
     getPanel(): PanelContainer {
         return this.panel;
     }
 
-    setPosition(x: number, y: number) {
-        const outerRect = this.dockManager.getContainerElement().getBoundingClientRect();
-        this.position = {x: x - outerRect.left, y: y - outerRect.top};
-        this.domDialog.left(this.position.x).top(this.position.y); 
-        this.resizePanelByDialog();
-    }
-
     getPosition(): IPoint {
         return {x: this.position?.x ?? 0, y: this.position?.y ?? 0};
     }
 
+    setPosition(x: number, y: number) {
+        this.position = {x: x, y: y};
+        this.domDialog.left(this.position.x).top(this.position.y); 
+        this.panel.updateState();
+
+        this.dockManager.notifyOnChangeDialogPosition(this, x, y);
+    }
+
+    resize(rect: IRect) {
+        this.domDialog.left(rect.x).top(rect.y).width(rect.w).height(rect.h);
+        this.dockManager.notifyOnChangeDialogPosition(this, rect.x, rect.y);
+    }
+
     show() {
         this.domDialog.css("display", "");
-        // TODO: ELEMENT CONTAINER Z-INDEX???
         if(this.isHidden) {
             this.isHidden = false;
-            // TODO: NOTIFY DOCKER MANAGER - POSSIBLY TRIGGER OPERATION
+            this.dockManager.notifyOnShowDialog(this);
         }
     }
 
@@ -149,27 +173,18 @@ export class Dialog implements IEventEmitter {
         this.domDialog.css("display", "none");
         if(! this.isHidden) {
             this.isHidden = true;
-            // TODO: NOTIFY DOCKER MANAGER
+            this.dockManager.notifyOnHideDialog(this);
         }
     }
 
-    close() {
-        this.hide();
-        this.remove();
-        this.destroy();
-    }
-
-    remove() {
-        this.domDialog.removeFromDOM();
-    }
-
     destroy() {
-        // TODO: MOVE TO PANEL CONTAINER HANDLER FOR STOP FLOATING STATE - MAYBE FLOAT STATE 
-        this.panel.getContentFrameDOM().zIndex("1");
-        // this.panel.updateLayoutState();
-
         this.mouseDownEvent.unbind();
         this.eventManager.disposeAll();
+
+        this.subOnClosed.unsubscribe();
+        this.subOnCollapsed.unsubscribe();
+        this.subOnExpanded.unsubscribe();
+        this.subOnFocused.unsubscribe();
 
         this.domDialog.removeFromDOM();
         this.draggable.dispose();
@@ -178,15 +193,11 @@ export class Dialog implements IEventEmitter {
         this.dockManager.getModelContext().removeDialog(this);
     }
 
-    resize(rect: IRect) {
-        this.domDialog.width(rect.w).height(rect.h);
-        this.resizePanelByDialog();
-    }
 
     bringToFront() {
-        // if(this.dockManager.isToplevelDialog(this))
-        //     return;
-        // this.dockManager.moveDialogToTop(this);
+        if(this.dockManager.isToplevelDialog(this))
+            return;
+        this.dockManager.moveDialogToTop(this);
 
         this.assignNewZIndex();
         this.dockManager.setActivePanel(this.panel);
@@ -194,14 +205,16 @@ export class Dialog implements IEventEmitter {
 
     private assignNewZIndex() {
         const nextZIndex = this.dockManager.genNextDialogZIndex();
+        this.lastDialogZIndex = nextZIndex;
         this.domDialog.zIndex(nextZIndex);
-        // TODO: UNIFY UPDATE STATE
-        this.panel.updateLayoutState();
-        this.panel.updateContainerState();
+        this.panel.updateState();
     }
 
+    /**
+     * Misc Event Handlers
+     */
+
     private handleResizeEvent(rect: IRect) {
-        this.setPosition(rect.x, rect.y);
         this.resize(rect);
     }
 
@@ -211,9 +224,7 @@ export class Dialog implements IEventEmitter {
     }
 
     private handleMouseDown(event: MouseEvent) {
-        if(event.button !== MOUSE_BTN_RIGHT) {
-            this.bringToFront();
-        }
+        this.bringToFront();
     }
 
     private handleOnCollapse() {
@@ -230,10 +241,5 @@ export class Dialog implements IEventEmitter {
 
     private handleOnClose() {
         this.destroy();
-    }
-
-    private resizePanelByDialog() {
-        const rect = this.domDialog.getBoundsRect();
-        this.panel.resize(rect);
     }
 }
