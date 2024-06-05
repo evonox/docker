@@ -14,7 +14,8 @@ export enum PanelContainerState {
     Floating = "floating", 
     Minimized = "minimized", 
     Maximized = "maximized",
-    InCollapser = "in-collapser" 
+    InCollapser = "in-collapser",
+    PopupWindow = "popup-window"
  }
 
 export enum DockKind { Left = "left", Right = "right", Up = "up", Down = "down", Fill = "fill" };

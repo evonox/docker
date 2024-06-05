@@ -14,7 +14,7 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, isPanelDefaultAction } from "../core/panel-default-buttons";
+import { PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, isPanelDefaultAction } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
@@ -259,6 +259,15 @@ export class PanelContainer extends Component implements IDockContainer {
         await this.state.minimize();
     }
 
+    async showPopupWindow() {
+        this.activatePanel();
+        await this.state.showPopup();
+    }
+
+    async hidePopupWindow() {
+        await this.state.hidePopup();
+    }
+
     toggleMaximizedPanelState() {
         if(this.state.getCurrentState() === PanelContainerState.Maximized) {
             this.restorePanel();
@@ -365,6 +374,8 @@ export class PanelContainer extends Component implements IDockContainer {
             await this.minimizePanel();
         } else if(actionName === PANEL_ACTION_CLOSE) {
             await this.close();
+        } else if(actionName === PANEL_ACTION_SHOW_POPUP) {
+            await this.showPopupWindow();
         }
 
         this._isProcessingDefaultAction = false;

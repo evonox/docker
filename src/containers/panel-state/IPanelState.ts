@@ -18,6 +18,9 @@ export interface IPanelStateAPI {
     collapse(): Promise<boolean>;
     expand(): Promise<boolean>;
 
+    showPopup(): Promise<boolean>;
+    hidePopup(): Promise<boolean>;
+
     // Central update method
     updateState(): void;
 }

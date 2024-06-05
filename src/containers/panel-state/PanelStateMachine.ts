@@ -8,6 +8,7 @@ import { FloatingState } from "./FloatingState";
 import { IGenericPanelState, IPanelStateAPI } from "./IPanelState";
 import { MaximizedState } from "./MaximizedState";
 import { MinimizedState } from "./MinimizedState";
+import { PopupWindowState } from "./PopupWindowState";
 import { SharedStateConfig } from "./SharedStateConfig";
 import { StateTransitionFactory } from "./StateTransitionFactory";
 
@@ -92,6 +93,23 @@ export class PanelStateMachine implements IPanelStateAPI {
         return isAllowed;
     }
 
+    async showPopup(): Promise<boolean> {
+        const isAllowed = await this.currentState.showPopup();
+        if(isAllowed) {
+            await this.changeStateTo(PanelContainerState.PopupWindow);
+        }
+        return isAllowed;
+    }
+
+    async hidePopup(): Promise<boolean> {
+        const isAllowed = await this.currentState.hidePopup();
+        if(isAllowed) {
+            await this.changeStateTo(this.config.get("restoreState", PanelContainerState.Docked));
+        }
+        return isAllowed;
+    }
+
+
     // Misc State Change Methods
     async collapse(): Promise<boolean> {
         return await this.currentState.collapse();
@@ -132,6 +150,7 @@ export class PanelStateMachine implements IPanelStateAPI {
             case PanelContainerState.Floating: return new FloatingState(this.dockManager, this.panel, this.config, this.dialog);
             case PanelContainerState.Maximized: return new MaximizedState(this.dockManager, this.panel, this.config);
             case PanelContainerState.Minimized: return new MinimizedState(this.dockManager, this.panel, this.config);
+            case PanelContainerState.PopupWindow: return new PopupWindowState(this.dockManager, this.panel, this.config);
             default: throw new Error(`Unknown Panel State ${state}`);
         }
     }

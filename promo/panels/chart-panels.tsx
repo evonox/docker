@@ -145,8 +145,11 @@ const ChartFactoryFn = (title: string, icon: string, component: React.ReactEleme
         getMinWidth: () => 400,
         getMinHeight: () => 180,
         onResize: (width: number, height: number) => {
-            domRoot.style.width = width + "px";
-            domRoot.style.height = height + "px";
+            if(domRoot !== undefined) {
+                domRoot.style.width = width + "px";
+                domRoot.style.height = height + "px";   
+            }
+            
         }
     }
 }

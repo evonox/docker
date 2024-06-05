@@ -41,6 +41,9 @@ export const TAB_STRIP_CONTEXT_MENU_ICON = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>    
 `;
 
+export const POPUP_WINDOW_ICON = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M432 48H208c-17.7 0-32 14.3-32 32V96H128V80c0-44.2 35.8-80 80-80H432c44.2 0 80 35.8 80 80V304c0 44.2-35.8 80-80 80H416V336h16c17.7 0 32-14.3 32-32V80c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16H320c8.8 0 16-7.2 16-16V256H48V448zM64 128H320c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192c0-35.3 28.7-64 64-64z"/></svg>
+`;
 
 /**
  * Configuration of default panel buttons
@@ -52,6 +55,7 @@ export const PANEL_ACTION_MINIMIZE = "onMinimize";
 export const PANEL_ACTION_RESTORE = "onRestore";
 export const PANEL_ACTION_MAXIMIZE = "onMaximize";
 export const PANEL_ACTION_CLOSE = "onClose";
+export const PANEL_ACTION_SHOW_POPUP = "onShowPopup";
 
 export const TABSTRIP_SCROLL_LEFT = "onScrollLeft";
 export const TABSTRIP_SCROLL_RIGHT = "onScrollRight";
@@ -64,6 +68,7 @@ const PANEL_DEFAULT_ACTION_LIST = [
     PANEL_ACTION_MAXIMIZE,
     PANEL_ACTION_MINIMIZE,
     PANEL_ACTION_RESTORE,
+    PANEL_ACTION_SHOW_POPUP,
     TABSTRIP_SCROLL_LEFT,
     TABSTRIP_SCROLL_RIGHT,
     TABSTRIP_SHOW_MENU
@@ -75,10 +80,17 @@ export function isPanelDefaultAction(actionName: string) {
 
 export const PANEL_DEFAULT_BUTTONS: IHeaderButton[] = [
     {
-        displayOrder: 10000,
+        displayOrder: 11000,
         icon:  CLOSE_BUTTON_ICON,
         title: "Close",
         actionName: PANEL_ACTION_CLOSE,
+        visible: true
+    },
+    {
+        displayOrder: 10000,
+        icon: POPUP_WINDOW_ICON,
+        title: "Show in new window",
+        actionName: PANEL_ACTION_SHOW_POPUP,
         visible: true
     },
     {

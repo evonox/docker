@@ -13,7 +13,7 @@ export class DockedState extends PanelStateBase {
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
-            minimize: false, maximize: true, restore: false, expand: false, collapse: false
+            minimize: false, maximize: true, restore: false, expand: false, collapse: false, popup: true
         });
 
         const wasHeaderVisible = this.config.get("wasHeaderVisible");
@@ -55,6 +55,11 @@ export class DockedState extends PanelStateBase {
         const rect = this.panel.getContentFrameDOM().getComputedRect();
         this.config.set("originalRect", rect);
 
+        return true;
+    }
+
+    async showPopup(): Promise<boolean> {
+        this.config.set("restoreState", PanelContainerState.Docked);
         return true;
     }
 

@@ -43,7 +43,7 @@ export class FloatingState extends PanelStateBase {
         }
 
         this.configureButtons({
-            minimize: true, maximize: true, restore: false, expand: false, collapse: true
+            minimize: true, maximize: true, restore: false, expand: false, collapse: true, popup: false
         });
         this.panel.updateState();
         this.dialog.show();

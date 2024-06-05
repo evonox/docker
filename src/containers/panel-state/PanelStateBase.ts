@@ -1,5 +1,5 @@
 import { IRect, ISize } from "../../common/dimensions";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE } from "../../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { RectHelper } from "../../utils/rect-helper";
@@ -14,6 +14,7 @@ export interface IHeaderButtonConfiguration {
     maximize: boolean;
     minimize: boolean;
     restore: boolean;
+    popup: boolean;
 }
 
 /**
@@ -93,6 +94,14 @@ export abstract class PanelStateBase implements IGenericPanelState {
         return false;
     }
 
+    async showPopup(): Promise<boolean> {
+        return false;
+    }
+
+    async hidePopup(): Promise<boolean> {
+        return false;
+    }
+
     protected observeElement(element: HTMLElement, handler: Function) {
         this.elementObservers.set(element, handler);
         this.resizeObserver.observe(element);
@@ -109,6 +118,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         this.panel.showHeaderButton(PANEL_ACTION_RESTORE, config.restore);
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, config.expand);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, config.collapse);
+        this.panel.showHeaderButton(PANEL_ACTION_SHOW_POPUP, config.popup);
     }
 
     updateState(): void {
