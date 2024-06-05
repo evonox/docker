@@ -8,6 +8,7 @@ import { PanelStateBase } from "./PanelStateBase";
 export class MinimizedState extends PanelStateBase {
 
     private minimizingSlotId = 0;
+    private isCapturedInMinimizingSlot = false;
 
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
@@ -18,16 +19,22 @@ export class MinimizedState extends PanelStateBase {
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.addClass("DockerTS-ContentFrame--Minimized");
 
+        this.isCapturedInMinimizingSlot = true;
         this.minimizingSlotId = this.dockManager.requestMinimizeSlot();
         this.updateMinimizedSlotPosition();
     }
 
     public async leaveState(): Promise<void> {
-        // Clean up applied CSS element styles
+        // For animation purposes we need to apply to CSS positioning attributes of the current position
         const domContentFrame = this.panel.getContentFrameDOM();
-        domContentFrame.zIndex("").removeClass("DockerTS-ContentFrame--Minimized").css("right", "");
+        const currentRect: IRect = domContentFrame.getComputedRect();
+        domContentFrame.zIndex("").removeClass("DockerTS-ContentFrame--Minimized")
+            .css("right", "").applyRect(currentRect);       
+            
         // Release the minimization slot
+        this.isCapturedInMinimizingSlot = false;
         this.dockManager.releaseMinimizeSlot(this.minimizingSlotId);      
+
         await super.leaveState();
     }
 
@@ -39,28 +46,20 @@ export class MinimizedState extends PanelStateBase {
     async maximize(): Promise<boolean> {
         this.config.set("restoreState", PanelContainerState.Floating);
         this.config.set("wasHeaderVisible", true);
-
-        this.applyCurrentRectToContentFrame();
-       return true;
+        return true;
     }
 
     async restore(): Promise<boolean> {
-        this.applyCurrentRectToContentFrame();
         return true;
     }
 
     public updateState(): void {
         super.updateState();
-        this.updateMinimizedSlotPosition();
+        if(this.isCapturedInMinimizingSlot) {
+            this.updateMinimizedSlotPosition();
+        }
     }
-
-    private applyCurrentRectToContentFrame() {
-        // For animation purposes we need to apply to CSS positioning attributes of the current position
-        const domContentFrame = this.panel.getContentFrameDOM();
-        const currentRect: IRect = domContentFrame.getComputedRect();
-        domContentFrame.applyRect(currentRect);
-    }
-
+ 
     private updateMinimizedSlotPosition() {
         const domContentFrame = this.panel.getContentFrameDOM();
         const domFrameHeader = this.panel.getFrameHeaderDOM();

@@ -102,8 +102,16 @@ export class MinimizeAnimationTransition extends TransitionBase {
 
     async trigger(): Promise<void> {
         const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame
+            .zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel)
+            .addClass("DockerTS-ContentFrame--Animating");
+        this.panel.updateState();
+
         const minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
         await AnimationHelper.animateMinimize(domContentFrame.get(), minimizedFreeSlot);
+
+        domContentFrame.applyRect(minimizedFreeSlot).removeClass("DockerTS-ContentFrame--Animating").zIndex("");
+        this.panel.updateState();
     }
 }
 
