@@ -63,7 +63,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         }
     }
 
-    // Transition State methods - by default return "false" - means that given transition is not allowed
+    // Transition State methods - by default returning "false" - means that given transition is not allowed
     async dockPanel(): Promise<boolean> {
         return false;
     }
@@ -142,7 +142,4 @@ export abstract class PanelStateBase implements IGenericPanelState {
             domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
         }
     }
-
-    // TODO: IS THIS NEEDED?
-    public abstract resize(rect: IRect): void;
 }

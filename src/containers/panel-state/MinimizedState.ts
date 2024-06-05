@@ -69,7 +69,4 @@ export class MinimizedState extends PanelStateBase {
             .width("").height(domFrameHeader.getHeight())
             .css("right", `var(${slotPropertyName})`);
     }
-
-    // TODO: IS THIS NEEDED???
-    public resize(rect: IRect) {}
 }

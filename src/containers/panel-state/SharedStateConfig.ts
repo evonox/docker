@@ -1,6 +1,6 @@
 
 /**
- * Configuration Object to share data among states
+ * Configuration Object to share data among states and transitions
  */
 export class SharedStateConfig {
 

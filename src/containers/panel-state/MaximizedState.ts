@@ -59,7 +59,4 @@ export class MaximizedState extends PanelStateBase {
         const dockContainerBounds = this.dockManager.getContainerBoundingRect();
         this.panel.getContentFrameDOM().applyRect(dockContainerBounds);
     }
-
-    // TODO: IS THIS NEEDED???
-    public resize(rect: IRect) {}
 }

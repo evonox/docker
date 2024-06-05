@@ -63,15 +63,6 @@ export class DockedState extends PanelStateBase {
         this.adjustPanelContentSize();
     }
 
-    // TODO: IS THIS FOR ANYTHING???
-    public resize(rect: IRect) {
-        // if(RectHelper.isSizeOnly(rect)) {
-        //     this.panel.getContentFrameDOM().applySize(rect);
-        // } else {
-        //     this.panel.getContentFrameDOM().applyRect(rect);       
-        // }
-    }
-
     private adjustPanelContentSize() {
         const rect = this.panel.getPlaceholderDOM().getBoundsRect();
         this.panel.getContentFrameDOM().applyRect(rect);

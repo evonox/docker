@@ -159,8 +159,4 @@ export class FloatingState extends PanelStateBase {
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getBoundsRect();
         this.panel.getContentFrameDOM().applyRect(rect);
     }
-
-    // TODO: IS THIS FOR ANYTHING???
-    public resize(rect: IRect) {
-    }
 }

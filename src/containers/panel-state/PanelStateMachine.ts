@@ -102,11 +102,8 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     updateState(): void {
+        // Note: Current State may be undefined when triggered from the transition class
         this.currentState?.updateState();
-    }
-
-    resize(rect: IRect) {
-        this.currentState?.resize(rect);
     }
 
     // Generic private method to change state

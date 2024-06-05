@@ -275,7 +275,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     resize(rect: IRect): void {
-        this.state.resize(rect);
+        // this.state.resize(rect);
     }
 
     invalidate() {

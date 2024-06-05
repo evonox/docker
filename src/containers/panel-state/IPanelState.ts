@@ -18,9 +18,8 @@ export interface IPanelStateAPI {
     collapse(): Promise<boolean>;
     expand(): Promise<boolean>;
 
-    // Misc update panel state methods
+    // Central update method
     updateState(): void;
-    resize(rect: IRect): void;
 }
 
 /**
