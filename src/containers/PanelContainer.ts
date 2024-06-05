@@ -328,6 +328,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this.contentPanelMouseDown.bind("mousedown", this.handleMouseDownOnPanel.bind(this), {capture: true});
     }
 
+    public getContentElement(): HTMLElement {
+        return this.domContent;
+    }
+
     public getHeaderElement(): HTMLElement {
         return this.domTitle.get();
     }

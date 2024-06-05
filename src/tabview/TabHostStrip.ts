@@ -125,6 +125,7 @@ export class TabHostStrip extends Component {
         });
 
         this.resizeObserver = new ResizeObserver(() => this.checkTabStripOverflowStatus());
+        this.domTabStrip.css("overflow", "hidden"); // Prevent recursive callback in case of content overflow
         this.resizeObserver.observe(this.domTabStrip.get(), {box: "border-box"});
 
         return this.domTabStrip.get();

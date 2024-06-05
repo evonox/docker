@@ -84,6 +84,8 @@ export class SplitterPanel extends Component {
             this.splitterPanelRO = new ResizeObserver(() => {
                 this.adjustContainerSizesToNewDimensions();
             });
+            // Prevent recursive callback in case of content overflow
+            this.domSplitterPanel.css("overflow", "hidden"); 
             this.splitterPanelRO.observe(this.domSplitterPanel.get());
         }
     }

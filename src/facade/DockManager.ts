@@ -100,6 +100,8 @@ export class DockManager {
         this.resizeObserver = new ResizeObserver(() => {
             this.handleContainerResized();
         });
+        // Prevent recursive callback in case of content overflow
+        DOM.from(this.container).css("overflow", "hidden"); 
         this.resizeObserver.observe(this.container, {box: "border-box"});
 
         // Init other MISC attributes

@@ -2,6 +2,7 @@ import { IRect, ISize } from "../../common/dimensions";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
+import { DOM } from "../../utils/DOM";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelContainer } from "../PanelContainer";
 import { IGenericPanelState } from "./IPanelState";
@@ -59,7 +60,9 @@ export abstract class PanelStateBase implements IGenericPanelState {
 
     private disposeResizeObserver() {
         if(this.resizeObserver !== undefined) {
-            this.elementObservers.clear();
+            for(const element of this.elementObservers.keys()) {
+                this.unobserveElement(element as HTMLElement);
+            }
             this.resizeObserver.disconnect();
             this.resizeObserver = undefined;
         }
@@ -104,10 +107,13 @@ export abstract class PanelStateBase implements IGenericPanelState {
 
     protected observeElement(element: HTMLElement, handler: Function) {
         this.elementObservers.set(element, handler);
+        // Prevent recursive callbacks when the content overflows
+        DOM.from(element).css("overflow", "hidden");
         this.resizeObserver.observe(element);
     }
 
     protected unobserveElement(element: HTMLElement) {
+        DOM.from(element).css("overflow", "");
         this.resizeObserver.unobserve(element);
         this.elementObservers.delete(element);
     }
