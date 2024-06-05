@@ -57,6 +57,7 @@ export class Dialog implements IEventEmitter {
     off(eventName: string): void {
          this.eventManager.unsubscribeAll(eventName);
     }
+    
     once(eventName: string, handler: ComponentEventHandler): ComponentEventSubscription {
         return this.eventManager.subscribeOnce(eventName, handler);
     }
@@ -228,14 +229,12 @@ export class Dialog implements IEventEmitter {
     }
 
     private handleOnCollapse() {
-        this.bringToFront();
         this.lastExpanedSize = this.domDialog.getHeight();
         const bounds = this.panel.getHeaderElement().getBoundingClientRect();
         this.domDialog.height(bounds.height);
     }
 
     private handleOnExpand() {
-        this.bringToFront();
         this.domDialog.height(this.lastExpanedSize);
     }
 

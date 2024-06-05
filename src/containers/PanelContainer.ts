@@ -205,6 +205,7 @@ export class PanelContainer extends Component implements IDockContainer {
     setActiveChild(container: IDockContainer): void {}
 
     activatePanel() {
+        this.triggerEvent("onFocused");
         this.dockManager.setActivePanel(this);
     }
 

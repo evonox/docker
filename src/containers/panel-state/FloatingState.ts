@@ -103,8 +103,10 @@ export class FloatingState extends PanelStateBase {
             return false;
         this.isCollapsed = false;
 
+        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
+        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
+
         const domDialogFrame = this.dialog.getDialogFrameDOM();
-        DOM.from(domDialogFrame).css("border", "");
         const domContentContainer = this.panel.getContentContainerDOM();
         if(doAnimation === true) {
             await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
@@ -115,9 +117,6 @@ export class FloatingState extends PanelStateBase {
         domContentContainer.height("").css("opacity", "");
 
         this.panel.triggerEvent("onEnableResize", true);
-
-        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
-        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
     }
 
     public async collapse(doAnimation?: boolean): Promise<boolean> {
@@ -128,26 +127,23 @@ export class FloatingState extends PanelStateBase {
             return false;
         this.isCollapsed = true;
 
+        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, true);
+        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
+
         this.panel.triggerEvent("onEnableResize", false);
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         const domFrameHeader = this.panel.getFrameHeaderDOM();
         const domContentContainer = this.panel.getContentContainerDOM();
-
-        // const headerHeight = domFrameHeader.getHeight();
-        const headerHeight = domFrameHeader.get().offsetHeight;
-
+        const headerHeight = domFrameHeader.getOffsetRect().h;
 
         this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
         this.lastContentExpandedHeight = domContentContainer.getHeight();
         if(doAnimation === true) {
             await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
         }
-        DOM.from(domDialogFrame).css("border", "none");
         DOM.from(domDialogFrame).height(headerHeight);
 
-        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, true);
-        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
     }
 
     updateState(): void {
