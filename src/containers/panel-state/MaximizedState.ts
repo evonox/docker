@@ -19,7 +19,7 @@ export class MaximizedState extends PanelStateBase {
         // Move the maximized panel to the TOP of viewport
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
-        this.panel.updateLayoutState(); // To update nested panels of TabbedPanelContainer      
+        this.panel.updateState(); // To update nested panels of TabbedPanelContainer      
 
         // Observe container element for resize changes
         const containerElement = this.dockManager.getContainerElement();
@@ -30,7 +30,7 @@ export class MaximizedState extends PanelStateBase {
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(1);
         // To update zIndex values in the nested panels of TabbedPanelContainer
-        this.panel.updateLayoutState(); 
+        this.panel.updateState(); 
 
         await super.leaveState();
     }
@@ -57,7 +57,7 @@ export class MaximizedState extends PanelStateBase {
 
     private adjustMaximizedElementRect() {
         const dockContainerBounds = this.dockManager.getContainerBoundingRect();
-        this.panel.getContentContainerDOM().applyRect(dockContainerBounds);
+        this.panel.getContentFrameDOM().applyRect(dockContainerBounds);
     }
 
     // TODO: IS THIS NEEDED???

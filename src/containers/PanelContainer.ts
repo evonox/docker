@@ -45,6 +45,7 @@ export class PanelContainer extends Component implements IDockContainer {
     private buttonBar: PanelButtonBar;
 
     private _isDefaultContextMenuEnabled = true;
+    private _isProcessingDefaultAction = false;
 
 
     // Icon & Title State
@@ -241,23 +242,23 @@ export class PanelContainer extends Component implements IDockContainer {
         return minHeight;
     }
 
-    expandPanel() {
+    async expandPanel() {
         this.activatePanel();
-        this.state.expand();
+        await this.state.expand();
     }
 
-    collapsePanel() {
+    async collapsePanel() {
         this.activatePanel();
-        this.state.collapse();
+        await this.state.collapse();
     }
 
-    restorePanel() {
+    async restorePanel() {
         this.activatePanel();
-        this.state.restore();
+        await this.state.restore();
     }
 
-    minimizePanel() {
-        this.state.minimize();
+    async minimizePanel() {
+        await this.state.minimize();
     }
 
     toggleMaximizedPanelState() {
@@ -348,20 +349,27 @@ export class PanelContainer extends Component implements IDockContainer {
         return this.buttonBar.isActionAllowed(actionName);
     }
 
-    handleDefaultPanelAction(actionName: string) {
+    async handleDefaultPanelAction(actionName: string) {
+        // We need to prevent multiple asynchronous calls for default action processing
+        if(this._isProcessingDefaultAction)
+            return;
+        this._isProcessingDefaultAction = true;
+
         if(actionName === PANEL_ACTION_COLLAPSE) {
-            this.collapsePanel();
+            await this.collapsePanel();
         } else if(actionName === PANEL_ACTION_EXPAND) {
-            this.expandPanel();
+            await  this.expandPanel();
         } else if(actionName === PANEL_ACTION_MAXIMIZE) {
-            this.maximizePanel();
+            await this.maximizePanel();
         } else if(actionName === PANEL_ACTION_RESTORE) {
-            this.restorePanel();
+            await this.restorePanel();
         } else if(actionName === PANEL_ACTION_MINIMIZE) {
-            this.minimizePanel();
+            await this.minimizePanel();
         } else if(actionName === PANEL_ACTION_CLOSE) {
-            this.close();
+            await this.close();
         }
+
+        this._isProcessingDefaultAction = false;
     }
 
     /**

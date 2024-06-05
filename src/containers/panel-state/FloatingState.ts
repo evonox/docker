@@ -45,7 +45,8 @@ export class FloatingState extends PanelStateBase {
         this.configureButtons({
             minimize: true, maximize: true, restore: false, expand: false, collapse: true
         });
-        this.panel.updateLayoutState();
+        this.panel.updateState();
+        this.dialog.show();
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         this.observeElement(domDialogFrame, () => this.adjustPanelContentState());
@@ -54,7 +55,7 @@ export class FloatingState extends PanelStateBase {
     public async leaveState(): Promise<void> {
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(1);
-        this.panel.updateLayoutState();
+        this.panel.updateState();
 
         this.dialog.hide();
 

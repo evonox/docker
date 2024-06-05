@@ -13,8 +13,11 @@ export class DockedState extends PanelStateBase {
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
-            minimize: false, maximize: true, restore: true, expand: false, collapse: false
+            minimize: false, maximize: true, restore: false, expand: false, collapse: false
         });
+
+        const wasHeaderVisible = this.config.get("wasHeaderVisible");
+        this.panel.setHeaderVisibility(wasHeaderVisible);
 
         const domPlaceholderDOM = this.panel.getPlaceholderDOM().get();
         this.observeElement(domPlaceholderDOM, () => this.adjustPanelContentSize());

@@ -102,26 +102,29 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     updateState(): void {
-        this.currentState.updateState();
+        this.currentState?.updateState();
     }
 
     resize(rect: IRect) {
-        this.currentState.resize(rect);
+        this.currentState?.resize(rect);
     }
 
     // Generic private method to change state
     private async changeStateTo(newState: PanelContainerState): Promise<void> {
         // Leave the state
-        await this.currentState.leaveState();
-        
+        await this.currentState.leaveState(); 
+        // No state set during transition operation due to the calls of 'update' function
+        this.currentState = undefined; 
+
         // Trigger the state transition
         const transition = StateTransitionFactory.create(this.dockManager, this.panel, this.config, 
                 this.containerState, newState);
         await transition.trigger();
-        
+
         // Create and enter the new state
         this.containerState = newState;
-        this.currentState = this.createStateByType(newState);
+        this.currentState = this.createStateByType(newState);       
+        
         await this.currentState.enterState(false);
     }
 
