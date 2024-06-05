@@ -159,8 +159,6 @@ export class SplitterPanel extends Component {
         if(index < 0)
             throw new Error("ERROR: Container is not member of splitter panel");
 
-        console.log("---- SET CONTAINER RATIO ----");
-
         const ratios = this.getRatios();
         ratios[index] = ratio;
         for(let i = 0; i < ratios.length; i++) {

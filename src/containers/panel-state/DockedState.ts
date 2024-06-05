@@ -64,7 +64,11 @@ export class DockedState extends PanelStateBase {
     }
 
     private adjustPanelContentSize() {
-        let rect = this.panel.getPlaceholderDOM().getBoundsRect();     
-        this.panel.getContentFrameDOM().applyRect(rect);
+        let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
+        // Note: In TabbedContainer this may trigger another ResizeObserver, we need to delegate it
+        // to requestAnimationFrame
+        requestAnimationFrame(() => {
+            this.panel.getContentFrameDOM().applyRect(rect);
+        })
     }
 }

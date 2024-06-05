@@ -19,10 +19,13 @@
 .DockerTS-TabHost--Right {
     grid-template-columns: 1fr auto auto;
     grid-template-rows: 100%;
+    overflow: hidden;
 }
 
 .DockerTS-TabContent {
     display: grid;
+    grid-template-rows: 100%;
+    overflow: hidden;
 }
 
 .DockerTS-TabStrip__Separator--Vertical {
@@ -48,4 +51,6 @@
 
 .DockerTS-TabPage--ContentWrapper {
     display: grid;
+    grid-template-rows: 100%;
+    overflow: hidden;
 }
