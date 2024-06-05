@@ -106,9 +106,11 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.updateContainerState();
         this.updateLayoutState();
         this.overrideFocusedState();
+        this.updateState();
     }
 
     updateLayoutState(): void {
+        this.updateState();
         super.updateLayoutState();
         this.tabHost.updateLayoutState();
     }
@@ -116,7 +118,7 @@ export class TabbedPanelContainer extends PanelContainer {
     updateState(): void {
         super.updateState();
         this.updateChildContainerZIndexes();
-        this.childContainers.forEach(child => child.updateState());
+        this.childContainers?.forEach(child => child.updateState());
     }
 
     private updateChildContainerZIndexes() {

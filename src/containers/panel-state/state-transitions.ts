@@ -42,6 +42,7 @@ export class MaximizeAnimationTransition extends TransitionBase {
         // Remove element CSS property value for the height
         domFrameHeader.height("");
         domContentFrame.applyRect(containerRect);
+        this.panel.updateState();
     }
 
     private async animateWithHeaderVisible() {

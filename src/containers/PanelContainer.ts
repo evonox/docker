@@ -20,6 +20,7 @@ import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { ContextMenuFactory } from "./ContextMenuFactory";
+import { EventHelper } from "../utils/event-helper";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -153,11 +154,8 @@ export class PanelContainer extends Component implements IDockContainer {
     setVisible(visible: boolean): void {
         this._isVisible = visible;
         if(visible) {
-            // TODO: DEBUG
             this.domContentFrame.show();
-            DOMUpdateInitiator.forceEnqueuedDOMUpdates();
-            const rect = this.domPanelPlaceholder.getBoundingClientRect();
-            this.domContentFrame.applyRect(rect);   
+            this.updateState();
         } else {
             this.domContentFrame.hide();
         }

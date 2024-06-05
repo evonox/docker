@@ -59,12 +59,12 @@ export class DockedState extends PanelStateBase {
     }
 
     public updateState(): void {
-        super.updateState();
         this.adjustPanelContentSize();
+        super.updateState();
     }
 
     private adjustPanelContentSize() {
-        const rect = this.panel.getPlaceholderDOM().getBoundsRect();
+        let rect = this.panel.getPlaceholderDOM().getBoundsRect();     
         this.panel.getContentFrameDOM().applyRect(rect);
     }
 }

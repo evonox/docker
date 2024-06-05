@@ -58,6 +58,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
 
     private disposeResizeObserver() {
         if(this.resizeObserver !== undefined) {
+            this.elementObservers.clear();
             this.resizeObserver.disconnect();
             this.resizeObserver = undefined;
         }
