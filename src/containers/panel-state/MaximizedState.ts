@@ -41,16 +41,6 @@ export class MaximizedState extends PanelStateBase {
 
     async restore(): Promise<boolean> {
         return true;
-
-        // TODO: MOVE TO FLOATING STATE
-        // const dialog: Dialog = this.config.get("panelDialog");
-        // DOM.from(dialog.getDialogFrameDOM()).applyRect(originalRect);
-        // dialog.show();
-        // this.panel.updateLayoutState();
-
-        // TODO: MOVE TO DOCKED STATE        
-        //this.panel.setHeaderVisibility(wasHeaderVisible);
-
     }
 
     public updateState(): void {}
