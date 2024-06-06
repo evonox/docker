@@ -107,20 +107,22 @@ export class TabbedPanelContainer extends PanelContainer {
         super.updateContainerState();
         this.tabHost.updateContainerState();
         this.updateLayoutState();
-        this.overrideFocusedState();
         this.updateState();
+        this.overrideFocusedState();
     }
 
     updateLayoutState(): void {
         this.updateState();
         super.updateLayoutState();
         this.tabHost.updateLayoutState();
+        this.overrideFocusedState();
     }
 
     updateState(): void {
         super.updateState();
         this.updateChildContainerZIndexes();
         this.childContainers?.forEach(child => child.updateState());
+        this.overrideFocusedState();
     }
 
     private updateChildContainerZIndexes() {
@@ -149,8 +151,7 @@ export class TabbedPanelContainer extends PanelContainer {
         if(this.dockManager.getActivePanel() === this || isTabHandleFocused) {
             domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
             this.tabHost.getSelectedTab()?.setSelectionState(SelectionState.Focused);
-            // TODO: Note - causes recursive calls - need to find a different solution
-            // this.triggerEvent("onFocused");
+            this.triggerEvent("onFocused");
         } else {
             domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
         }
