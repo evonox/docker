@@ -206,9 +206,10 @@ export class Dialog implements IEventEmitter {
 
     private assignNewZIndex() {
         const nextZIndex = this.dockManager.genNextDialogZIndex();
-        this.lastDialogZIndex = nextZIndex;
-        this.domDialog.zIndex(nextZIndex);
+        this.lastDialogZIndex = nextZIndex + 2;
+        this.domDialog.zIndex(nextZIndex + 2);
         this.panel.updateState();
+        this.resizable.updateState();
     }
 
     /**

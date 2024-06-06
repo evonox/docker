@@ -107,13 +107,13 @@ export abstract class PanelStateBase implements IGenericPanelState {
 
     protected observeElement(element: HTMLElement, handler: Function) {
         this.elementObservers.set(element, handler);
+        // NOTE: DEBUG ERROR - We need for some elements to have overflows ALLOWED!!!!
         // Prevent recursive callbacks when the content overflows
-        DOM.from(element).css("overflow", "hidden");
+        // DOM.from(element).css("overflow", "hidden");
         this.resizeObserver.observe(element);
     }
 
     protected unobserveElement(element: HTMLElement) {
-        DOM.from(element).css("overflow", "");
         this.resizeObserver.unobserve(element);
         this.elementObservers.delete(element);
     }

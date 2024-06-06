@@ -139,7 +139,7 @@ export class DockManager {
     }
 
     genNextDialogZIndex(): number {
-        return this.lastDialogZIndex++;
+        return this.lastDialogZIndex += 4;
     }
 
     getWheelZIndex(): number {

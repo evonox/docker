@@ -59,7 +59,7 @@ export class FloatingState extends PanelStateBase {
 
         this.dialog.hide();
 
-       await super.leaveState();
+        await super.leaveState();
     }
 
     async dockPanel(): Promise<boolean> {
@@ -149,7 +149,7 @@ export class FloatingState extends PanelStateBase {
 
     updateState(): void {
         const zIndex = DOM.from(this.dialog.getDialogFrameDOM()).getZIndex();
-        this.panel.getContentFrameDOM().zIndex(zIndex);
+        this.panel.getContentFrameDOM().zIndex(zIndex - 2);
 
         this.adjustPanelContentState();
         super.updateState();

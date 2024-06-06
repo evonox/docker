@@ -19,6 +19,10 @@ export class DockedState extends PanelStateBase {
         const wasHeaderVisible = this.config.get("wasHeaderVisible");
         this.panel.setHeaderVisibility(wasHeaderVisible);
 
+        const domContentFrame = this.panel.getContentFrameDOM();
+        domContentFrame.zIndex(1);
+        this.panel.updateState();
+
         const domPlaceholderDOM = this.panel.getPlaceholderDOM().get();
         this.observeElement(domPlaceholderDOM, () => this.adjustPanelContentSize());
     }

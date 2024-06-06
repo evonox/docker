@@ -30,6 +30,10 @@ export class ResizeHandle extends Component {
         return queryResizeMouseCursor(this);
     }
 
+    adjustZIndex(zIndex: number) {
+        this.domHandle.zIndex(zIndex);
+    }
+
     north() { return this.handleType.north; }
     south() { return this.handleType.south; }
     east() { return this.handleType.east; }

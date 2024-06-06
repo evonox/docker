@@ -103,6 +103,10 @@ export class ResizableContainer implements IDockContainer {
         this.destroyResizeHandles();
     }
 
+    updateState() {
+        this.adjustResizeHandleZIndexes();
+    }
+
     /**
      * Construct & Destroy Resizing Handles Logic 
      */
@@ -135,6 +139,9 @@ export class ResizableContainer implements IDockContainer {
         this.buildResizeHandle({north: true, south: false, west: true, east: false});
         this.buildResizeHandle({north: false, south: true, west: true, east: false});
         this.buildResizeHandle({north: false, south: true, west: false, east: true});
+
+        // Adjust zIndexes due to TabbedPanelContainer
+        this.adjustResizeHandleZIndexes();
     }
 
     private buildResizeHandle(kind: ResizeHandleType) {
@@ -150,6 +157,11 @@ export class ResizableContainer implements IDockContainer {
             resizeHandle.dispose();
         }
         this.resizeHandles = [];
+    }
+
+    private adjustResizeHandleZIndexes() {
+        // const zIndex = DOM.from(this.topElement).getZIndex();
+        // this.resizeHandles.forEach(handle => handle.adjustZIndex(zIndex + 3));
     }
 
     /**
