@@ -1,16 +1,17 @@
 import { IDockContainer } from "../common/declarations";
 import { IRect } from "../common/dimensions";
-import { PanelContainerState, SelectionState, TabOrientation } from "../common/enumerations";
+import { SelectionState, TabOrientation } from "../common/enumerations";
 import { ITabbedPanelAPI } from "../common/panel-api";
 import { DockManager } from "../facade/DockManager";
 import { TabHost } from "../tabview/TabHost";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { DOM } from "../utils/DOM";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
-import { RectHelper } from "../utils/rect-helper";
 import { PanelContainer } from "./PanelContainer";
 
-
+/**
+ * Sub-class of Panel Container implementing a tabbed version of PanelContainer 
+ */
 export class TabbedPanelContainer extends PanelContainer {
 
     private childContainers: PanelContainer[] = [];
@@ -26,7 +27,7 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     /**
-     * Child Container Management
+     * Child Container Management Methods
      */
 
     getChildContainers(): IDockContainer[] {
@@ -56,26 +57,51 @@ export class TabbedPanelContainer extends PanelContainer {
         this.updateState();
     }
 
+    /**
+     * TabbedPanelContainer Life-Cycle Methods Overrides
+     */
 
+    protected onInitialized(): void {
+        super.onInitialized();
+        this.createTabHostElement(TabOrientation.Left); // By default we create TabHandles to the left
+    }
 
+    protected onInitialRender(): HTMLElement {
+        const result = super.onInitialRender();
+        this.injectTabHostIntoDOM();
+        return result;
+    }
+
+    protected onDisposed(): void {
+        super.onDisposed();
+        this.tabHost.dispose();
+    }
+
+    private createTabHostElement(orientation: TabOrientation) {
+        this.tabHost = new TabHost(this.getDockManager(), orientation);
+        // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
+        this.tabHost.setEnableUndock(false);
+        this.tabHost.setEnableMaximization(false);
+        this.tabHost.setEnableTabReordering(false);
+        this.tabHost.setEnableFrameHeaderVisibility(false);
+    }
+
+    private injectTabHostIntoDOM() {
+        const domTabHost = this.tabHost.getDOM();
+        DOM.from(domTabHost).height("100%");
+        this.setContentElement(domTabHost);  
+    }
+
+    /**
+     * Public API Methods
+     */
 
     setTabOrientation(orientation: TabOrientation) {
         if(this.tabHost.getTabOrientation() !== orientation) {
-            // Destroy TabHost
             this.tabHost.dispose();
-            this.tabHost = new TabHost(this.getDockManager(), orientation);
-            // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
-            this.tabHost.setEnableUndock(false);
-            this.tabHost.setEnableMaximization(false);
-            this.tabHost.setEnableTabReordering(false);
-            this.tabHost.setEnableFrameHeaderVisibility(false);
-            // Perform Layout
+            this.createTabHostElement(orientation);
             this.tabHost.performLayout(this.childContainers, false);
-            // Append the TabHost to the panel
-            const domTabHost = this.tabHost.getDOM();
-            DOM.from(domTabHost).height("100%");
-            this.setContentElement(domTabHost);  
-            // Update the state of the panel
+            this.injectTabHostIntoDOM();            
             this.updateState();
         }
     }
@@ -89,29 +115,6 @@ export class TabbedPanelContainer extends PanelContainer {
         }
     }
 
-    protected onInitialized(): void {
-        super.onInitialized();
-        this.tabHost = new TabHost(this.getDockManager(), TabOrientation.Left);
-        // Note: We do not support Undock & Maximization Behavior of contained Panel Containers for now
-        this.tabHost.setEnableUndock(false);
-        this.tabHost.setEnableMaximization(false);
-        this.tabHost.setEnableTabReordering(false);
-        this.tabHost.setEnableFrameHeaderVisibility(false);
-    }
-
-    protected onInitialRender(): HTMLElement {
-        const result = super.onInitialRender();
-        const domTabHost = this.tabHost.getDOM();
-        DOM.from(domTabHost).height("100%");
-        this.setContentElement(domTabHost);
-        return result;
-    }
-
-    protected onDisposed(): void {
-        super.onDisposed();
-        this.tabHost.dispose();
-    }
-
     updateState(): void {
         super.updateState();
         this.tabHost.updateContainerState();
@@ -119,37 +122,6 @@ export class TabbedPanelContainer extends PanelContainer {
         this.updateChildContainerZIndexes();
         this.childContainers?.forEach(child => child.updateState());
         this.overrideFocusedState();
-    }
-
-    private updateChildContainerZIndexes() {
-        let zIndex = this.getContentFrameDOM().getZIndex();
-        if(isNaN(zIndex)) {
-            zIndex = 1;
-        }
-        this.childContainers?.forEach(child => {
-            child.getContentFrameDOM().zIndex(zIndex + 1)
-        });
-
-    }
-
-    resize(rect: IRect): void {
-        if(this.state.getCurrentState() === PanelContainerState.Maximized) {
-            rect = RectHelper.fromDOMRect(this.dockManager.getContainerBoundingRect());
-        }
-        super.resize(rect);
-        this.updateState();
-    }
-
-    private overrideFocusedState() {
-        const isTabHandleFocused = this.tabHost.getSelectedTab()?.getSelectionState() === SelectionState.Focused;
-        const domFrameHeader = this.getFrameHeaderDOM();
-        if(this.dockManager.getActivePanel() === this || isTabHandleFocused) {
-            domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
-            this.tabHost.getSelectedTab()?.setSelectionState(SelectionState.Focused);
-            this.triggerEvent("onFocused");
-        } else {
-            domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
-        }
     }
 
     setActiveChild(container: IDockContainer): void {
@@ -169,6 +141,30 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.performLayout(this.childContainers, relayoutEvenIfEqual);
     }
 
+    async close(): Promise<boolean> {
+        const canClose = await this.getAPI().canClose?.() ?? true;
+        if(canClose) {
+            for(const childContainer of this.childContainers) {
+                await childContainer.performClose();
+            }
+            await super.close();
+        }
+        return canClose;
+    }
+
+    // TODO: IS THIS NEEDED?
+    resize(rect: IRect): void {
+        // if(this.state.getCurrentState() === PanelContainerState.Maximized) {
+        //     rect = RectHelper.fromDOMRect(this.dockManager.getContainerBoundingRect());
+        // }
+        // super.resize(rect);
+        // this.updateState();
+    }
+
+    /**
+     * Dragging Handlers
+     */
+
     onDraggingStarted(): void {
         super.onDraggingStarted();
         this.childContainers.forEach(child => child.onDraggingStarted());
@@ -179,14 +175,29 @@ export class TabbedPanelContainer extends PanelContainer {
         this.childContainers.forEach(child => child.onDraggingEnded());
     }
 
-    async close(): Promise<boolean> {
-        const canClose = await this.getAPI().canClose?.() ?? true;
-        if(canClose) {
-            for(const childContainer of this.childContainers) {
-                await childContainer.performClose();
-            }
-            await super.close();
+    /**
+     * Misc Private Methods
+     */
+
+    private updateChildContainerZIndexes() {
+        let zIndex = this.getContentFrameDOM().getZIndex();
+        if(isNaN(zIndex)) {
+            zIndex = 1;
         }
-        return canClose;
+        this.childContainers?.forEach(child => {
+            child.getContentFrameDOM().zIndex(zIndex + 1)
+        });
+    }
+
+    private overrideFocusedState() {
+        const isTabHandleFocused = this.tabHost.getSelectedTab()?.getSelectionState() === SelectionState.Focused;
+        const domFrameHeader = this.getFrameHeaderDOM();
+        if(this.dockManager.getActivePanel() === this || isTabHandleFocused) {
+            domFrameHeader.addClass("DockerTS-FrameHeader--Selected");
+            this.tabHost.getSelectedTab()?.setSelectionState(SelectionState.Focused);
+            this.triggerEvent("onFocused");
+        } else {
+            domFrameHeader.removeClass("DockerTS-FrameHeader--Selected");
+        }
     }
 }
