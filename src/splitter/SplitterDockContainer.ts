@@ -65,6 +65,10 @@ export abstract class SplitterDockContainer implements IDockContainer {
         this.splitterPanel.setContainerRatio(container, ratio);
     }
 
+    getContainerRatio(container: IDockContainer): number {
+        return this.splitterPanel.getContainerRatio(container);
+    }
+
     getRatios(): number[] {
         return this.splitterPanel.getRatios();
     }

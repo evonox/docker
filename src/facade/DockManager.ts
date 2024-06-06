@@ -17,7 +17,7 @@ import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 import { ContainerType, OrientationKind } from "../common/enumerations";
-import { IDockContainer } from "../common/declarations";
+import { IDockContainer, IDockInfo } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
 import { ChannelManager } from "./ChannelManager";
@@ -315,6 +315,15 @@ export class DockManager {
         this.bindDialogDragEvents(dialog);
 
         return dialog;
+    }
+
+    queryDockInformationForContainer(container: PanelContainer): IDockInfo {
+        const dockNode = this.findNodeFromContainer(container);
+        return this.layoutEngine.queryDockInformation(dockNode);
+    }
+
+    queryDockInformationForNode(dockNode: DockNode): IDockInfo {
+        return this.layoutEngine.queryDockInformation(dockNode);
     }
 
     /**

@@ -1,10 +1,19 @@
 import type { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
-import { IRect, ISize } from "./dimensions";
-import { ContainerType } from "./enumerations";
+import type { DockNode } from "../model/DockNode";
+import type { IRect, ISize } from "./dimensions";
+import type { ContainerType, DockKind } from "./enumerations";
 import type { IContextMenuAPI } from "./panel-api";
 import type { IState } from "./serialization";
 
+/**
+ * Interface containing the container dock information
+ */
 
+export interface IDockInfo {
+    referenceNode: DockNode;
+    dockKind: DockKind;
+    ratio?: number;
+}
 
 /**
  * Interface for components having event support

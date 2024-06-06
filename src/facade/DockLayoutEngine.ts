@@ -1,14 +1,16 @@
 import { DockManager } from "./DockManager";
-import { IDockContainer } from "../common/declarations";
+import { IDockContainer, IDockInfo } from "../common/declarations";
 import { DockNode } from "../model/DockNode";
 import { ColumnLayoutDockContainer } from "../splitter/ColumnLayoutDockContainer";
 import { RowLayoutDockContainer } from "../splitter/RowLayoutDockContainer";
 import { FillDockContainer } from "../containers/FillDockContainer";
 import { TabHandle } from "../tabview/TabHandle";
-import { ContainerType, OrientationKind, TabOrientation } from "../common/enumerations";
+import { ContainerType, DockKind, OrientationKind, TabOrientation } from "../common/enumerations";
 import { IRect } from "../common/dimensions";
 import { DOM } from "../utils/DOM";
 import { RectHelper } from "../utils/rect-helper";
+import { container } from "webpack";
+import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 
 /**
  * DockLayoutEngine - class responsible for layout operations
@@ -159,6 +161,50 @@ export class DockLayoutEngine {
         this.dockManager.invalidate();
         // TODO: ERROR IN ORIGINAL CODE???
         this.dockManager.notifyOnUnDock(node);
+    }
+
+    queryDockInformation(node: DockNode): IDockInfo {
+        const parentNode = node.parent;
+        if(! parentNode)
+            throw new Error("ERROR: Panel Container does not have parent node.");
+
+        const parentContainerType = parentNode.container.getContainerType();
+
+        if(parentContainerType === ContainerType.FillLayout) {
+            return { referenceNode: node.parent, dockKind: DockKind.Fill }
+        } else if(parentContainerType === ContainerType.RowLayout) {
+            const ratio = (parentNode.container as SplitterDockContainer).getContainerRatio(node.container);
+            if(parentNode.getChildNodeIndex(node) === 0) {
+                return {
+                    referenceNode: parentNode.getChildNodeAt(1),
+                    dockKind: DockKind.Left,
+                    ratio: ratio
+                }
+            } else {
+                return {
+                    referenceNode: parentNode.getChildNodeAt(0),
+                    dockKind: DockKind.Right,
+                    ratio: ratio
+                }
+            }
+        } else if(parentContainerType === ContainerType.ColumnLayout) {
+            const ratio = (parentNode.container as SplitterDockContainer).getContainerRatio(node.container);
+            if(parentNode.getChildNodeIndex(node) === 0) {
+                return {
+                    referenceNode: parentNode.getChildNodeAt(1),
+                    dockKind: DockKind.Up,
+                    ratio: ratio
+                }
+            } else {
+                return {
+                    referenceNode: parentNode.getChildNodeAt(0),
+                    dockKind: DockKind.Down,
+                    ratio: ratio
+                }
+            }
+        } else {
+            throw new Error("ERROR: Invalid container type.");
+        }
     }
 
     reorderTabs(node: DockNode, handle: TabHandle, state: string, index: number) {

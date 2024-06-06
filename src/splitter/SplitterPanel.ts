@@ -168,6 +168,14 @@ export class SplitterPanel extends Component {
         this.setRatios(ratios);
     }
 
+    getContainerRatio(container: IDockContainer): number {
+        const index = this.childContainers.indexOf(container);
+        if(index < 0)
+            throw new Error("ERROR: Container is not member of splitter panel");
+        const ratios = this.getRatios();
+        return ratios[index];
+    }
+
     getRatios(): number[] {
         // Compute new content size
         let totalSize = this.getVaryingSize(this.domSplitterPanel);
