@@ -1,4 +1,3 @@
-import { IRect } from "../../common/dimensions";
 import { PanelContainerState } from "../../common/enumerations";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";

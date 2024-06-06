@@ -76,6 +76,7 @@ export class DockedState extends PanelStateBase {
         let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
         // Note: In TabbedContainer this may trigger another ResizeObserver, we need to delegate it
         // to requestAnimationFrame
+        // Note: Solution - ResizeObserver only on EMPTY ELEMENTS
         requestAnimationFrame(() => {
             this.panel.getContentFrameDOM().applyRect(rect);
         })

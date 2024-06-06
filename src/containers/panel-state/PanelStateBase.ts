@@ -2,7 +2,6 @@ import { IRect, ISize } from "../../common/dimensions";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
-import { DOM } from "../../utils/DOM";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelContainer } from "../PanelContainer";
 import { IGenericPanelState } from "./IPanelState";

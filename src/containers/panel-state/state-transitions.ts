@@ -12,11 +12,13 @@ export class MaximizeAnimationTransition extends TransitionBase {
     async trigger(): Promise<void> {
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.addClass("DockerTS-ContentFrame--Animating");
+
         if(this.panel.isHeaderVisible()) {
             await this.animateWithHeaderVisible();
         } else {
             await this.animateWithHeaderShowing();
         }
+        
         domContentFrame.removeClass("DockerTS-ContentFrame--Animating");
     }
 
@@ -82,7 +84,7 @@ export class RestoreAnimationTransition extends TransitionBase {
         if(previousState === PanelContainerState.Docked) {
             if(wasHeaderVisible === false) {
                 const domHeader = this.panel.getFrameHeaderDOM();
-                await AnimationHelper.animateRestoreNoHeader(domContentFrame.get(), domHeader.get(), targetRect);;
+                await AnimationHelper.animateRestoreNoHeader(domContentFrame.get(), domHeader.get(), targetRect);
                 domHeader.height("");   
             } else {
                 await AnimationHelper.animateRestore(domContentFrame.get(), targetRect);
@@ -90,7 +92,7 @@ export class RestoreAnimationTransition extends TransitionBase {
         } else {
             await AnimationHelper.animateRestore(domContentFrame.get(), targetRect);
         }
-        // TODO: WILL ANIMATION LIBRARY CLENAUP AFTER ITSELF OR NOT???
+
         domContentFrame.applyRect(targetRect).removeClass("DockerTS-ContentFrame--Animating").zIndex("");
         this.panel.updateState();
     }

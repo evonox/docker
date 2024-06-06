@@ -13,5 +13,4 @@ export class SharedStateConfig {
     set(key: string, value: any) {
         this.data[key] = value;
     }
-
 }
