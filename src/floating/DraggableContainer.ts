@@ -35,16 +35,13 @@ export class DraggableContainer implements IDockContainer {
         this.dockDragStop = this.delegate.on("onDockingDragStop", event => this.handleMouseUp(event));
     }
 
-    updateLayoutState(): void {
-        this.delegate.updateLayoutState();
-    }
 
     handleContextMenuAction(actionName: string): void {
         this.delegate.handleContextMenuAction(actionName);
     }
-    
-    updateContainerState(): void {
-        return this.delegate.updateContainerState();
+
+    updateState(): void {
+        this.delegate.updateState();
     }
 
     setHeaderVisibility(visible: boolean): void {

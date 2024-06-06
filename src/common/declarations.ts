@@ -33,7 +33,7 @@ export interface IDockContainer extends IEventEmitter {
     setVisible(visible: boolean): void;
     isHidden(): boolean;
     setHeaderVisibility(visible: boolean): void;
-    updateContainerState(): void;
+    updateState(): void;
 
     // Cleanup
     dispose(): void;
@@ -51,8 +51,6 @@ export interface IDockContainer extends IEventEmitter {
     getMinHeight(): number;
 
     queryLoadedSize(): ISize;
-
-    updateLayoutState(): void;
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void;    
     resize(rect: IRect): void;

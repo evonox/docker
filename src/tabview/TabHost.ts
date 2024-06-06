@@ -101,11 +101,11 @@ export class TabHost extends Component {
     }
 
     updateLayoutState() {
-        this.tabPages.forEach(tabPage => tabPage.getContainer().updateLayoutState());
+        this.tabPages.forEach(tabPage => tabPage.getContainer().updateState());
     }
 
     updateContainerState(): void {
-        this.tabPages.forEach(tabPage => tabPage.getContainer().updateContainerState());
+        this.tabPages.forEach(tabPage => tabPage.getContainer().updateState());
 
         const activePanel = this.dockManager.getActivePanel();
         if(activePanel !== this.selectedTab?.getContainer()) {

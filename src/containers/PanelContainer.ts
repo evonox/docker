@@ -302,14 +302,6 @@ export class PanelContainer extends Component implements IDockContainer {
         this.state.updateState();
     }
 
-    updateLayoutState(): void {
-        this.state.updateState();
-    }
-
-    updateContainerState() {
-        this.state.updateState();
-    }
-
     onDraggingStarted() {
         this.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging");
     }
@@ -446,8 +438,7 @@ export class PanelContainer extends Component implements IDockContainer {
 
         this.setHeaderVisibility(false);
         this.updateTitle();
-        this.updateContainerState();
-        this.updateLayoutState();
+        this.updateState();
 
         return this.domPanelPlaceholder.get();
     }
@@ -517,7 +508,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
         await this.state.dockPanel();
         // this.containerState = PanelContainerState.Docked;
-        this.updateContainerState();
+        this.updateState();
     }
 
     /**

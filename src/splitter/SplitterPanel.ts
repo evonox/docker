@@ -148,12 +148,8 @@ export class SplitterPanel extends Component {
         this.invalidate();
     }
 
-    updateContainerState(): void {
-        this.childContainers.forEach(child => child.updateContainerState());
-    }
-
-    updateLayoutState(): void {
-        this.childContainers.forEach(child => child.updateLayoutState());       
+    updateState() {
+        this.childContainers.forEach(child => child.updateState());
     }
 
     setContainerRatio(container: IDockContainer, ratio: number) {

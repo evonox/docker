@@ -333,7 +333,7 @@ export class DockManager {
         if(index >= 0) {
             this.minimizedSlots.splice(index, 1);
             this.recomputeMinimizedSlotsCSS();
-            this.updateLayoutState();
+            this.updateState();
         }
     }
 
@@ -540,17 +540,10 @@ export class DockManager {
         DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
     }
 
-    private updateContainerState() {
-        this.context.model.rootNode.container.updateContainerState();
+    private updateState() {
+        this.context.model.rootNode.container.updateState();
         for(const dialog of this.context.model.dialogs) {
-            dialog.getPanel().updateContainerState();
-        }
-    }
-
-    private updateLayoutState() {
-        this.context.model.rootNode.container.updateLayoutState();
-        for(const dialog of this.context.model.dialogs) {
-            dialog.getPanel().updateLayoutState();
+            dialog.getPanel().updateState();
         }
     }
 
@@ -757,7 +750,7 @@ export class DockManager {
     setActivePanel(panel: PanelContainer) {
         if(this.activePanel !== panel) {
             this.activePanel = panel;
-            this.updateContainerState();
+            this.updateState();
             /**
              * 1. Zjistit posledni aktivni panel, ktery neni dialog
              * 2. Uchovat si posledni aktivni panel

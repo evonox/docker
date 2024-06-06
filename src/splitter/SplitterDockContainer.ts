@@ -21,12 +21,8 @@ export abstract class SplitterDockContainer implements IDockContainer {
 
     handleContextMenuAction(actionName: string): void {}
 
-    updateContainerState(): void {
-        this.splitterPanel.updateContainerState();
-    }
-
-    updateLayoutState(): void {
-        this.splitterPanel.updateLayoutState();
+    updateState(): void {
+        this.splitterPanel.updateState();
     }
 
     isHidden(): boolean {

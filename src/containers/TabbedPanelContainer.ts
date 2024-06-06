@@ -3,7 +3,6 @@ import { IRect } from "../common/dimensions";
 import { PanelContainerState, SelectionState, TabOrientation } from "../common/enumerations";
 import { ITabbedPanelAPI } from "../common/panel-api";
 import { DockManager } from "../facade/DockManager";
-import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { TabHost } from "../tabview/TabHost";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { DOM } from "../utils/DOM";
@@ -26,6 +25,40 @@ export class TabbedPanelContainer extends PanelContainer {
         super(dockManager, panelTypeName, tabbedApi);
     }
 
+    /**
+     * Child Container Management
+     */
+
+    getChildContainers(): IDockContainer[] {
+        return [...this.childContainers];
+    }
+
+    addContainer(container: PanelContainer) {
+        this.childContainers.push(container);
+        this.tabHost.performLayout(this.childContainers, false);
+        this.updateState();
+
+        container.enableDefaultContextMenu(false);
+        this.updateChildContainerZIndexes();
+
+        // Redirecting the onFocused event
+        container.on("onFocused", () => {
+            this.triggerEvent("onFocused");
+        });
+    }
+
+    removeContainer(container: PanelContainer) {
+        // Clear all binded events
+        container.off("onFocused");
+        ArrayUtils.removeItem(this.childContainers, container);
+        this.tabHost.performLayout(this.childContainers, false);
+        container.enableDefaultContextMenu(true);
+        this.updateState();
+    }
+
+
+
+
     setTabOrientation(orientation: TabOrientation) {
         if(this.tabHost.getTabOrientation() !== orientation) {
             // Destroy TabHost
@@ -45,30 +78,6 @@ export class TabbedPanelContainer extends PanelContainer {
             // Update the state of the panel
             this.updateState();
         }
-    }
-
-    addContainer(container: PanelContainer) {
-        this.getDockManager().getContainerElement().appendChild(container.getContentFrameDOM().get());
-        this.childContainers.push(container);
-        this.tabHost.performLayout(this.childContainers, false);
-        this.updateContainerState();
-
-        container.enableDefaultContextMenu(false);
-        this.updateChildContainerZIndexes();
-
-        // Redirecting the onFocused event
-        container.on("onFocused", () => {
-            this.triggerEvent("onFocused");
-        });
-    }
-
-    removeContainer(container: PanelContainer) {
-        // Clear all binded events
-        container.off("onFocused");
-        ArrayUtils.removeItem(this.childContainers, container);
-        this.tabHost.performLayout(this.childContainers, false);
-        container.enableDefaultContextMenu(true);
-        this.updateContainerState();
     }
 
     setVisible(visible: boolean): void {
@@ -103,23 +112,10 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.dispose();
     }
 
-    updateContainerState(): void {
-        super.updateContainerState();
-        this.tabHost.updateContainerState();
-        this.updateLayoutState();
-        this.updateState();
-        this.overrideFocusedState();
-    }
-
-    updateLayoutState(): void {
-        this.updateState();
-        super.updateLayoutState();
-        this.tabHost.updateLayoutState();
-        this.overrideFocusedState();
-    }
-
     updateState(): void {
         super.updateState();
+        this.tabHost.updateContainerState();
+        this.tabHost.updateLayoutState();
         this.updateChildContainerZIndexes();
         this.childContainers?.forEach(child => child.updateState());
         this.overrideFocusedState();
@@ -141,8 +137,7 @@ export class TabbedPanelContainer extends PanelContainer {
             rect = RectHelper.fromDOMRect(this.dockManager.getContainerBoundingRect());
         }
         super.resize(rect);
-        this.updateContainerState();
-        this.updateLayoutState();
+        this.updateState();
     }
 
     private overrideFocusedState() {
@@ -158,8 +153,7 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     setActiveChild(container: IDockContainer): void {
-        this.updateContainerState();
-        this.updateLayoutState();
+        this.updateState();
         this.tabHost.focusActiveTab(container);
     }    
 
@@ -173,10 +167,6 @@ export class TabbedPanelContainer extends PanelContainer {
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {
         this.tabHost.performLayout(this.childContainers, relayoutEvenIfEqual);
-    }
-
-    getChildContainers(): IDockContainer[] {
-        return [...this.childContainers];
     }
 
     onDraggingStarted(): void {

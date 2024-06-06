@@ -29,12 +29,9 @@ export class FillDockContainer implements IDockContainer {
 
     handleContextMenuAction(actionName: string): void {}
 
-    updateLayoutState(): void {
-        this.tabHost.updateLayoutState();
-    }
-
-    updateContainerState(): void {
+    updateState(): void {
         this.tabHost.updateContainerState();
+        this.tabHost.updateLayoutState();
     }
 
     setHeaderVisibility(visible: boolean): void {}

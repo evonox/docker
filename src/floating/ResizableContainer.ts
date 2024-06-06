@@ -45,16 +45,8 @@ export class ResizableContainer implements IDockContainer {
      *  Pure Decorator Overrides passing control to the delegated container
      */
 
-    updateLayoutState(): void {
-        this.delegate.updateLayoutState();
-    }
-
     handleContextMenuAction(actionName: string): void {
         this.delegate.handleContextMenuAction(actionName);
-    }
-
-    updateContainerState(): void {
-        this.delegate.updateContainerState();
     }
 
     isHidden(): boolean {
@@ -108,6 +100,7 @@ export class ResizableContainer implements IDockContainer {
     }
 
     updateState() {
+        this.delegate.updateState();
         this.adjustResizeHandleZIndexes();
     }
 
