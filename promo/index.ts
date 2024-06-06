@@ -12,8 +12,12 @@ import { CreditsFactoryFn } from "./panels/CreditsPanel";
 import { DockModelViewFactoryFn } from "./panels/DockModelView";
 import { BarChartFactoryFn, DoughnutChartFactoryFn, LineChartFactoryFn, PieChartFactoryFn, StackedChartFactoryFn } from "./panels/chart-panels";
 import { createVillageScene } from "./village-demo";
+import { DebugHelper } from "../src/utils/DebugHelper";
 
 declare var ace: any;
+
+DebugHelper.enableOptimizations(false);
+
 
 const dockManager = new DockManager(document.getElementById("main"));
 dockManager.initialize();
