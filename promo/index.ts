@@ -48,6 +48,7 @@ dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
         initialize: async (api, options) => {
             const documentTitle = options.getValue("title");
             const documentMode = options.getValue("mode");
+            const documentUrl = options.getValue("url");
 
             api.setPanelFAIcon("fa fa-file");
             api.setPanelTitle(documentTitle);
@@ -61,6 +62,10 @@ dockManager.registerPanelType("aceEditor", "transient", (dockManager) => {
                 var editor = ace.edit(domRootElement);
                 editor.setTheme("ace/theme/theme");
                 editor.session.setMode(`ace/mode/${documentMode}`);               
+
+                window.fetch(documentUrl).then(respose => respose.text().then(content => {
+                    editor.session.setValue(content);
+                }));
             }
             catch {}
             finally {
@@ -110,19 +115,23 @@ async function performDocking() {
         // Construct Code Editors
         const pythonEditor = await dockManager.createPanel("aceEditor", {
             title: "Python Editor",
-            mode: "python"
+            mode: "python",
+            url: "/code/example.py"
         });
         const javascriptEditor = await dockManager.createPanel("aceEditor", {
             title: "JavaScript Editor",
-            mode: "javascript"
+            mode: "javascript",
+            url: "/code/example.js"
         });
         const typescriptEditor = await dockManager.createPanel("aceEditor", {
             title: "TypeScript Editor",
-            mode: "typescript"
+            mode: "typescript",
+            url: "/code/example.ts"
         });
         const javaEditor = await dockManager.createPanel("aceEditor", {
             title: "Java Editor",
-            mode: "java"
+            mode: "java",
+            url: "/code/example.java"
         });
 
 

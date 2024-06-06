@@ -9,5 +9,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "jsx": "react"
-  }
+  },
+  "exclude": [
+    "./public/*"
+  ]
 }
