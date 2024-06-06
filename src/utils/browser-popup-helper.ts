@@ -37,7 +37,8 @@ export interface IBrowserPopupHelperOptions {
  */
 export class BrowserPopupHelper {
 
-    static showElementInBrowserWindow(targetElement: HTMLElement, dependentElements: HTMLElement[] , options: IBrowserPopupHelperOptions) {
+    static showElementInBrowserWindow(targetElement: HTMLElement, dependentElements: HTMLElement[] , 
+        options: IBrowserPopupHelperOptions): Window {
         // Compute the new window position and dimensions
         const targetBounds = targetElement.getBoundingClientRect();
         const windowBounds: IRect = {
@@ -72,6 +73,8 @@ export class BrowserPopupHelper {
             element = popupWindow.document.adoptNode(element);
             popupWindow.document.body.appendChild(element);
         });
+
+        return popupWindow;
     }
 
     // Creates the <title> element with the panel container title

@@ -9,6 +9,17 @@ export class DockModel {
     private _documentManagerNode: DockNode;
     private _dialogs: Dialog[] = [];
 
+    existsDockNodeInModel(dockNode: DockNode): boolean {
+        const queue = [this._rootNode];
+        while(queue.length > 0) {
+            const node = queue.shift();
+            if(node === dockNode)
+                return true;
+            node.childNodes.forEach(child => queue.push(child));
+        }
+        return false;
+    }
+
     setRootNode(node: DockNode) {
         this._rootNode = node;
     }

@@ -171,7 +171,20 @@ export class DockLayoutEngine {
         const parentContainerType = parentNode.container.getContainerType();
 
         if(parentContainerType === ContainerType.FillLayout) {
-            return { referenceNode: node.parent, dockKind: DockKind.Fill }
+            if(parentNode.getChildCount() > 1) {
+                let index = parentNode.getChildNodeIndex(node);
+                index--;
+                if(index < 0) {
+                    index = parentNode.getChildCount() - 1;
+                }
+                return {
+                    referenceNode: parentNode.getChildNodeAt(index),
+                    dockKind: DockKind.Fill
+                };
+            } else {
+                return { referenceNode: node.parent, dockKind: DockKind.Fill }
+            }
+
         } else if(parentContainerType === ContainerType.RowLayout) {
             const ratio = (parentNode.container as SplitterDockContainer).getContainerRatio(node.container);
             if(parentNode.getChildNodeIndex(node) === 0) {

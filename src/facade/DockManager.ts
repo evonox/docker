@@ -326,6 +326,10 @@ export class DockManager {
         return this.layoutEngine.queryDockInformation(dockNode);
     }
 
+    existsDockNodeInModel(dockNode: DockNode): boolean {
+        return this.context.model.existsDockNodeInModel(dockNode);
+    }
+
     /**
      * Minimized Slot Management
      */
