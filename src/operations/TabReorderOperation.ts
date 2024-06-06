@@ -29,6 +29,8 @@ export class TabReorderOperation implements IEventEmitter {
     private dragMinimumLeft: number;
     private dragMaximumRight: number;
 
+    private tabStripScrollLeft: number = 0;
+
     private lastX: number;
 
     private indexMap: TabReorderIndexMap;
@@ -118,6 +120,8 @@ export class TabReorderOperation implements IEventEmitter {
         // Prevent DOM TabHostStrip from loosing its height when the tab handles are removed 
         // from document flow
         const domTabStrip = DOM.from(this.tabStrip.getDOM());
+        this.tabStripScrollLeft = this.tabStrip.getTabHandleContainerDOM().get().scrollLeft;
+        
         const boundsTabStrip = domTabStrip.getBoundsRect();
         domTabStrip.css("min-width", boundsTabStrip.w + "px");
         domTabStrip.css("min-height", boundsTabStrip.h + "px");
@@ -125,7 +129,7 @@ export class TabReorderOperation implements IEventEmitter {
         this.domTabHandles.forEach(dom => {
             const parentBounds = dom.getOffsetParent().getBoundingClientRect(); 
             const bounds = dom.getBoundingClientRect();
-            dom.left(bounds.left - parentBounds.left)
+            dom.left(bounds.left - parentBounds.left + this.tabStripScrollLeft)
                 .top(bounds.top - parentBounds.top)
                 .zIndex(zIndex);
         });
@@ -154,6 +158,7 @@ export class TabReorderOperation implements IEventEmitter {
 
         const domTabStrip = this.tabStrip.getDOM();
         DOM.from(domTabStrip).css("min-width", "").css("min-height", "");
+        this.tabStrip.getTabHandleContainerDOM().get().scrollLeft = this.tabStripScrollLeft;
     }
 
     private dispose() {

@@ -51,6 +51,10 @@ export class TabHostStrip extends Component {
         return this.tabHost;
     }
 
+    getTabHandleContainerDOM() {
+        return this.domTabHandleContainer;
+    }
+
     isTabReorderingEnabled(): boolean {
         return this._tabReorderingEnabled;
     }
