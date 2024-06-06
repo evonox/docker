@@ -35,6 +35,7 @@ export class TabbedPanelContainer extends PanelContainer {
             this.tabHost.setEnableUndock(false);
             this.tabHost.setEnableMaximization(false);
             this.tabHost.setEnableTabReordering(false);
+            this.tabHost.setEnableFrameHeaderVisibility(false);
             // Perform Layout
             this.tabHost.performLayout(this.childContainers, false);
             // Append the TabHost to the panel
@@ -86,6 +87,7 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.setEnableUndock(false);
         this.tabHost.setEnableMaximization(false);
         this.tabHost.setEnableTabReordering(false);
+        this.tabHost.setEnableFrameHeaderVisibility(false);
     }
 
     protected onInitialRender(): HTMLElement {

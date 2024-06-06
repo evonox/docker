@@ -23,6 +23,7 @@ export class TabHost extends Component {
     // Flag means whether a undock operation is allowed on the TabHandle components
     private isUndockEnabled: boolean = true;
     private isMaximizationEnabled: boolean = true;
+    private isFrameHeaderVisibilityEnabled: boolean = true;
 
     // Tab Page references
     private tabPages: TabPage[] = [];
@@ -51,6 +52,10 @@ export class TabHost extends Component {
 
     setEnableTabReordering(flag: boolean) {
         this.tabStrip.enabledTabReordering(flag);
+    }
+
+    setEnableFrameHeaderVisibility(flag: boolean) {
+        this.isFrameHeaderVisibilityEnabled = flag;
     }
 
     getTabOrientation() {
@@ -138,7 +143,9 @@ export class TabHost extends Component {
             if(childContainer.getContainerType() !== ContainerType.Panel)
                 throw new Error("ERROR: Only panel containers are allowed to be inserted inside TabHost");
             if(this.isContainerInsideHost(childContainer) === false) {
-                childContainer.setHeaderVisibility(this.tabStripDirection === TabOrientation.Bottom);
+                childContainer.setHeaderVisibility(
+                    this.tabStripDirection === TabOrientation.Bottom && this.isFrameHeaderVisibilityEnabled
+                );
 
                 const tabPage = new TabPage(this.dockManager, childContainer as PanelContainer, 
                     this.tabStripDirection, this.isUndockEnabled, this.isMaximizationEnabled);
