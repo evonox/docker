@@ -19,6 +19,7 @@ export class FillDockContainer implements IDockContainer {
     private domContainer: DOM<HTMLElement>;
     private tabHost: TabHost;
     private _loadedSize: ISize;
+    private childContainers: IDockContainer[] = [];
 
     constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
         this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer").cacheBounds(false);
@@ -88,7 +89,12 @@ export class FillDockContainer implements IDockContainer {
     }
 
     performLayout(children: IDockContainer[], relayoutEvenIfEqual: boolean): void {
+        this.childContainers = children;
         this.tabHost.performLayout(children, relayoutEvenIfEqual);
+    }
+
+    getChildContainers(): IDockContainer[] {
+        return [...this.childContainers];
     }
 
     resize(rect: IRect): void {

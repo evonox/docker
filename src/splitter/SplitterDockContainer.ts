@@ -45,6 +45,10 @@ export abstract class SplitterDockContainer implements IDockContainer {
         return 2;
     }
 
+    getChildContainers(): IDockContainer[] {
+        return [...this.childContainers];
+    }
+
     setActiveChild(container: IDockContainer): void {}
 
     saveState(state: IState): void {

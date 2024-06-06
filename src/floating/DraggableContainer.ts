@@ -63,6 +63,10 @@ export class DraggableContainer implements IDockContainer {
         return this.delegate.getMinimumChildNodeCount();
     }
 
+    getChildContainers(): IDockContainer[] {
+        return this.delegate.getChildContainers();
+    }
+
     isHidden(): boolean {
         return this.delegate.isHidden();
     }

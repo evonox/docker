@@ -1,4 +1,5 @@
 import { BrowserPopupHelper } from "../../utils/browser-popup-helper";
+import { PanelContainer } from "../PanelContainer";
 import { PanelStateBase } from "./PanelStateBase";
 
 /**
@@ -31,8 +32,12 @@ export class PopupWindowState extends PanelStateBase {
 
     private openWindowInPopup() {
         const targetElement = this.panel.getContentFrameDOM();
+        const nestedContainers = this.panel.getChildContainers();
+        const dependentElements = nestedContainers.map(container => {
+            return (container as PanelContainer).getContentFrameDOM().get();
+        });
         
-        BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), {
+        BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), dependentElements, {
             title: this.panel.getTitle(),
             windowOffset: {
                 x: 0,

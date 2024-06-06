@@ -77,6 +77,10 @@ export class ResizableContainer implements IDockContainer {
         return this.delegate.getMinimumChildNodeCount();
     }
 
+    getChildContainers(): IDockContainer[] {
+        return this.delegate.getChildContainers();
+    }
+
     setActiveChild(container: IDockContainer): void {
         this.delegate.setActiveChild(container);
     }

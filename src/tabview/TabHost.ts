@@ -65,7 +65,7 @@ export class TabHost extends Component {
     getSelectedTab(): TabPage | undefined {
         return this.selectedTab;
     }
-
+    
     focusActiveTab(container: IDockContainer) {
         if(this.isContainerInsideHost(container) === false) {
             this.selectedTab.setSelectionState(SelectionState.Selected);

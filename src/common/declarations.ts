@@ -26,6 +26,7 @@ export interface IDockContainer extends IEventEmitter {
     getContainerType(): ContainerType;
     hasChanges(): boolean;
     getMinimumChildNodeCount(): number;
+    getChildContainers(): IDockContainer[];
 
     // Visibility and active child selection
     setActiveChild(container: IDockContainer): void;    

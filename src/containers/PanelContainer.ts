@@ -200,6 +200,11 @@ export class PanelContainer extends Component implements IDockContainer {
         return 0;
     }
 
+    getChildContainers(): IDockContainer[] {
+        return [];
+    }
+
+
     // Note: PanelContainer is leaf node, no child active selection
     setActiveChild(container: IDockContainer): void {}
 

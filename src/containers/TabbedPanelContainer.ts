@@ -175,6 +175,10 @@ export class TabbedPanelContainer extends PanelContainer {
         this.tabHost.performLayout(this.childContainers, relayoutEvenIfEqual);
     }
 
+    getChildContainers(): IDockContainer[] {
+        return [...this.childContainers];
+    }
+
     onDraggingStarted(): void {
         super.onDraggingStarted();
         this.childContainers.forEach(child => child.onDraggingStarted());
