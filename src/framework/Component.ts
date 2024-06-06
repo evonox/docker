@@ -35,7 +35,7 @@ export abstract class Component {
         this.element.remove();
     }
 
-    public dispose() {
+    public dispose() {       
         this.onDisposed();
 
         this.domEventManager.unbindAll();
