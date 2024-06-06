@@ -1,7 +1,7 @@
 import { DockManager } from "./facade/DockManager"
 
 import "./index.css";
-import { IPanelAPI, IPanelStateAPI } from "./common/panel-api";
+import { IPanelAPI, IPanelStateAPI, ITabbedPanelStateAPI } from "./common/panel-api";
 import { DOM } from "./utils/DOM";
 import { DebugHelper } from "./utils/DebugHelper";
 import { TabOrientation } from "./common/enumerations";
@@ -195,17 +195,52 @@ dockManager.registerPanelType("panel6", "transient", (dockManager) => {
 });
 
 dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) => {
+
+    let tabbedApi: ITabbedPanelStateAPI;
+
     return {
         initialize: async (api, options) => {
             api.setPanelFAIcon("fa fa-plus");
             api.setPanelTitle("Tabbed View");
+            tabbedApi = api
         },
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
                 displayOrder: 1,
-                title: "Tabbed Stuff",
-                actionName: "TAbbed"
+                title: "Tab Headers to Top",
+                actionName: "Top"
+            });
+            config.appendMenuItem({
+                displayOrder: 2,
+                title: "Tab Headers to Bottom",
+                actionName: "Bottom"
             })
+            config.appendMenuItem({
+                displayOrder: 3,
+                title: "Tab Headers to Left",
+                actionName: "Left"
+            })
+            config.appendMenuItem({
+                displayOrder: 4,
+                title: "Tab Headers to Right",
+                actionName: "Right"
+            })
+            config.appendMenuItem({
+                displayOrder: 4,
+                separator: true
+            })
+
+        },
+        onActionInvoked: (actionName) => {
+            if(actionName === "Top") {
+                tabbedApi.setTabOrientation("top");
+            } else if(actionName === "Bottom") {
+                tabbedApi.setTabOrientation("bottom");
+            } else if(actionName === "Left") {
+                tabbedApi.setTabOrientation("left");
+            } else if(actionName === "Right") {
+                tabbedApi.setTabOrientation("right");
+            }
         }
     }
 });
@@ -228,9 +263,6 @@ async function performDocking() {
         tabbedContainer.addContainer(containerThree1);
         tabbedContainer.addContainer(containerThree2);
         tabbedContainer.addContainer(containerThree3);
-        setTimeout(() => {
-            tabbedContainer.setTabOrientation(TabOrientation.Right);
-        }, 5000);
 
 
         dockManager.dockFill(dockManager.getDocumentNode(), containerOne);

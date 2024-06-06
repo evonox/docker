@@ -6,6 +6,8 @@ import type { DockManager } from "../facade/DockManager";
 
 export type ViewInstanceType = "singleton" | "transient";
 
+export type TabOrientationType = "top" | "bottom" | "left" | "right";
+
 
 export interface PanelFactoryFunction {
     (dockManager: DockManager): IPanelAPI;
@@ -100,6 +102,10 @@ export interface IPanelStateAPI {
     listenTo(eventName: string, handler: (payload?: any) => void): ISubscriptionAPI;
 }
 
+export interface ITabbedPanelStateAPI extends IPanelStateAPI {
+    setTabOrientation(orientation: TabOrientationType): void;
+}
+
 /**
  * This is interface implemented by a panel's factory method to query its state
  * The only required method is the factory method "initialize()" to create the panel's content
@@ -126,6 +132,6 @@ export interface IPanelAPI extends IGenericPanelAPI {
 }
 
 export interface ITabbedPanelAPI extends IGenericPanelAPI {
-    initialize: (api: IPanelStateAPI, options: IInitOptions) => Promise<void>;
+    initialize: (api: ITabbedPanelStateAPI, options: IInitOptions) => Promise<void>;
 
 }

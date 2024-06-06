@@ -24,6 +24,7 @@ import { ChannelManager } from "./ChannelManager";
 import { TabbedPanelContainer } from "../containers/TabbedPanelContainer";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { DebugHelper } from "../utils/DebugHelper";
+import { TabbedPanelStateAdapter } from "../api/TabbedPanelStateAdapter";
 
 
 /**
@@ -232,7 +233,7 @@ export class DockManager {
         const panelContainer = new TabbedPanelContainer(this, panelTypeName, panelTypeContract);        
         // Invoke the constructor function
         const initOptions = new PanelInitConfig(options);
-        const apiAdapter = new PanelStateAdapter(panelContainer);
+        const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
         await panelTypeContract.initialize(apiAdapter, initOptions);
         
         // Return finally the panel container
