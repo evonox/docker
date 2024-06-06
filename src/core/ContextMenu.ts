@@ -31,11 +31,12 @@ export class ContextMenu extends Component {
             this.domContextMenu.get(), {x: event.pageX, y: event.pageY}
         );
 
+        const targetElement = event.target as HTMLElement;
         this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
             .left(contextMenuPosition.x).top(contextMenuPosition.y)
-            .zIndex(zIndex).appendTo(document.body);
+            .zIndex(zIndex).appendTo(targetElement.ownerDocument.body);
             
-        this.bind(window, "mousedown", this.handleMouseDown.bind(this), {capture: true});   
+        this.bind(targetElement.ownerDocument.documentElement, "mousedown", this.handleMouseDown.bind(this), {capture: true});   
     }
 
     hide() {
