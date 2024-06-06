@@ -97,6 +97,7 @@ export class FloatingState extends PanelStateBase {
     }
 
     public async expand(doAnimation?: boolean): Promise<boolean> {
+        // Perform initial checks prior the animation
         if(doAnimation === undefined) {
             doAnimation = true;
         }
@@ -104,23 +105,30 @@ export class FloatingState extends PanelStateBase {
             return false;
         this.isCollapsed = false;
 
+        // Reconfigure expand / collapse button visibility
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, false);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, true);
 
+        // Query the needed DOM references and info for the animation
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         const domContentContainer = this.panel.getContentContainerDOM();
+
+        // Perform the Expand animation
         if(doAnimation === true) {
             await AnimationHelper.animatePanelExpand(domDialogFrame, domContentContainer.get(), 
             this.lastDialogExpandedHeight, this.lastContentExpandedHeight);
         }
 
+        // Final CSS style setting and cleanup
         DOM.from(domDialogFrame).height(this.lastDialogExpandedHeight);
         domContentContainer.height("").css("opacity", "");
 
+        // Enable resizing behavior on the dialog frame
         this.panel.triggerEvent("onEnableResize", true);
     }
 
     public async collapse(doAnimation?: boolean): Promise<boolean> {
+        // Perform initial checks prior the animation
         if(doAnimation === undefined) {
             doAnimation = true;
         }
@@ -128,23 +136,28 @@ export class FloatingState extends PanelStateBase {
             return false;
         this.isCollapsed = true;
 
+        // Reconfigure expand / collapse button visibility
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, true);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, false);
 
+        // Disabled resizing behavior on the dialog frame
         this.panel.triggerEvent("onEnableResize", false);
 
+        // Query the needed DOM references and info for the animation
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         const domFrameHeader = this.panel.getFrameHeaderDOM();
         const domContentContainer = this.panel.getContentContainerDOM();
         const headerHeight = domFrameHeader.getOffsetRect().h;
 
+        // Perform the Collapse animation
         this.lastDialogExpandedHeight = DOM.from(domDialogFrame).getHeight();
         this.lastContentExpandedHeight = domContentContainer.getHeight();
         if(doAnimation === true) {
             await AnimationHelper.animatePanelCollapse(domDialogFrame, domContentContainer.get(), headerHeight);
         }
-        DOM.from(domDialogFrame).height(headerHeight);
 
+        // Final CSS style setting and cleanup
+        DOM.from(domDialogFrame).height(headerHeight);
     }
 
     updateState(): void {
