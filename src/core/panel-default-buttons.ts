@@ -87,28 +87,28 @@ export const PANEL_DEFAULT_BUTTONS: IHeaderButton[] = [
         visible: true
     },
     {
-        displayOrder: 10000,
+        displayOrder: 7000,
         icon: POPUP_WINDOW_ICON,
         title: "Show in new window",
         actionName: PANEL_ACTION_SHOW_POPUP,
         visible: true
     },
     {
-        displayOrder: 9000,
+        displayOrder: 10000,
         icon: MAXIMIZE_BUTTON_ICON,
         title: "Maximize",
         actionName: PANEL_ACTION_MAXIMIZE,
         visible: true
     },
     {
-        displayOrder: 8000,
+        displayOrder: 9000,
         icon: RESTORE_BUTTON_ICON,
         title: "Restore",
         actionName: PANEL_ACTION_RESTORE,
         visible: true
     },
     {
-        displayOrder: 7000,
+        displayOrder: 8000,
         icon: MINIMIZE_BUTTON_ICON,
         title: "Minimize",
         actionName: PANEL_ACTION_MINIMIZE,
