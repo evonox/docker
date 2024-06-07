@@ -5,6 +5,7 @@ import { PanelContainer } from "../PanelContainer";
 import { DockedState } from "./DockedState";
 import { FloatingState } from "./FloatingState";
 import { IGenericPanelState, IPanelStateAPI } from "./IPanelState";
+import { InCollapserState } from "./InCollapserState";
 import { MaximizedState } from "./MaximizedState";
 import { MinimizedState } from "./MinimizedState";
 import { PopupWindowState } from "./PopupWindowState";
@@ -108,6 +109,22 @@ export class PanelStateMachine implements IPanelStateAPI {
         return isAllowed;
     }
 
+    async pinPanel(): Promise<boolean> {
+        const isAllowed = await this.currentState.showPopup();
+        if(isAllowed) {
+            await this.changeStateTo(PanelContainerState.Docked);
+        }
+        return isAllowed;              
+    }
+
+    async unpinPanel(): Promise<boolean> {
+        const isAllowed = await this.currentState.showPopup();
+        if(isAllowed) {
+            await this.changeStateTo(PanelContainerState.InCollapser);
+        }
+        return isAllowed;       
+    }
+
 
     // Misc State Change Methods
     async collapse(): Promise<boolean> {
@@ -150,6 +167,7 @@ export class PanelStateMachine implements IPanelStateAPI {
             case PanelContainerState.Maximized: return new MaximizedState(this.dockManager, this.panel, this.config);
             case PanelContainerState.Minimized: return new MinimizedState(this.dockManager, this.panel, this.config);
             case PanelContainerState.PopupWindow: return new PopupWindowState(this.dockManager, this.panel, this.config);
+            case PanelContainerState.InCollapser: return new InCollapserState(this.dockManager, this.panel, this.config);
             default: throw new Error(`Unknown Panel State ${state}`);
         }
     }

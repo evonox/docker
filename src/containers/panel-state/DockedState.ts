@@ -67,6 +67,10 @@ export class DockedState extends PanelStateBase {
         return true;
     }
 
+    async pinPanel(): Promise<boolean> {
+        return true;    
+    }
+
     public updateState(): void {
         this.adjustPanelContentSize();
         super.updateState();

@@ -14,7 +14,7 @@ import "./PanelContainer.css";
 import { DOMEvent } from "../framework/dom-events";
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
 import { ContextMenu } from "../core/ContextMenu";
-import { PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, isPanelDefaultAction } from "../core/panel-default-buttons";
+import { PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, PANEL_ACTION_TOGGLE_PIN, isPanelDefaultAction } from "../core/panel-default-buttons";
 import { PanelStateMachine } from "./panel-state/PanelStateMachine";
 import { Dialog } from "../floating/Dialog";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
@@ -273,6 +273,14 @@ export class PanelContainer extends Component implements IDockContainer {
         await this.state.hidePopup();
     }
 
+    async togglePinState() {
+        if(this.state.getCurrentState() === PanelContainerState.InCollapser) {
+            await this.state.pinPanel()
+        } else {
+            await this.state.unpinPanel();
+        }
+    }
+
     toggleMaximizedPanelState() {
         if(this.state.getCurrentState() === PanelContainerState.Maximized) {
             this.restorePanel();
@@ -377,6 +385,8 @@ export class PanelContainer extends Component implements IDockContainer {
             await this.close();
         } else if(actionName === PANEL_ACTION_SHOW_POPUP) {
             await this.showPopupWindow();
+        } else if(actionName === PANEL_ACTION_TOGGLE_PIN) {
+            await this.togglePinState();
         }
 
         this._isProcessingDefaultAction = false;

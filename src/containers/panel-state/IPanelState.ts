@@ -21,6 +21,9 @@ export interface IPanelStateAPI {
     showPopup(): Promise<boolean>;
     hidePopup(): Promise<boolean>;
 
+    pinPanel(): Promise<boolean>;
+    unpinPanel(): Promise<boolean>;
+
     // Central update method
     updateState(): void;
 }

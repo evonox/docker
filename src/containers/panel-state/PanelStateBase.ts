@@ -105,6 +105,15 @@ export abstract class PanelStateBase implements IGenericPanelState {
         return false;
     }
 
+    async pinPanel(): Promise<boolean> {
+        return false;
+    }
+
+    async unpinPanel(): Promise<boolean> {
+        return false;
+    }
+
+
     protected observeElement(element: HTMLElement, handler: Function) {
         this.elementObservers.set(element, handler);
         // NOTE: DEBUG ERROR - We need for some elements to have overflows ALLOWED!!!!

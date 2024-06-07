@@ -72,6 +72,14 @@ const STATE_TRANSITIONS: TransitionDefinition[] = [
     {
         fromState: PanelContainerState.PopupWindow, toState: PanelContainerState.Docked,
         transitionCtor: NoActionTransition
+    },
+    {
+        fromState: PanelContainerState.Docked, toState: PanelContainerState.InCollapser,
+        transitionCtor: NoActionTransition
+    },
+    {
+        fromState: PanelContainerState.InCollapser, toState: PanelContainerState.Docked,
+        transitionCtor: NoActionTransition
     }
 ];
 
