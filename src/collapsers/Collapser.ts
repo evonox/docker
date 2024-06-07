@@ -6,10 +6,10 @@ import { Component } from "../framework/Component";
 import { ComponentEventSubscription } from "../framework/component-events";
 import { DOM } from "../utils/DOM";
 import { CollapserHeader } from "./CollapserHeader";
-
-import "./Collapser.css";
 import { AnimationHelper } from "../utils/animation-helper";
 import { RectHelper } from "../utils/rect-helper";
+
+import "./Collapser.css";
 
 /**
  * 
