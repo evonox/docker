@@ -84,7 +84,7 @@ export class DockManager {
         } else {
             this.dockContentContainer = DOM.create("div")
                 .css("position", "absolute").css("display", "grid")
-                .left(26).top(0).right(26).bottom(26)
+                .left(0).top(0).right(0).bottom(0)
                 .css("overflow", "visible")
                 .cacheBounds(false)
                 .addClass("DockerTS-DockContent")
@@ -641,6 +641,9 @@ export class DockManager {
         this.context.model.rootNode.container.updateState();
         for(const dialog of this.context.model.dialogs) {
             dialog.getPanel().updateState();
+        }
+        for(const collapser of this.context.model.collapsers) {
+            collapser.getPanel().updateState();
         }
     }
 

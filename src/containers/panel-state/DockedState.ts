@@ -67,7 +67,7 @@ export class DockedState extends PanelStateBase {
         return true;
     }
 
-    async pinPanel(): Promise<boolean> {
+    async unpinPanel(): Promise<boolean> {
         return true;    
     }
 

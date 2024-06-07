@@ -29,9 +29,6 @@ export class InCollapserState extends PanelStateBase {
         const collapserDock = this.autoDock.getCollapserDockKind();
         this.collapser = new Collapser(this.dockManager, this.panel, collapserDock, panelRect);
 
-        const domPanelPlacehoder = this.collapser.getPanelPlaceholderDOM();
-        this.observeElement(domPanelPlacehoder.get(), () => this.panel.updateState())    
-
         this.collapser.on("onShowPanel", () => this.handlePanelShown());
         this.collapser.on("onHidePanel", () => this.handlePanelHidden());
     }
@@ -49,7 +46,7 @@ export class InCollapserState extends PanelStateBase {
         this.autoDock.dispose();
     }
 
-    async unpinPanel(): Promise<boolean> {
+    async pinPanel(): Promise<boolean> {
         return true;
     }
 

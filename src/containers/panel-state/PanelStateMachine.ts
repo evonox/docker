@@ -110,7 +110,7 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     async pinPanel(): Promise<boolean> {
-        const isAllowed = await this.currentState.showPopup();
+        const isAllowed = await this.currentState.pinPanel();
         if(isAllowed) {
             await this.changeStateTo(PanelContainerState.Docked);
         }
@@ -118,7 +118,7 @@ export class PanelStateMachine implements IPanelStateAPI {
     }
 
     async unpinPanel(): Promise<boolean> {
-        const isAllowed = await this.currentState.showPopup();
+        const isAllowed = await this.currentState.unpinPanel();
         if(isAllowed) {
             await this.changeStateTo(PanelContainerState.InCollapser);
         }

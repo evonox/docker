@@ -4,6 +4,8 @@
  */
 export class MouseLeaveGuard {
 
+    private handlerTriggered: boolean = false;
+
     constructor(private elements: HTMLElement[], private mouseLeaveHandler: () => void) {
         this.handleMouseMove = this.handleMouseMove.bind(this);
         window.addEventListener("mousemove", this.handleMouseMove);
@@ -19,7 +21,10 @@ export class MouseLeaveGuard {
             flag = flag || this.isInsideRect(event, element);
         }
         if(flag === false) {
-            this.mouseLeaveHandler();
+            if(! this.handlerTriggered) {
+                this.handlerTriggered = true;
+                this.mouseLeaveHandler();
+            }
         }
     }
 

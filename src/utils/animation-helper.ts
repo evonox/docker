@@ -201,26 +201,28 @@ export class AnimationHelper {
         });       
     }
 
-    static async animateShowCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
+    static async animateShowCollapserPanel(targetElement: HTMLElement, targetRect: IRect, progress: () => void) {
         return new Promise<void>((resolve, reject) => {
             Velocity(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
-                    duration: 350,
+                    duration: 500,
                     easing: "linear",
+                    progress: () => progress(),
                     complete: () => resolve()
                 }
             );
         });       
     }
 
-    static async animateHideCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
+    static async animateHideCollapserPanel(targetElement: HTMLElement, targetRect: IRect, progress: () => void) {
         return new Promise<void>((resolve, reject) => {
             Velocity(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
-                    duration: 350,
+                    duration: 500,
                     easing: "linear",
+                    progress: () => progress(),
                     complete: () => resolve()
                 }
             );

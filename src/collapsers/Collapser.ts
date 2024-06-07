@@ -27,6 +27,7 @@ export class Collapser extends Component {
 
     private titleChangeSubscription: ComponentEventSubscription;
     private mouseLeaveGuard: MouseLeaveGuard;
+    private animationRunning: boolean = false;
 
     constructor(
         private dockManager: DockManager, 
@@ -83,6 +84,10 @@ export class Collapser extends Component {
      * Public API Methods
      */
 
+    public getPanel(): PanelContainer {
+        return this.panel;
+    }
+
     public getPanelPlaceholderDOM(): DOM<HTMLElement> {
         return this.domPanelPlaceholder;
     }
@@ -91,34 +96,49 @@ export class Collapser extends Component {
      * Show & Hide Panel Animation Methods
      */
 
-    private async showPanel(): Promise<void> {
-        if(this.isPanelVisible())
+    private async showPanel(): Promise<void> {        
+        // Prevent asynchronous requests
+        if(this.isPanelVisible() || this.animationRunning)
             return;
+        this.animationRunning = true;
 
         let sourceHiddenRect = this.computePanelHiddenRect();
         let targetVisibleRect = this.computePanelVisibleRect();
+
         this.triggerEvent("onShowPanel");
+
         this.domPanelPlaceholder.show().applyRect(sourceHiddenRect);        
-        await AnimationHelper.animateShowCollapserPanel(this.domPanelPlaceholder.get(), targetVisibleRect);
+        await AnimationHelper.animateShowCollapserPanel(this.domPanelPlaceholder.get(), 
+            targetVisibleRect, () => this.panel.updateState());
         this.domPanelPlaceholder.applyRect(targetVisibleRect);
+        this.panel.updateState();
 
         this.mouseLeaveGuard = new MouseLeaveGuard([
             this.domPanelPlaceholder.get(), this.header.getDOM()
         ], () => this.hidePanel());
+
+        this.animationRunning = false;
     }
 
     private async hidePanel(): Promise<void> {
+        // Prevent asynchronous requests
+        if(this.animationRunning)
+            return;
+        this.animationRunning = true;
+
         this.mouseLeaveGuard.dispose();
         this.mouseLeaveGuard = undefined;
 
         let targetHiddenRect = this.computePanelHiddenRect();
-        await AnimationHelper.animateHideCollapserPanel(this.domPanelPlaceholder.get(), targetHiddenRect);
+        await AnimationHelper.animateHideCollapserPanel(this.domPanelPlaceholder.get(), targetHiddenRect,
+                () => this.panel.updateState());
         this.triggerEvent("onHidePanel");
         this.domPanelPlaceholder.hide();
+
+        this.animationRunning = false;
     }
 
     private isPanelVisible(): boolean {
-        return this.mouseLeaveGuard !== undefined;
         return this.panel.isHidden() === false;
     }
     
@@ -133,25 +153,26 @@ export class Collapser extends Component {
 
         switch(this.collapseKind) {
             case DockKind.Left:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: slidingSize + 1, h: nonSlidingSize };
+                return { x: anchorPoint.x, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize };
             case DockKind.Right:
-                return { x: anchorPoint.x - slidingSize, y: anchorPoint.y, w: slidingSize + 1, h: nonSlidingSize }
+                return { x: anchorPoint.x - slidingSize, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize }
             case DockKind.Down:
-                return { x: anchorPoint.x, y: anchorPoint.y - slidingSize, w: nonSlidingSize, h: slidingSize + 1 }
+                return { x: anchorPoint.x, y: anchorPoint.y - slidingSize, w: nonSlidingSize, h: slidingSize }
         }
     }
 
     private computePanelHiddenRect(): IRect {
         const anchorPoint: IPoint = this.getHeaderArchorPosition();
+        const slidingSize = this.getSlidingDimensionSize();
         const nonSlidingSize = this.getNonSlidingDimensionSize();
 
         switch(this.collapseKind) {
             case DockKind.Left:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: 0, h: nonSlidingSize };
+                return { x: anchorPoint.x - slidingSize, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize };
             case DockKind.Right:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: 0, h: nonSlidingSize }
+                return { x: anchorPoint.x + slidingSize, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize }
             case DockKind.Down:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: nonSlidingSize, h: 0 }
+                return { x: anchorPoint.x, y: anchorPoint.y + slidingSize, w: nonSlidingSize, h: slidingSize }
         }
     }
 
