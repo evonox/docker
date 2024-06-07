@@ -16,8 +16,8 @@ export class DockedState extends PanelStateBase {
             minimize: false, maximize: true, restore: false, expand: false, collapse: false, popup: true, pin: true
         });
 
-        const wasHeaderVisible = this.config.get("wasHeaderVisible");
-        this.panel.setHeaderVisibility(wasHeaderVisible);
+        const shouldBeHeaderVisible = this.dockManager.isInsideDocumentManager(this.panel) === false;
+        this.panel.setHeaderVisibility(shouldBeHeaderVisible);
 
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(1);

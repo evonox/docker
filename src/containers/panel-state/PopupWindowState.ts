@@ -1,6 +1,7 @@
 import { IDockInfo } from "../../common/declarations";
 import { DockKind } from "../../common/enumerations";
 import { DockNode } from "../../model/DockNode";
+import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
 import { BrowserPopupHelper } from "../../utils/browser-popup-helper";
 import { PanelContainer } from "../PanelContainer";
 import { PanelStateBase } from "./PanelStateBase";
@@ -11,9 +12,7 @@ import { PanelStateBase } from "./PanelStateBase";
 export class PopupWindowState extends PanelStateBase {
 
     private popupWindow: Window;
-    private dockingInfo: Map<DockNode, IDockInfo> = new Map<DockNode, IDockInfo>();
-    private dockingHierarchy: Array<DockNode> = new Array<DockNode>();
-
+    private autoDock: IAutoDock;
     private adoptedPopupElements: HTMLElement[] = [];
 
     public async enterState(initialState: boolean): Promise<void> {
@@ -23,8 +22,7 @@ export class PopupWindowState extends PanelStateBase {
         });
         this.panel.enableDefaultContextMenu(false);
 
-        this.saveCurrentDockingState();
-
+        this.autoDock = AutoDockHelper.scanDockInfo(this.dockManager, this.panel);
         this.undockPanel();
         this.panel.updateState();
 
@@ -36,9 +34,8 @@ export class PopupWindowState extends PanelStateBase {
 
     public async leaveState(): Promise<void> {
         // Perform clean up
+        this.autoDock.dispose();
         this.adoptedPopupElements = [];
-        this.dockingHierarchy = [];
-        this.dockingInfo.clear();
         this.popupWindow = undefined;
 
         await super.leaveState();
@@ -52,9 +49,8 @@ export class PopupWindowState extends PanelStateBase {
         })
         // Close the popup window
         this.popupWindow.close();
-        // Restore the docking state
-        this.restoreOriginalDockingState();
-        // Perform updates
+        // Restore the docking state & perform updates
+        this.autoDock.restoreDock();
         this.panel.activatePanel();
         this.panel.updateState();
 
@@ -85,48 +81,5 @@ export class PopupWindowState extends PanelStateBase {
             },
             onPopupWindowClosed: () => this.panel.hidePopupWindow()
         })
-    }
-
-    private saveCurrentDockingState() {
-        let dockNode = this.dockManager.findNodeFromContainer(this.panel);
-        while(dockNode.parent) {
-            this.dockingHierarchy.push(dockNode);
-            const dockInfo = this.dockManager.queryDockInformationForNode(dockNode);
-            this.dockingInfo.set(dockNode, dockInfo);
-            dockNode = dockNode.parent;
-        }
-    }
-
-    private restoreOriginalDockingState() {
-        for(let i = 0; i < this.dockingHierarchy.length; i++) {
-            const dockNode = this.dockingHierarchy[i];
-            const dockInfo = this.dockingInfo.get(dockNode);
-            if(this.dockManager.existsDockNodeInModel(dockInfo.referenceNode) === false) 
-                continue;
-            if(dockInfo.referenceNode === this.dockManager.getDocumentNode() && dockInfo.dockKind === DockKind.Fill) {
-                this.config.set("wasHeaderVisible", false);
-            } else {
-                this.config.set("wasHeaderVisible", true);
-            }
-
-            this.performDock(dockInfo);
-            return;
-        }
-        // As a last resort, we dock the missing panel to the DocumentManagerNode()
-        this.performDock({referenceNode: this.dockManager.getDocumentNode(), dockKind: DockKind.Fill});
-    }
-
-    private performDock(dockInfo: IDockInfo) {
-        if(dockInfo.dockKind === DockKind.Fill) {
-            this.dockManager.dockFill(dockInfo.referenceNode, this.panel);
-        } else if(dockInfo.dockKind === DockKind.Left) {
-            this.dockManager.dockLeft(dockInfo.referenceNode, this.panel, dockInfo.ratio);
-        } else if(dockInfo.dockKind ===  DockKind.Right) {
-            this.dockManager.dockRight(dockInfo.referenceNode, this.panel, dockInfo.ratio);
-        } else if(dockInfo.dockKind ===  DockKind.Up) {
-            this.dockManager.dockUp(dockInfo.referenceNode, this.panel, dockInfo.ratio);           
-        } else if(dockInfo.dockKind ===  DockKind.Down) {
-            this.dockManager.dockDown(dockInfo.referenceNode, this.panel, dockInfo.ratio);            
-        }
     }
 }

@@ -407,6 +407,13 @@ export class DockManager {
         return this.context.model.existsDockNodeInModel(dockNode);
     }
 
+    isInsideDocumentManager(container: PanelContainer): boolean {
+        const dockNode = this.findNodeFromContainer(container);
+        if(dockNode === null)
+            return false;
+        return dockNode.parent === this.getDocumentNode();
+    }
+
     /**
      * Minimized Slot Management
      */
