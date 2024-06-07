@@ -60,7 +60,6 @@ module.exports = {
     }
   },
   optimization: {
-    // runtimeChunk: 'single',
     minimizer: [
       `...`,
       new CssMinimizerPlugin({
