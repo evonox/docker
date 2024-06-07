@@ -49,7 +49,7 @@ export interface IDockConfig {
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     enableCollapsers: true,
     collapserMarginSize: 26,
-    collapserSlidingDimRatio: 0.35,
+    collapserSlidingDimRatio: 0.25,
     collapserMaxNonSlidingDim: 300,
     labels: {
         collapseLabel: "Collapse Panel",

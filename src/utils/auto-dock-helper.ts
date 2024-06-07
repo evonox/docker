@@ -8,6 +8,7 @@ import { DockNode } from "../model/DockNode";
  * Public API Interface for the auto-docking class
  */
 export interface IAutoDock {
+    getCollapserDockKind(): DockKind;
     restoreDock(): void;
     dispose(): void;
 }
@@ -21,6 +22,20 @@ class AutoDock implements IAutoDock {
     private dockingHierarchy: Array<DockNode> = new Array<DockNode>();
 
     constructor(private dockManager: DockManager, private panel: PanelContainer) {}
+
+        getCollapserDockKind(): DockKind {
+        for(let i = 0; i < this.dockingHierarchy.length; i++) {
+            const dockNode = this.dockingHierarchy[i];
+            const dockInfo = this.dockingInfo.get(dockNode);
+            if(dockInfo.dockKind === DockKind.Left || dockInfo.dockKind === DockKind.Right) {
+                return dockInfo.dockKind;
+            } else if(dockInfo.dockKind === DockKind.Up || dockInfo.dockKind === DockKind.Down) {
+                return DockKind.Down;
+            }
+        }
+        // Default docking down 
+        return DockKind.Down;
+    }
 
     scanDock(): void {
         let dockNode = this.dockManager.findNodeFromContainer(this.panel);
@@ -38,13 +53,6 @@ class AutoDock implements IAutoDock {
             const dockInfo = this.dockingInfo.get(dockNode);
             if(this.dockManager.existsDockNodeInModel(dockInfo.referenceNode) === false) 
                 continue;
-            // TODO: HOW TO RESOLVE THIS???? - DOCK PANEL MUST DETECT IF IT IS INSIDE DOCUMENT MANAGER
-            // if(dockInfo.referenceNode === this.dockManager.getDocumentNode() && dockInfo.dockKind === DockKind.Fill) {
-            //     this.config.set("wasHeaderVisible", false);
-            // } else {
-            //     this.config.set("wasHeaderVisible", true);
-            // }
-
             this.performDock(dockInfo);
             return;
         }

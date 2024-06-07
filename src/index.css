@@ -31,5 +31,5 @@
 }
 
 .DockerTS-DockContent {
-    outline: 3px solid var(--docker-ts-primary-color);
+    outline: 1px solid rgba(0, 0, 0, 0.15);
 }

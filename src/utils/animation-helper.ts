@@ -204,7 +204,7 @@ export class AnimationHelper {
     static async animateShowCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
         return new Promise<void>((resolve, reject) => {
             Velocity(targetElement, 
-                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.y},
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 350,
                     easing: "linear",
@@ -217,7 +217,7 @@ export class AnimationHelper {
     static async animateHideCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
         return new Promise<void>((resolve, reject) => {
             Velocity(targetElement, 
-                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.y},
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 350,
                     easing: "linear",

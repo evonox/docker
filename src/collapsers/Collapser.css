@@ -2,4 +2,10 @@
 
 .DockerTS-Collapser-Placeholder {
     position: absolute;
+    background: transparent;
+    z-index: 4;
+    pointer-events: none;
+
+    /* Box-Shadow taken from Tailwind CSS Framework */
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1), inset 0 0 0 1px #aaa;
 }

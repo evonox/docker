@@ -10,6 +10,7 @@ import { AnimationHelper } from "../utils/animation-helper";
 import { RectHelper } from "../utils/rect-helper";
 
 import "./Collapser.css";
+import { MouseLeaveGuard } from "../utils/mouse-leave-guard";
 
 /**
  * 
@@ -25,11 +26,13 @@ export class Collapser extends Component {
     private header: CollapserHeader;
 
     private titleChangeSubscription: ComponentEventSubscription;
+    private mouseLeaveGuard: MouseLeaveGuard;
 
     constructor(
         private dockManager: DockManager, 
         private panel: PanelContainer, 
-        private collapseKind: DockKind
+        private collapseKind: DockKind,
+        private panelRect: IRect
     ) {
         super();
         this.initializeComponent();
@@ -48,17 +51,18 @@ export class Collapser extends Component {
         this.dockManager.getCollapserMargin(this.collapseKind).appendHeader(this.header.getDOM());
 
         this.header.on("onMouseEnter", () => this.showPanel());
-        this.header.on("onMouseLeave", () => this.hidePanel());
 
         this.titleChangeSubscription = this.panel.on("onTitleChanged", () => this.requestUpdate());
         this.dockManager.getModelContext().appendCollapser(this);
     }
 
-    protected onDisposed(): void {
+    protected onDisposed(): void {        
         this.dockManager.getModelContext().removeCollapser(this);
         this.titleChangeSubscription.unsubscribe();
 
         this.dockManager.getCollapserMargin(this.collapseKind).removeHeader(this.header.getDOM());
+        this.mouseLeaveGuard?.dispose();
+        this.mouseLeaveGuard = undefined;
         this.header.dispose();
     }
 
@@ -88,20 +92,34 @@ export class Collapser extends Component {
      */
 
     private async showPanel(): Promise<void> {
-        const sourceHiddenRect = this.computePanelHiddenRect();
-        const targetVisibleRect = this.computePanelVisibleRect();
+        if(this.isPanelVisible())
+            return;
 
-        this.domPanelPlaceholder.show().applyRect(sourceHiddenRect);        
+        let sourceHiddenRect = this.computePanelHiddenRect();
+        let targetVisibleRect = this.computePanelVisibleRect();
         this.triggerEvent("onShowPanel");
+        this.domPanelPlaceholder.show().applyRect(sourceHiddenRect);        
         await AnimationHelper.animateShowCollapserPanel(this.domPanelPlaceholder.get(), targetVisibleRect);
         this.domPanelPlaceholder.applyRect(targetVisibleRect);
+
+        this.mouseLeaveGuard = new MouseLeaveGuard([
+            this.domPanelPlaceholder.get(), this.header.getDOM()
+        ], () => this.hidePanel());
     }
 
     private async hidePanel(): Promise<void> {
-        const targetHiddenRect = this.computePanelHiddenRect();
+        this.mouseLeaveGuard.dispose();
+        this.mouseLeaveGuard = undefined;
+
+        let targetHiddenRect = this.computePanelHiddenRect();
         await AnimationHelper.animateHideCollapserPanel(this.domPanelPlaceholder.get(), targetHiddenRect);
         this.triggerEvent("onHidePanel");
         this.domPanelPlaceholder.hide();
+    }
+
+    private isPanelVisible(): boolean {
+        return this.mouseLeaveGuard !== undefined;
+        return this.panel.isHidden() === false;
     }
     
     /**
@@ -115,11 +133,11 @@ export class Collapser extends Component {
 
         switch(this.collapseKind) {
             case DockKind.Left:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize };
+                return { x: anchorPoint.x, y: anchorPoint.y, w: slidingSize + 1, h: nonSlidingSize };
             case DockKind.Right:
-                return { x: anchorPoint.x - slidingSize, y: anchorPoint.y, w: slidingSize, h: nonSlidingSize }
+                return { x: anchorPoint.x - slidingSize, y: anchorPoint.y, w: slidingSize + 1, h: nonSlidingSize }
             case DockKind.Down:
-                return { x: anchorPoint.x, y: anchorPoint.y - slidingSize, w: nonSlidingSize, h: slidingSize }
+                return { x: anchorPoint.x, y: anchorPoint.y - slidingSize, w: nonSlidingSize, h: slidingSize + 1 }
         }
     }
 
@@ -133,14 +151,14 @@ export class Collapser extends Component {
             case DockKind.Right:
                 return { x: anchorPoint.x, y: anchorPoint.y, w: 0, h: nonSlidingSize }
             case DockKind.Down:
-                return { x: anchorPoint.x, y: anchorPoint.y, w: 0, h: nonSlidingSize }
+                return { x: anchorPoint.x, y: anchorPoint.y, w: nonSlidingSize, h: 0 }
         }
     }
 
     private getSlidingDimensionSize(): number {
         const dockContainerBounds = this.dockManager.getContentBoundingRect();
         const slidingDimension = 
-            this.collapseKind === DockKind.Down ? this.panel.getHeight() : this.panel.getWidth();
+            this.collapseKind === DockKind.Down ? this.panelRect.h : this.panelRect.w;
         const windowSlidingDimension = 
             this.collapseKind === DockKind.Down ? dockContainerBounds.h : dockContainerBounds.w;
         return Math.min(slidingDimension, this.dockManager.config.collapserSlidingDimRatio * windowSlidingDimension);
@@ -148,7 +166,7 @@ export class Collapser extends Component {
 
     private getNonSlidingDimensionSize(): number {
         const nonSlidingDimension = 
-            this.collapseKind === DockKind.Down ? this.panel.getWidth() : this.panel.getHeight();
+            this.collapseKind === DockKind.Down ? this.panelRect.w : this.panelRect.h;
         return Math.min(nonSlidingDimension, this.dockManager.config.collapserMaxNonSlidingDim);
     }
 

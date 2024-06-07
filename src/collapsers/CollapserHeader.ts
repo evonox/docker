@@ -4,6 +4,8 @@ import { property } from "../framework/decorators";
 import { DOM } from "../utils/DOM";
 import { EventHelper } from "../utils/event-helper";
 
+import "./CollapserHeader.css";
+
 /**
  * 
  * Collapser Header placed inside the Collapser Margin
