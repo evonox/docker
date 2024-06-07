@@ -48,11 +48,16 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
+  experiments: {
+    outputModule: true,
+  },  
   output: {
     filename: 'docker-ts.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
-    iife: true
+    library: {
+      type: "module"
+    }
   },
   optimization: {
     // runtimeChunk: 'single',
