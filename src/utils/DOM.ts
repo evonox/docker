@@ -178,6 +178,28 @@ export class DOM<T extends HTMLElement> {
         }
     }
 
+    getRight(): number {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
+            return parseFloat(this.getCss("right"));           
+        } else if(this.styleMap.has("right") === false) {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("right"));           
+        } else {
+            return parseFloat(this.getCss("right"));           
+        }
+    }
+
+    getBottom(): number {
+        if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
+            return parseFloat(this.getCss("bottom"));           
+        } else if(this.styleMap.has("bottom") === false) {
+            this.storeBoundsToCache();
+            return parseFloat(this.getCss("bottom"));           
+        } else {
+            return parseFloat(this.getCss("bottom"));           
+        }
+    }
+
     getWidth(): number {
         if(this.isBoundsCachingOn === false || DebugHelper.isCSSStyleCacheEnabled() === false) {
             return this.getBoundingClientRect().width;
@@ -259,6 +281,24 @@ export class DOM<T extends HTMLElement> {
             this.css("top", value);
         } else {
             this.css("top", MathHelper.toPX(value));
+        }
+        return this;
+    }
+
+    right(value: number | string) {
+        if(typeof value === "string") {
+            this.css("right", value);
+        } else {
+            this.css("right", MathHelper.toPX(value));               
+        }
+        return this;
+    }
+
+    bottom(value: number | string) {
+        if(typeof value === "string") {
+            this.css("bottom", value);
+        } else {
+            this.css("bottom", MathHelper.toPX(value));               
         }
         return this;
     }

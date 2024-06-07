@@ -43,7 +43,7 @@ export class FloatingState extends PanelStateBase {
         }
 
         this.configureButtons({
-            minimize: true, maximize: true, restore: false, expand: false, collapse: true, popup: false
+            minimize: true, maximize: true, restore: false, expand: false, collapse: true, popup: false, pin: false
         });
         this.panel.updateState();
         this.dialog.show();
@@ -168,8 +168,12 @@ export class FloatingState extends PanelStateBase {
         super.updateState();
     }
 
-    private adjustPanelContentState() {
+    private adjustPanelContentState() {               
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getBoundsRect();
+        const bounds = this.dockManager.getContentBoundingRect();
+        rect.x -= bounds.x;
+        rect.y -= bounds.y;
+
         this.panel.getContentFrameDOM().applyRect(rect);
     }
 }

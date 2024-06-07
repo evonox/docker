@@ -27,8 +27,8 @@ export class MaximizeAnimationTransition extends TransitionBase {
         domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
         this.panel.updateState();
 
-        const containerRect = this.dockManager.getContainerBoundingRect();
-        
+        const containerRect = this.dockManager.getRelativeFullWindowRect();
+       
         // Get the initial header height for the animation purposes
         const domFrameHeader = this.panel.getFrameHeaderDOM();
         const height = domFrameHeader.getOffsetRect().h;
@@ -38,7 +38,7 @@ export class MaximizeAnimationTransition extends TransitionBase {
         DOMUpdateInitiator.forceEnqueuedDOMUpdates();
 
         await AnimationHelper.animateMaximizeNoHeader(domContentFrame.get(), domFrameHeader.get(), height, {
-            x: containerRect.left, y: containerRect.top, w: containerRect.width, h: containerRect.height
+            x: containerRect.x, y: containerRect.y, w: containerRect.w, h: containerRect.h
         });
         
         // Remove element CSS property value for the height
@@ -52,10 +52,10 @@ export class MaximizeAnimationTransition extends TransitionBase {
         domContentFrame.zIndex(this.dockManager.config.zIndexes.zIndexMaximizedPanel);
         this.panel.updateState();
 
-        const containerRect = this.dockManager.getContainerBoundingRect();
+        const containerRect = this.dockManager.getRelativeFullWindowRect();
 
         await AnimationHelper.animateMaximize(domContentFrame.get(), {
-            x: containerRect.left, y: containerRect.top, w: containerRect.width, h: containerRect.height
+            x: containerRect.x, y: containerRect.y, w: containerRect.w, h: containerRect.h
         });
 
         domContentFrame.applyRect(containerRect);
@@ -78,7 +78,9 @@ export class RestoreAnimationTransition extends TransitionBase {
         let targetRect: IRect = this.config.get("originalRect");
         if(previousState === PanelContainerState.Docked) {
             targetRect = this.panel.getPlaceholderDOM().getBoundsRect();
+            targetRect = this.dockManager.adjustToFullWindowRelative(targetRect);
         }
+
         const wasHeaderVisible = this.config.get("wasHeaderVisible", true);
         
         if(previousState === PanelContainerState.Docked) {
@@ -110,7 +112,8 @@ export class MinimizeAnimationTransition extends TransitionBase {
             .addClass("DockerTS-ContentFrame--Animating");
         this.panel.updateState();
 
-        const minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
+        let minimizedFreeSlot = this.dockManager.getNextFreeMinimizedSlotRect();
+        minimizedFreeSlot = this.dockManager.adjustToFullWindowRelative(minimizedFreeSlot);
         await AnimationHelper.animateMinimize(domContentFrame.get(), minimizedFreeSlot);
 
         domContentFrame.applyRect(minimizedFreeSlot).removeClass("DockerTS-ContentFrame--Animating").zIndex("");

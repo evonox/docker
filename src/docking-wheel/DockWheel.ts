@@ -94,13 +94,14 @@ export class DockWheel {
             this.domSideWheel.removeFromDOM();
         } else {
             // Compute position of the main wheel
+            const boundsDockContainer = this.dockManager.getContentBoundingRect();
             const domContainer = this.activeNode.container.getDOM();
             const containerBounds = domContainer.getBoundingClientRect();
             const middlePoint: IPoint = {
                 x: containerBounds.x + containerBounds.width / 2,
                 y: containerBounds.y + containerBounds.height / 2
             };
-            this.domMainWheel.left(middlePoint.x).top(middlePoint.y);
+            this.domMainWheel.left(middlePoint.x - boundsDockContainer.x).top(middlePoint.y);
 
             const domDockerContainer = this.dockManager.getContainerElement();
             this.domMainWheel.appendTo(domDockerContainer);
@@ -108,9 +109,8 @@ export class DockWheel {
 
             // Compute position of sidewheels
             const sideWheelMargin = this.dockManager.config.sideWheelMargin;
-            const boundsDockContainer = this.dockManager.getContainerBoundingRect();
-            const dockerWidth = boundsDockContainer.width;
-            const dockerHeight = boundsDockContainer.height;
+            const dockerWidth = boundsDockContainer.w;
+            const dockerHeight = boundsDockContainer.h;
 
             this.setWheelButtonPosition(WheelTypes.SideLeft, sideWheelMargin, dockerHeight / 2);
             this.setWheelButtonPosition(WheelTypes.SideRight, dockerWidth - sideWheelMargin, dockerHeight / 2 )
@@ -172,7 +172,8 @@ export class DockWheel {
             }
             this.domPanelPreview.css("opacity", "");
 
-            const bounds = this.queryDockingBounds(wheelItem);            
+            let bounds = this.queryDockingBounds(wheelItem);            
+            bounds = this.dockManager.adjustToFullWindowRelative(bounds);
             this.animation = AnimationHelper.animateDockWheelPlaceholder(this.domPanelPreview.get(), bounds);
         }
     }

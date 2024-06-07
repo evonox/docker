@@ -25,6 +25,7 @@ import { TabbedPanelContainer } from "../containers/TabbedPanelContainer";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { DebugHelper } from "../utils/DebugHelper";
 import { TabbedPanelStateAdapter } from "../api/TabbedPanelStateAdapter";
+import { RectHelper } from "../utils/rect-helper";
 
 
 /**
@@ -33,6 +34,9 @@ import { TabbedPanelStateAdapter } from "../api/TabbedPanelStateAdapter";
 export class DockManager {
 
     private defaultDialogPosition: IPoint = {x: 0, y: 0};
+
+    // Dock Content Container
+    private dockContentContainer: DOM<HTMLElement>;
 
     // DockManager Model
     private context: DockManagerContext;
@@ -70,6 +74,20 @@ export class DockManager {
             .css("display", "grid")
             .css("overflow", "hidden")
             .cacheBounds(false);
+
+        if(this.config.enableCollapsers === false) {
+            this.dockContentContainer = DOM.from(this.container);            
+        } else {
+            this.dockContentContainer = DOM.create("div")
+                .css("position", "absolute").css("display", "grid")
+                .left(26).top(0).right(26).bottom(26)
+                .css("overflow", "visible")
+                .cacheBounds(false)
+                .addClass("DockerTS-DockContent")
+                .appendTo(this.container);
+            DOM.from(this.container).addClass("DockerTS-DockContainer");
+        }
+        
 
         // Lets contrain the resize logic to double rate than FPS to prevent flickering
         this.handleContainerResized = _.throttle(this.handleContainerResized.bind(this),
@@ -124,10 +142,52 @@ export class DockManager {
 
     getContainerBoundingRect(): DOMRect {
         return this.container.getBoundingClientRect();
+        // const left = this.dockContentContainer.getLeft();
+        // const right = this.dockContentContainer.getRight()
+        // const bottom = this.dockContentContainer.getBottom();
+        // const width = this.dockContentContainer.getWidth();
+        // const height = this.dockContentContainer.getHeight();
+        // return new DOMRect(-left, 0, width + left + right, height + bottom);
+        // return {
+        //     x: -left, 
+        //     y: 0,
+        //     w: width + left + right,
+        //     h: height + bottom
+        // }
+    }
+
+    getRelativeFullWindowRect(): IRect {
+        const left = this.dockContentContainer.getLeft();
+        const right = this.dockContentContainer.getRight()
+        const bottom = this.dockContentContainer.getBottom();
+        const width = this.dockContentContainer.getWidth();
+        const height = this.dockContentContainer.getHeight();
+
+        return {
+            x: -left,
+            y: 0,
+            w: width + left + right,
+            h: height + bottom
+        }
+    }
+
+    getContentBoundingRect(): IRect {
+        return this.dockContentContainer.getBoundsRect();
+    }
+
+    adjustToFullWindowRelative(rect: IRect): IRect {
+        const left = this.dockContentContainer.getLeft();
+        const right = this.dockContentContainer.getRight()
+        return {
+            x: rect.x - left,
+            y: rect.y,
+            w: rect.w,
+            h: rect.h
+        }
     }
 
     getContainerElement(): HTMLElement {
-        return this.container;
+        return this.dockContentContainer.get();
     }
 
     getModelContext(): DockManagerContext {
@@ -351,12 +411,12 @@ export class DockManager {
     }
 
     getNextFreeMinimizedSlotRect(): IRect {
-        const containerRect = this.getContainerBoundingRect();
+        const containerRect = this.getContentBoundingRect();
         const windowWidth = this.config.minimizedWindowWidth;
         const windowHeight = this.config.minimizedWindowHeight;
         return {
-            x: containerRect.right - windowWidth * (this.minimizedSlots.length + 1),
-            y: containerRect.bottom - windowHeight,
+            x: containerRect.x + containerRect.w - windowWidth * (this.minimizedSlots.length + 1),
+            y: containerRect.y + containerRect.h - windowHeight,
             w: windowWidth,
             h: windowHeight
         };
@@ -373,13 +433,13 @@ export class DockManager {
     private recomputeMinimizedSlotsCSS() {
         // Set the window width
         const windowWidth = this.config.minimizedWindowWidth;
-        DOM.from(this.container).css("--docker-ts-minimized-width", windowWidth.toFixed(0) + "px");
+        this.dockContentContainer.css("--docker-ts-minimized-width", windowWidth.toFixed(0) + "px");
         // Compute offsets of the slots
         let offsetRight = 0;
         for(let i = this.minimizedSlots.length - 1; i >= 0; i--) {
             const slotId = this.minimizedSlots[i];
             const cssVariableName = this.getSlotCSSPropertyName(slotId);
-            DOM.from(this.container).css(cssVariableName, offsetRight.toFixed(0) + "px");
+            this.dockContentContainer.css(cssVariableName, offsetRight.toFixed(0) + "px");
             offsetRight += windowWidth;
         }
     }
@@ -531,7 +591,7 @@ export class DockManager {
     }
 
     private isRectInsideContainer(rect: IRect): boolean {
-        const rectContainer = this.container.getBoundingClientRect();
+        const rectContainer = this.dockContentContainer.get().getBoundingClientRect();
         return rectContainer.left < rect.x && rectContainer.top < rect.y &&
             rect.x + rect.w < rectContainer.right && rect.y + rect.h < rectContainer.bottom;
     }
@@ -546,7 +606,7 @@ export class DockManager {
         // We force any pending updates before resizing the layout
         DOMUpdateInitiator.forceAllEnqueuedUpdates();
         // Get the current container bounds and resize the dock layout accordingly
-        const rect = DOM.from(this.container).getBoundsRect();
+        const rect = RectHelper.fromDOMRect(this.getContainerElement().getBoundingClientRect());
         this.resize(rect);
         DOMUpdateInitiator.forceAllEnqueuedUpdates();
 
@@ -593,7 +653,7 @@ export class DockManager {
     setRootNode(rootNode: DockNode) {
         rootNode.detachFromParent();
         this.context.model.setRootNode(rootNode);
-        this.container.appendChild(rootNode.container.getDOM());
+        this.dockContentContainer.get().appendChild(rootNode.container.getDOM());
     }
 
     /**

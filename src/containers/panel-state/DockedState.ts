@@ -13,7 +13,7 @@ export class DockedState extends PanelStateBase {
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
-            minimize: false, maximize: true, restore: false, expand: false, collapse: false, popup: true
+            minimize: false, maximize: true, restore: false, expand: false, collapse: false, popup: true, pin: true
         });
 
         const wasHeaderVisible = this.config.get("wasHeaderVisible");
@@ -74,6 +74,10 @@ export class DockedState extends PanelStateBase {
 
     private adjustPanelContentSize() {
         let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
+        const bounds = this.dockManager.getContentBoundingRect();
+        rect.x -= bounds.x;
+        rect.y -= bounds.y;
+
         // Note: In TabbedContainer this may trigger another ResizeObserver, we need to delegate it
         // to requestAnimationFrame
         // Note: Solution - ResizeObserver only on EMPTY ELEMENTS

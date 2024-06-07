@@ -4,6 +4,8 @@
  */
 
 export interface IDockConfig {
+    enableCollapsers?: boolean;
+    collapserMarginSize?: number;
     defaultPanelSizeMagnitude?: number;
     minimumDefaultWidth?: number;
     minimumDefaultHeight?: number;
@@ -42,6 +44,8 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    enableCollapsers: true,
+    collapserMarginSize: 26,
     labels: {
         collapseLabel: "Collapse Panel",
         expandLabel: "Expand Panel",

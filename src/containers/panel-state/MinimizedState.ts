@@ -13,7 +13,7 @@ export class MinimizedState extends PanelStateBase {
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
-            minimize: false, maximize: true, restore: true, expand: false, collapse: false, popup: false
+            minimize: false, maximize: true, restore: true, expand: false, collapse: false, popup: false, pin: false
         });
 
         const domContentFrame = this.panel.getContentFrameDOM();

@@ -20,7 +20,7 @@ export class DraggableContainer implements IDockContainer {
     private dockDragMove: ComponentEventSubscription;
     private dockDragStop: ComponentEventSubscription;
 
-    constructor(private dockMananger: DockManager, private delegate: IDockContainer, private topElement: HTMLElement, private dragHandle: HTMLElement) {
+    constructor(private dockManager: DockManager, private delegate: IDockContainer, private topElement: HTMLElement, private dragHandle: HTMLElement) {
         this.handleMouseDown = this.handleMouseDown.bind(this);
 
         this.domEventMouseDown = new DOMEvent<MouseEvent>(this.dragHandle);
@@ -110,10 +110,11 @@ export class DraggableContainer implements IDockContainer {
     }
 
     private async stopDragging(event: MouseEvent) {
-        const [correctX, correctY] = this.computeDialogPositionInsideViewport();
+        let [correctX, correctY] = this.computeDialogPositionInsideViewport();
         const bounds = this.topElement.getBoundingClientRect();
+        const dockContentBounds = this.dockManager.getContentBoundingRect();
         if(Math.abs(bounds.x - correctX) > 1 || Math.abs(bounds.y - correctY) > 1) {
-            await AnimationHelper.animateDialogMove(this.topElement, correctX, correctY, () => {
+            await AnimationHelper.animateDialogMove(this.topElement, correctX - dockContentBounds.x, correctY, () => {
                 const bounds = this.topElement.getBoundingClientRect();
                 this.eventManager.triggerEvent("onDraggableDragMove", {event, x: bounds.x, y: bounds.y});
             });
@@ -147,7 +148,7 @@ export class DraggableContainer implements IDockContainer {
     // Check if the dragged dialog is inside DockerTS Viewport
     private computeDialogPositionInsideViewport(): [number, number] {
         const bounds = DOM.from(this.topElement).getBoundsRect();
-        const domViewport = this.dockMananger.getContainerBoundingRect();
+        const domViewport = this.dockManager.getContainerBoundingRect();
             
         // Left, right and bottom edge can hide the floating dialog only by half
         const middlePoint: IPoint = {

@@ -1,5 +1,5 @@
 import { IRect, ISize } from "../../common/dimensions";
-import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP } from "../../core/panel-default-buttons";
+import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, PANEL_ACTION_TOGGLE_PIN } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { RectHelper } from "../../utils/rect-helper";
@@ -15,6 +15,7 @@ export interface IHeaderButtonConfiguration {
     minimize: boolean;
     restore: boolean;
     popup: boolean;
+    pin: boolean;
 }
 
 /**
@@ -124,6 +125,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         this.panel.showHeaderButton(PANEL_ACTION_EXPAND, config.expand);
         this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, config.collapse);
         this.panel.showHeaderButton(PANEL_ACTION_SHOW_POPUP, config.popup);
+        this.panel.showHeaderButton(PANEL_ACTION_TOGGLE_PIN, config.pin);
     }
 
     updateState(): void {

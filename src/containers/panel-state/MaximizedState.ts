@@ -13,7 +13,7 @@ export class MaximizedState extends PanelStateBase {
         const restoreState = this.config.get("restoreState");
         this.configureButtons({
             minimize: restoreState === PanelContainerState.Floating,
-            restore: true, maximize: false, expand: false, collapse: false, popup: false
+            restore: true, maximize: false, expand: false, collapse: false, popup: false, pin: false
         })
 
         // Move the maximized panel to the TOP of viewport
@@ -46,7 +46,7 @@ export class MaximizedState extends PanelStateBase {
     public updateState(): void {}
 
     private adjustMaximizedElementRect() {
-        const dockContainerBounds = this.dockManager.getContainerBoundingRect();
+        const dockContainerBounds = this.dockManager.getRelativeFullWindowRect();
         this.panel.getContentFrameDOM().applyRect(dockContainerBounds);
     }
 }

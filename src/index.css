@@ -19,11 +19,17 @@
     --docker-ts-tabstrip-background: #B2C1D6;
 
     --docker-ts-document-manager-background: #B2C1D6;
+    --docker-ts-collapser-margin-background: #B2C1D6;
 }
 
 .DockerTS--DisableSelection {
     user-select: none;
 }
 
+.DockerTS-DockContainer {
+    background: var(--docker-ts-collapser-margin-background);
+}
 
-
+.DockerTS-DockContent {
+    outline: 3px solid var(--docker-ts-primary-color);
+}

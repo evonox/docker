@@ -150,7 +150,8 @@ export class Dialog implements IEventEmitter {
     }
 
     setPosition(x: number, y: number) {
-        this.position = {x: x, y: y};
+        const bounds = this.dockManager.getContentBoundingRect();
+        this.position = {x: x - bounds.x, y: y - bounds.y};
         this.domDialog.left(this.position.x).top(this.position.y); 
         this.panel.updateState();
 
@@ -158,6 +159,7 @@ export class Dialog implements IEventEmitter {
     }
 
     resize(rect: IRect) {
+        rect = this.dockManager.adjustToFullWindowRelative(rect);
         this.domDialog.left(rect.x).top(rect.y).width(rect.w).height(rect.h);
         this.dockManager.notifyOnChangeDialogPosition(this, rect.x, rect.y);
     }

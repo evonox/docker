@@ -19,7 +19,7 @@ export class PopupWindowState extends PanelStateBase {
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
-            maximize: false, minimize: false, expand: false, collapse: false, restore: false, popup: false
+            maximize: false, minimize: false, expand: false, collapse: false, restore: false, popup: false, pin: false
         });
         this.panel.enableDefaultContextMenu(false);
 

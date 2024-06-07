@@ -45,6 +45,10 @@ export const POPUP_WINDOW_ICON = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M432 48H208c-17.7 0-32 14.3-32 32V96H128V80c0-44.2 35.8-80 80-80H432c44.2 0 80 35.8 80 80V304c0 44.2-35.8 80-80 80H416V336h16c17.7 0 32-14.3 32-32V80c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16H320c8.8 0 16-7.2 16-16V256H48V448zM64 128H320c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192c0-35.3 28.7-64 64-64z"/></svg>
 `;
 
+export const PIN_PANEL_ICON = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M32 32C32 14.3 46.3 0 64 0H320c17.7 0 32 14.3 32 32s-14.3 32-32 32H290.5l11.4 148.2c36.7 19.9 65.7 53.2 79.5 94.7l1 3c3.3 9.8 1.6 20.5-4.4 28.8s-15.7 13.3-26 13.3H32c-10.3 0-19.9-4.9-26-13.3s-7.7-19.1-4.4-28.8l1-3c13.8-41.5 42.8-74.8 79.5-94.7L93.5 64H64C46.3 64 32 49.7 32 32zM160 384h64v96c0 17.7-14.3 32-32 32s-32-14.3-32-32V384z"/></svg>
+`;
+
 /**
  * Configuration of default panel buttons
  */
@@ -56,6 +60,7 @@ export const PANEL_ACTION_RESTORE = "onRestore";
 export const PANEL_ACTION_MAXIMIZE = "onMaximize";
 export const PANEL_ACTION_CLOSE = "onClose";
 export const PANEL_ACTION_SHOW_POPUP = "onShowPopup";
+export const PANEL_ACTION_TOGGLE_PIN = "onTogglePin";
 
 export const TABSTRIP_SCROLL_LEFT = "onScrollLeft";
 export const TABSTRIP_SCROLL_RIGHT = "onScrollRight";
@@ -69,6 +74,7 @@ const PANEL_DEFAULT_ACTION_LIST = [
     PANEL_ACTION_MINIMIZE,
     PANEL_ACTION_RESTORE,
     PANEL_ACTION_SHOW_POPUP,
+    PANEL_ACTION_TOGGLE_PIN,
     TABSTRIP_SCROLL_LEFT,
     TABSTRIP_SCROLL_RIGHT,
     TABSTRIP_SHOW_MENU
@@ -84,13 +90,6 @@ export const PANEL_DEFAULT_BUTTONS: IHeaderButton[] = [
         icon:  CLOSE_BUTTON_ICON,
         title: "Close",
         actionName: PANEL_ACTION_CLOSE,
-        visible: true
-    },
-    {
-        displayOrder: 7000,
-        icon: POPUP_WINDOW_ICON,
-        title: "Show in new window",
-        actionName: PANEL_ACTION_SHOW_POPUP,
         visible: true
     },
     {
@@ -115,14 +114,28 @@ export const PANEL_DEFAULT_BUTTONS: IHeaderButton[] = [
         visible: true
     },
     {
+        displayOrder: 7000,
+        icon: POPUP_WINDOW_ICON,
+        title: "Show in new window",
+        actionName: PANEL_ACTION_SHOW_POPUP,
+        visible: true
+    },
+    {
         displayOrder: 6000,
+        icon: PIN_PANEL_ICON,
+        title: "Pin / Unpin Panel",
+        actionName: PANEL_ACTION_TOGGLE_PIN,
+        visible: true
+    },
+    {
+        displayOrder: 5000,
         icon: EXPAND_BUTTON_ICON,
         title: "Expand",
         actionName: PANEL_ACTION_EXPAND,
         visible: true
     },
     {
-        displayOrder: 5000,
+        displayOrder: 4000,
         icon: COLLAPSE_BUTTON_ICON,
         title: "Collapse",
         actionName: PANEL_ACTION_COLLAPSE,
