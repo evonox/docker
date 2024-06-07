@@ -16,7 +16,7 @@ import { PanelStateAdapter } from "../api/PanelStateAdapter";
 import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
-import { ContainerType, OrientationKind } from "../common/enumerations";
+import { ContainerType, DockKind, OrientationKind } from "../common/enumerations";
 import { IDockContainer, IDockInfo } from "../common/declarations";
 import { DOM } from "../utils/DOM";
 import { DragAndDrop } from "../utils/DragAndDrop";
@@ -26,6 +26,7 @@ import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { DebugHelper } from "../utils/DebugHelper";
 import { TabbedPanelStateAdapter } from "../api/TabbedPanelStateAdapter";
 import { RectHelper } from "../utils/rect-helper";
+import { CollapserMargin } from "../collapsers/CollapserMargin";
 
 
 /**
@@ -68,6 +69,9 @@ export class DockManager {
     private lastMinimizedSlotId = 0;
     private minimizedSlots: number[] = [];
 
+    // Collapser Margin Support
+    private collapserMargins: CollapserMargin[] = [];
+
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
         this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
         DOM.from(this.container).css("position", "relative")
@@ -86,6 +90,15 @@ export class DockManager {
                 .addClass("DockerTS-DockContent")
                 .appendTo(this.container);
             DOM.from(this.container).addClass("DockerTS-DockContainer");
+
+            this.collapserMargins.push(new CollapserMargin(this, DockKind.Left));
+            this.collapserMargins.push(new CollapserMargin(this, DockKind.Right));
+            this.collapserMargins.push(new CollapserMargin(this, DockKind.Down));
+
+            this.collapserMargins.forEach(margin => this.container.appendChild(margin.getDOM()));
+
+            const marginThickness = this.config.collapserMarginSize;
+            this.container.style.setProperty("--docker-ts-margin-thickness", `${marginThickness}px`);
         }
         
 
@@ -138,6 +151,10 @@ export class DockManager {
 
     get config(): Readonly<IDockConfig> {
         return this._config;
+    }
+
+    getCollapserMargin(collapseKind: DockKind): CollapserMargin {
+        return this.collapserMargins.find(margin => margin.getMarginKind() === collapseKind);
     }
 
     getContainerBoundingRect(): DOMRect {

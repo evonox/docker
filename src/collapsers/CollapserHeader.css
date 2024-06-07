@@ -1,0 +1,65 @@
+
+
+.DockerTS-CollapserHeader {
+    display: flex;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+
+    align-items: center;
+    align-content: center;
+
+    user-select: none;
+
+    color: var(--docker-ts-inactive-on-color);
+    background: var(--docker-ts-inactive-color);
+
+    gap: 7px;
+}
+
+.DockerTS-CollapserHeader--Left {
+    width: var(--docker-ts-header-thickness);
+    flex-direction: column-reverse;
+}
+
+.DockerTS-CollapserHeader--Right {
+    width: var(--docker-ts-header-thickness);
+    flex-direction: column;
+}
+
+.DockerTS-CollapserHeader--Down {
+    height: var(--docker-ts-header-thickness);
+    flex-direction: row;
+}
+
+.DockerTS-CollapserHeader__Icon {
+    width: var(--docker-ts-header-thickness);
+    height: var(--docker-ts-header-thickness);
+    
+    color: var(--docker-ts-inactive-on-color);
+    fill: var(--docker-ts-inactive-on-color);
+    stroke: var(--docker-ts-inactive-on-color);
+}
+
+.DockerTS-CollapserHeader__Icon svg {
+    width: inherit;
+    height: inherit;
+}
+
+.DockerTS-CollapserHeader__Title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.DockerTS-CollapserHeader--Left .DockerTS-CollapserHeader__Title {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+}
+
+.DockerTS-CollapserHeader--Right .DockerTS-CollapserHeader__Title {
+    writing-mode: vertical-lr;
+}
+
+.DockerTS-CollapserHeader--Down .DockerTS-CollapserHeader__Title {
+    
+}

@@ -187,4 +187,43 @@ export class AnimationHelper {
             );
         });       
     }
+
+    static async animateCollapserMargin(targetElement: HTMLElement, propertyName: string, targetValue: number) {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {[propertyName]: targetValue},
+                {
+                    duration: 350,
+                    easing: "linear",
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
+
+    static async animateShowCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.y},
+                {
+                    duration: 350,
+                    easing: "linear",
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
+
+    static async animateHideCollapserPanel(targetElement: HTMLElement, targetRect: IRect) {
+        return new Promise<void>((resolve, reject) => {
+            Velocity(targetElement, 
+                {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.y},
+                {
+                    duration: 350,
+                    easing: "linear",
+                    complete: () => resolve()
+                }
+            );
+        });       
+    }
 }

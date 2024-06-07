@@ -1,0 +1,37 @@
+
+
+.DockerTS-CollapserMargin {
+    position: absolute;   
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.DockerTS-CollapserMargin--Left {
+    flex-direction: column-reverse;
+    justify-content: start;
+
+    left: 0;
+    top: 0;
+    width: var(--docker-ts-margin-thickness);
+    height: 100%;
+}
+
+.DockerTS-CollapserMargin--Right {
+    flex-direction: column;
+    justify-content: start;
+
+    right: 0;
+    top: 0;
+    width: var(--docker-ts-margin-thickness);
+    height: 100%;
+}
+
+.DockerTS-CollapserMargin--Down {
+    flex-direction: row;
+    justify-content: start;
+
+    left: var(--docker-ts-margin-thickness);
+    bottom: 0;
+    width: calc(100% - 2 * var(--docker-ts-margin-thickness));
+    height: var(--docker-ts-margin-thickness);
+}

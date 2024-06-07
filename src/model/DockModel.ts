@@ -1,3 +1,4 @@
+import { Collapser } from "../collapsers/Collapser";
 import { Dialog } from "../floating/Dialog";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { DockNode } from "./DockNode";
@@ -8,6 +9,7 @@ export class DockModel {
     private _rootNode: DockNode;
     private _documentManagerNode: DockNode;
     private _dialogs: Dialog[] = [];
+    private _collapsers: Collapser[] = [];
 
     existsDockNodeInModel(dockNode: DockNode): boolean {
         const queue = [this._rootNode];
@@ -43,6 +45,10 @@ export class DockModel {
 
     get dialogs() {
         return this._dialogs;
+    }
+
+    get collapsers() {
+        return this._collapsers;
     }
 
     get documentManagerNode() {

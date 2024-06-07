@@ -3,6 +3,7 @@ import { Dialog } from "../floating/Dialog";
 import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
 import { DockModel } from "./DockModel";
 import { ArrayUtils } from "../utils/ArrayUtils";
+import { Collapser } from "../collapsers/Collapser";
 
 
 export class DockManagerContext {
@@ -33,5 +34,13 @@ export class DockManagerContext {
 
     removeDialog(dialog: Dialog) {
         ArrayUtils.removeItem(this._model.dialogs, dialog);
+    }
+
+    appendCollapser(collapser: Collapser) {
+        this._model.collapsers.push(collapser);
+    }
+
+    removeCollapser(collapser: Collapser) {
+        ArrayUtils.removeItem(this._model.collapsers, collapser);
     }
 }
