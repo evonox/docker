@@ -1,8 +1,5 @@
-import "velocity-animate";
 import { IRect } from "../common/dimensions";
-import { PanelContainer } from "../containers/PanelContainer";
-
-declare var Velocity: any;
+import { animate } from "../animation/animation";
 
 export interface IAnimation {
     commit(): void;
@@ -14,7 +11,8 @@ export class AnimationHelper {
 
     static animateFadeOut(target: HTMLElement): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(target, {opacity: 0}, {
+            animate(target, {opacity: 0}, {
+                easing: "linear",
                 duration: 300,
                 complete: () => resolve()
             })
@@ -22,14 +20,13 @@ export class AnimationHelper {
     }
 
     static animateDockWheelPlaceholder(target: HTMLElement, rect: IRect): IAnimation {
-        Velocity(target, {left: rect.x, top: rect.y, width: rect.w, height: rect.h, opacity: 1}, {
+        const animation = animate(target, {left: rect.x, top: rect.y, width: rect.w, height: rect.h, opacity: 1}, {
+            easing: "linear",
             duration: 250,
         });
         return {
-            commit: () => {
-                Velocity(target, "finish")
-            },
-            cancel: () => Velocity(target, "stop")
+            commit: () => animation.finish(),
+            cancel: () => animation.cancel()
         }
     }
 
@@ -38,9 +35,9 @@ export class AnimationHelper {
         let isAnimationRunning = true;
         let sourceLeftCoordinate: number = parseFloat(target.style.left);
 
-        Velocity(target, {left: targetLeftCoordinate}, {
+        const animation = animate(target, {left: targetLeftCoordinate}, {
             duration: 150,
-            easing: "ease-in-out",
+            easing: "easeInOut",
             complete: () => isAnimationRunning = false
         });
 
@@ -48,14 +45,14 @@ export class AnimationHelper {
             commit: () => {
                 if(isAnimationRunning) {
                     isAnimationRunning = false;
-                    Velocity(target, "stop")
+                    animation.cancel();
                     target.style.left = targetLeftCoordinate.toFixed(3) + "px";
                 }
             },
             cancel: () => {
                 if(isAnimationRunning) {
                     isAnimationRunning = false;
-                    Velocity(target, "stop")
+                    animation.cancel();
                     target.style.left = sourceLeftCoordinate.toFixed(3) + "px";
                 }
             }
@@ -64,12 +61,12 @@ export class AnimationHelper {
 
     static async animatePanelCollapse(domDialog: HTMLElement, domContent: HTMLElement, headerHeight: number): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(domDialog, {height: headerHeight}, {
+            animate(domDialog, {height: headerHeight}, {
                 duration: 250,
                 easing: "easeInSine",
                 complete: () => resolve()
             });
-            Velocity(domContent, {height: 0, opacity: 0}, {
+            animate(domContent, {height: 0}, {
                 duration: 250,
                 easing: "easeInSine",
                 complete: () => resolve()
@@ -79,12 +76,12 @@ export class AnimationHelper {
 
     static async animatePanelExpand(domDialog: HTMLElement, domContent: HTMLElement, dialogHeight: number, contentHeight: number): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(domDialog, {height: dialogHeight}, {
+            animate(domDialog, {height: dialogHeight}, {
                 duration: 400,
                 easing: "easeOutCubic",
                 complete: () => resolve()
             });
-            Velocity(domContent, {height: contentHeight, opacity: 1}, {
+            animate(domContent, {height: contentHeight}, {
                 duration: 400,
                 easing: "easeOutCubic",
                 complete: () => resolve()
@@ -96,7 +93,7 @@ export class AnimationHelper {
 
     static async animateMaximize(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 350,
@@ -109,7 +106,7 @@ export class AnimationHelper {
 
     static async animateRestore(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 350,
@@ -122,11 +119,11 @@ export class AnimationHelper {
 
     static async animateMaximizeNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, headerHeight: number, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(headerElement, {height: headerHeight}, {
+            animate(headerElement, {height: headerHeight}, {
                 duration: 100,
                 easing: 'linear',
                 complete: () => {
-                    Velocity(targetElement, 
+                    animate(targetElement, 
                         {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                         {
                             delay: 100,
@@ -143,13 +140,13 @@ export class AnimationHelper {
 
     static async animateRestoreNoHeader(targetElement: HTMLElement, headerElement: HTMLElement, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 350,
                     easing: "easeInOutCubic",
                     complete: () => {
-                        Velocity(headerElement, {height: 0}, {
+                        animate(headerElement, {height: 0}, {
                             delay: 100,
                             duration: 100,
                             easing: 'linear',
@@ -163,7 +160,7 @@ export class AnimationHelper {
 
     static async animateMinimize(targetElement: HTMLElement, targetRect: IRect): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 450,
@@ -176,7 +173,7 @@ export class AnimationHelper {
 
     static async animateDialogMove(targetElement: HTMLElement, targetLeft: number, targetTop: number, progress: () => void): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetLeft, top: targetTop},
                 {
                     duration: 250,
@@ -190,7 +187,7 @@ export class AnimationHelper {
 
     static async animateCollapserMargin(targetElement: HTMLElement, propertyName: string, targetValue: number) {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {[propertyName]: targetValue},
                 {
                     duration: 350,
@@ -203,7 +200,7 @@ export class AnimationHelper {
 
     static async animateShowCollapserPanel(targetElement: HTMLElement, targetRect: IRect, progress: () => void) {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 500,
@@ -217,7 +214,7 @@ export class AnimationHelper {
 
     static async animateHideCollapserPanel(targetElement: HTMLElement, targetRect: IRect, progress: () => void) {
         return new Promise<void>((resolve, reject) => {
-            Velocity(targetElement, 
+            animate(targetElement, 
                 {left: targetRect.x, top: targetRect.y, width: targetRect.w, height: targetRect.h},
                 {
                     duration: 500,
