@@ -323,15 +323,21 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     /**
-     * Misc Methods
+     * Content Element Manipulation Methods
      */
 
-
     public setContentElement(content: HTMLElement) {
+        // First check, if the content element is NOT the same
+        // Note: we do not want to cause flickering when there is not the reason to do so
+        if(this.domContent === content && this.domContent.parentElement === content.parentElement)
+            return;
+
+        // If not so and we need to change the elements, perform the change of content elements
         this.domContent?.remove();
         this.domContent = content;
         this.domContentHost?.appendChild(this.domContent);
 
+        // Release and bind again the panel mouse down handler for its activation purposes
         this.contentPanelMouseDown?.unbind();
         this.contentPanelMouseDown = new DOMEvent(this.domContentHost.get());
         this.contentPanelMouseDown.bind("mousedown", this.handleMouseDownOnPanel.bind(this), {capture: true});
