@@ -11,6 +11,10 @@ import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
 import { DOMRegistry } from "../utils/DOMRegistry";
 
+/**
+ * SplitterPanel Component takes care of resizing child containers either vertically or horizontally
+ * It provides splitted view for two or more child containers.
+ */
 export class SplitterPanel extends Component {
 
     private domSplitterPanelWrapper: DOM<HTMLElement>;
@@ -83,6 +87,8 @@ export class SplitterPanel extends Component {
         if(this.splitterPanelRO === undefined) {
             this.splitterPanelRO = new ResizeObserver(() => {
                 this.adjustContainerSizesToNewDimensions();
+                this.adjustSizesIfMinimumSizesOverflows();
+                this.applyChildContainerSizes();
             });
             // Prevent recursive callback in case of content overflow
             this.domSplitterPanel.css("overflow", "hidden"); 
@@ -142,8 +148,9 @@ export class SplitterPanel extends Component {
 
         if(previousSizes !== undefined) {
             this.containerSizes = previousSizes;
-            this.applyChildContainerSizes();   
         }
+        this.adjustSizesIfMinimumSizesOverflows();
+        this.applyChildContainerSizes();   
 
         this.invalidate();
     }
@@ -194,6 +201,7 @@ export class SplitterPanel extends Component {
         // Recompute and apply changes
         this.containerSizes = ratios.map(ratio => ratio * contentSize);
 
+        this.adjustSizesIfMinimumSizesOverflows();
         this.applyChildContainerSizes();
         // this.triggerChildContainerResize();
     }
@@ -313,6 +321,63 @@ export class SplitterPanel extends Component {
         }
     }
 
+    private adjustSizesIfMinimumSizesOverflows() {
+        // If varying minium sizes fit in the range, we have no job to do
+        if(this.isVaryingMinSizeOverflow() === false) {
+            this.probeMinSizesAreNotOverflown();
+            return;
+        }
+        // Get minimum required & avialable size
+        const requiredMinimumSize = this.getRequiredMinimumVaryingSize();
+        const availableMinimumSize = this.getVaryingSize(this.domSplitterPanel);
+        const scalingFactor = availableMinimumSize / requiredMinimumSize;
+        // Scale the container space evenly accoriding to the minimum sizes
+        for(let i = 0; i < this.containerSizes.length; i++) {
+            
+            // Get the child container and recompute the new sizes proportionally to the minimum size
+            const childContainer = this.childContainers[i];
+            const minimumSize = this.getContainerMinimumVaryingSize(childContainer);
+            const sizeRatio = minimumSize / requiredMinimumSize * scalingFactor;
+            this.containerSizes[i] = sizeRatio * availableMinimumSize;
+        }
+    }
+
+    private probeMinSizesAreNotOverflown() {
+        // Adjust the minimum size if the current size is smaller
+        const hasMinimumSize = new Array(this.childContainers.length).fill(false);
+        for(let i = 0; i < this.childContainers.length; i++) {
+            const childContainer = this.childContainers[i];
+            const minSize = this.getContainerMinimumVaryingSize(childContainer);
+            if(minSize > this.containerSizes[i]) {
+                this.containerSizes[i] = minSize;
+                hasMinimumSize[i] = true;
+            }
+        }
+        // Check if to some element was set the minimum size
+        const wasSetAnyMinimumSize = hasMinimumSize.reduce((prev, curr) => prev || curr, false);
+        if(! wasSetAnyMinimumSize)
+            return;
+
+        // Compute the overflow of the new sizes
+        const totalContainerSize = MathHelper.sum(this.containerSizes);
+        const availableSize = this.getVaryingSize(this.domSplitterPanel);
+        const remainderOverflownSize = totalContainerSize - availableSize;
+        const sizeOfNonMinimumContainers = MathHelper.sum(
+            this.childContainers
+                .filter((child, index) => hasMinimumSize[index] === false)
+                .map((child, index) => this.containerSizes[index])
+        );
+        //const scalingFactor = remainderOverflownSize / sizeOfNonMinimumContainers;
+        // Distribute the overflow size among containers that do not have minimum size
+        for(let i = 0; i < this.containerSizes.length; i++) {
+            if(hasMinimumSize[i])
+                continue;
+            const ratio = this.containerSizes[i] / sizeOfNonMinimumContainers;
+            const distributedOverflowRemainder = ratio * remainderOverflownSize;
+            this.containerSizes[i] -= distributedOverflowRemainder;
+        }
+    }
+
     private computeInitialSize() {
         if(this.containerSizes.length === 0) {
             const count = this.childContainers.length;
@@ -321,10 +386,52 @@ export class SplitterPanel extends Component {
         }
     }
 
+    /**
+     * Misc Dimension Computation & Checking Methods
+     */
+
+    private isVaryingMinSizeOverflow() {
+        const availableVaryingSize = this.getVaryingSize(this.domSplitterPanel);
+        const requiredVaryingSize = this.getRequiredMinimumVaryingSize();
+        return requiredVaryingSize >= availableVaryingSize;            
+    }
+
+    private getRequiredMinimumVaryingSize(): number {
+        return this.orientation === OrientationKind.Row
+            ? this.getRequiredMinimumWidth() : this.getRequiredMinimumHeight();
+    }
+
     private getVaryingSize(element: DOM<HTMLElement> | HTMLElement) {
         if(element instanceof HTMLElement) {
             element = DOM.from(element);
         }
         return this.orientation === OrientationKind.Row ? element.getWidth() : element.getHeight();
+    }
+
+    isMinWidthSizeOverflow(): boolean {
+        const requiredMinWidth = this.getRequiredMinimumWidth();
+        return requiredMinWidth >= this.domSplitterPanel.getWidth();
+    }
+
+    isMinHeightSizeOverflow(): boolean {
+        const requiredMinHeight = this.getRequiredMinimumHeight();
+        return requiredMinHeight >= this.domSplitterPanel.getHeight();
+    }
+
+    private getContainerMinimumVaryingSize(childContainer: IDockContainer): number {
+        return this.orientation === OrientationKind.Row ? childContainer.getMinWidth()
+            : childContainer.getMinHeight();
+    }
+
+    private getRequiredMinimumWidth(): number {
+        return MathHelper.sum(
+            this.childContainers.map(child => child.getMinWidth())
+        );
+    }
+
+    private getRequiredMinimumHeight(): number {
+        return MathHelper.sum(
+            this.childContainers.map(child => child.getMinHeight())
+        );
     }
 }

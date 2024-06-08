@@ -90,6 +90,9 @@ export class SplitterBar extends Component {
     }
 
     private processDraggingX(delta: number, event: MouseEvent) {
+        // If there is minimum widht size overflow, suppress dragging X
+        if(this.splitterPanel.isMinWidthSizeOverflow())
+            return;
         // Check the overflow guard
         const overflowState = this.overflowGuard.isInDragOverflow(event.pageX);
         if(overflowState === DragOverflowState.InOverflowState)
@@ -132,6 +135,9 @@ export class SplitterBar extends Component {
     }
 
     private processDraggingY(delta: number, event: MouseEvent) {
+        // If there is minimum height overflow - suppress the dragging Y
+        if(this.splitterPanel.isMinHeightSizeOverflow())
+            return;
         // Check the overflow guard
         const overflowState = this.overflowGuard.isInDragOverflow(event.pageY);
         if(overflowState === DragOverflowState.InOverflowState)
