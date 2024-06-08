@@ -2,13 +2,14 @@ import * as React from "react";
 import { Root, createRoot } from "react-dom/client";
 import { DockManager } from "../../src/facade/DockManager";
 import { IPanelAPI } from "../../src/common/panel-api";
-import { OrganizationChart } from 'primereact/organizationchart';
 import { TreeNode } from "primereact/treenode";
 import { DockNode } from "../../src/model/DockNode";
 import { ContainerType } from "../../src/common/enumerations";
-import { ScrollPanel } from 'primereact/scrollpanel';
+import { AnimatedTree } from "react-tree-graph";
 
+import 'react-tree-graph/dist/style.css'
 import "./Scrollbars.css";
+
 
 function stringifyContainerType(containerType: ContainerType): string {
     switch(containerType) {
@@ -19,43 +20,39 @@ function stringifyContainerType(containerType: ContainerType): string {
     }
 }
 
-function createTreeNode(node: DockNode): TreeNode {
+function createTreeNode(node: DockNode): any {
     return {
-        label: "Node",
-        data: {
-            type: stringifyContainerType(node.container.getContainerType())
+        name: stringifyContainerType(node.container.getContainerType()),
+        svgProps: {
+            className:"NodeClass"
         }
     }
 }
 
-function constructOrgChart(node: DockNode): TreeNode {
-    const childNodes =  node.childNodes.map(child => constructOrgChart(child));
+function constructTreeGraph(node: DockNode): TreeNode {
+    const childNodes =  node.childNodes.map(child => constructTreeGraph(child));
     const treeNode = createTreeNode(node);
     treeNode.children = childNodes;
-    treeNode.expanded = childNodes.length > 0;
     return treeNode;
 }
 
 function DockModelView({dockManager}: {dockManager: DockManager}) {
 
-    const [model, setModel] = React.useState<TreeNode[]>([{}]);
-
-    const nodeTemplate = (node: TreeNode) => {
-        return (<div>{node.data?.type}</div>);
-    }
+    const [model, setModel] = React.useState<any>(null);
 
     React.useLayoutEffect(() => {
         setTimeout(() => {
-            const model = constructOrgChart(dockManager.getModelContext().model.rootNode);
-            setModel([model]);   
+            const model = constructTreeGraph(dockManager.getModelContext().model.rootNode);
+            setModel(model);   
         }, 1000);
     }, []);
 
     return (
-        <div style={{height: "100%", background: "white"}}>
-            <ScrollPanel style={{width: "100%", height: "100%"}} className="custombar1" >
-                <OrganizationChart value={model} nodeTemplate={nodeTemplate} />
-            </ScrollPanel>
+        <div style={{height: "100%", background: "#444", overflow: "auto", stroke: "#888", fill: "#888"}}>
+            { model !== null && (
+                <AnimatedTree  data={model} width={800} height={600} />
+            )}
+
         </div>
     );
 }

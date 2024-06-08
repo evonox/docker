@@ -41,8 +41,11 @@ export abstract class PanelStateBase implements IGenericPanelState {
 
     async enterState(initialState: boolean): Promise<void> {
         this.resizeObserver = new ResizeObserver((entries) => {
+            console.dir("--- OBSERVING ----")
             for(const entry of entries) {
+                console.log(entry);
                 if(this.elementObservers.has(entry.target)) {
+                    console.dir("--- MAP OBSERVER HIT ---- ");
                     const handler = this.elementObservers.get(entry.target);
                     handler();
                 }
@@ -143,7 +146,8 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     protected notifyIfSizeChanged() {
-        let rect = this.panel.getContentContainerDOM().getBoundsRect();
+        console.log("notifyIfSizeChanged")
+        let rect = this.panel.getContentHostDOM().getBoundsRect();
         // We round down to whole pixels to prevent vain resize notifications
         rect = RectHelper.floor(rect); 
         if(this.hasSizeChanged(rect)) {

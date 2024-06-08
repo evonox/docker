@@ -143,6 +143,10 @@ export class PanelContainer extends Component implements IDockContainer {
         return this.domFrameHeader;
     }
 
+    getContentHostDOM() {
+        return this.domContentHost;
+    }
+
     getPlaceholderDOM() {
         return this.domPanelPlaceholder;
     }

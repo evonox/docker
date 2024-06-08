@@ -1,5 +1,16 @@
 
 
+.node {
+    fill: black !important;
+    stroke: white !important;
+
+}
+
+.node text {
+    fill: #eee!important;
+    stroke: #eee !important;
+}
+
 /* ScrollPanelDemo.css */
 
  .p-scrollpanel.custombar1 .p-scrollpanel-wrapper {

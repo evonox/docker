@@ -87,6 +87,7 @@ export class DockedState extends PanelStateBase {
         // Note: Solution - ResizeObserver only on EMPTY ELEMENTS
         requestAnimationFrame(() => {
             this.panel.getContentFrameDOM().applyRect(rect);
+            this.notifyIfSizeChanged();
         })
     }
 }
