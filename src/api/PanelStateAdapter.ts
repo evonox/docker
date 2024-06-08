@@ -1,6 +1,8 @@
 import { DockManager } from "../facade/DockManager";
 import { PanelContainer } from "../containers/PanelContainer";
 import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI, IChannel } from "../common/panel-api";
+import { DOM } from "../utils/DOM";
+import { COG_LOADING_PROGRESS } from "../core/panel-default-buttons";
 
 /**
  * Adapter object given the bridge between the outer panel state interface 
@@ -8,10 +10,32 @@ import { IPanelStateAPI, IHeaderButton, ISubscriptionAPI, IChannel } from "../co
  */
 export class PanelStateAdapter implements IPanelStateAPI {
 
+    private domProgressLoader: HTMLElement;
+
     constructor(private panelContainer: PanelContainer) {}
 
     channel(name?: string): IChannel {
         return this.panelContainer.getDockManager().getChannel(name);
+    }
+
+    enableProgressLoader(enable: boolean): void {
+        if(enable) {
+            this.domProgressLoader = this.panelContainer.getAPI().getProgressLoader?.();
+            // If the progress loader is not provided, use the default one
+            if(this.domProgressLoader === undefined) {
+                this.domProgressLoader = DOM.create("div")
+                    .addClass("DockerTS-ProgressLoader")
+                    .html(COG_LOADING_PROGRESS).get();
+            }
+            this.panelContainer.setContentElement(this.domProgressLoader);
+
+        } else {
+            // Remove the progress loader if present
+            if(this.domProgressLoader !== undefined) {
+                this.domProgressLoader.remove();
+                this.domProgressLoader = undefined;
+            }
+        }
     }
 
     activate(): void {

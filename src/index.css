@@ -34,3 +34,29 @@
     outline: 1px solid rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
+
+.DockerTS-ProgressLoader {
+    height: 100%;
+    display: grid;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    justify-items: center;
+    font-size: 5rem;
+}
+
+@keyframes docker-ts-progress-rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+}
+
+.DockerTS-ProgressLoader svg {
+    width: 1em;
+    height: 1em;
+    opacity: 0.5;
+    animation: docker-ts-progress-rotating 2s linear infinite;
+}

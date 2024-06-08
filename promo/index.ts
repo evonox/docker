@@ -28,16 +28,22 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
         initialize: async (api, options) => {
             api.setPanelFAIcon("fa-brands fa-unity");
             api.setPanelTitle("BabylonJS 3D Engine Demo");
+            api.enableProgressLoader(true);
 
-            const domRootElement = document.createElement("div");
-            domRootElement.style.overflow = "hidden";
-            const domCanvas = document.createElement("canvas");
-            domRootElement.appendChild(domCanvas);            
-            domRootElement.classList.add("renderCanvas")
-            domCanvas.classList.add("canvasZone");
+            return new Promise<HTMLElement>(async (resolve, reject) => {
+                const domRootElement = document.createElement("div");
+                domRootElement.style.overflow = "hidden";
+                const domCanvas = document.createElement("canvas");
+                domRootElement.appendChild(domCanvas);            
+                domRootElement.classList.add("renderCanvas")
+                domCanvas.classList.add("canvasZone");
+                await startBabylonDemo(domCanvas, createVillageScene)
+                setTimeout(() => {
+                    api.enableProgressLoader(false);
+                    resolve(domRootElement);
+                }, 5 * 1000);
+            })
 
-            startBabylonDemo(domCanvas, createVillageScene)
-            return domRootElement;
         }
     }
 });
@@ -146,10 +152,10 @@ async function performDocking() {
         dockManager.dockFill(documentNode, javascriptEditor);
         dockManager.dockFill(documentNode, typescriptEditor);
         dockManager.dockFill(documentNode, javaEditor);
-        dockManager.dockLeft(documentNode, babylonJSPanel, 0.4);
+        dockManager.dockLeft(documentNode, babylonJSPanel, 0.35);
         const nodeCredits = dockManager.dockDown(documentNode, creditsPanel, 0.35);
         dockManager.dockFill(nodeCredits, chartView);
-        dockManager.dockRight(documentNode, dockModelPanel, 0.28);
+        dockManager.dockRight(documentNode, dockModelPanel, 0.45);
     }
     catch(err) {
         console.dir(err);

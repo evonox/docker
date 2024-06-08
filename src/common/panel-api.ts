@@ -86,6 +86,7 @@ export interface IChannel {
 export interface IPanelStateAPI {
     getDockManager(): DockManager;
 
+    enableProgressLoader(enable: boolean): void;
     activate(): void;
 
     setPanelIcon(html: string): void;
@@ -111,6 +112,8 @@ export interface ITabbedPanelStateAPI extends IPanelStateAPI {
  * The only required method is the factory method "initialize()" to create the panel's content
  */
 export interface IGenericPanelAPI {
+
+    getProgressLoader?: () => HTMLElement;
 
     canClose?: () => Promise<boolean>;
     onClose?: () => Promise<void>;
