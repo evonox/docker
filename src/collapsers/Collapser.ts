@@ -182,13 +182,21 @@ export class Collapser extends Component {
             this.collapseKind === DockKind.Down ? this.panelRect.h : this.panelRect.w;
         const windowSlidingDimension = 
             this.collapseKind === DockKind.Down ? dockContainerBounds.h : dockContainerBounds.w;
-        return Math.min(slidingDimension, this.dockManager.config.collapserSlidingDimRatio * windowSlidingDimension);
+        const slidingRatio = 
+            this.collapseKind === DockKind.Down 
+            ? this.dockManager.config.collapserVerticalSlidingRatio
+            : this.dockManager.config.collapserHorizontalSlidingRatio;
+        return Math.min(slidingDimension, slidingRatio * windowSlidingDimension);
     }
 
     private getNonSlidingDimensionSize(): number {
         const nonSlidingDimension = 
             this.collapseKind === DockKind.Down ? this.panelRect.w : this.panelRect.h;
-        return Math.min(nonSlidingDimension, this.dockManager.config.collapserMaxNonSlidingDim);
+        const maxNonSlidingDimension = 
+            this.collapseKind === DockKind.Down 
+            ? this.dockManager.config.collapserMaxVerticalNonSlidingDim
+            : this.dockManager.config.collapserMaxHorizontalNonSlidingDim
+        return Math.min(nonSlidingDimension, maxNonSlidingDimension);
     }
 
     private getHeaderArchorPosition(): IPoint {

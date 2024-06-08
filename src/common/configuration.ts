@@ -7,8 +7,10 @@ export interface IDockConfig {
     enableLiveResize?: boolean;
     enableCollapsers?: boolean;
     collapserMarginSize?: number;
-    collapserSlidingDimRatio?: number;
-    collapserMaxNonSlidingDim?: number;
+    collapserHorizontalSlidingRatio?: number;
+    collapserVerticalSlidingRatio?: number;
+    collapserMaxHorizontalNonSlidingDim?: number;
+    collapserMaxVerticalNonSlidingDim?: number;
 
     defaultPanelSizeMagnitude?: number;
     minimumDefaultWidth?: number;
@@ -51,8 +53,10 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     enableLiveResize: true,
     enableCollapsers: true,
     collapserMarginSize: 26,
-    collapserSlidingDimRatio: 0.25,
-    collapserMaxNonSlidingDim: 300,
+    collapserHorizontalSlidingRatio: 0.3,
+    collapserVerticalSlidingRatio: 0.4,
+    collapserMaxHorizontalNonSlidingDim: 300,
+    collapserMaxVerticalNonSlidingDim: 800,
     labels: {
         collapseLabel: "Collapse Panel",
         expandLabel: "Expand Panel",
