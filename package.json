@@ -6,7 +6,6 @@
     "@jest/globals": "^29.7.0",
     "@types/lodash-es": "^4.17.12",
     "@types/react-dom": "^18.3.0",
-    "@types/velocity-animate": "^2.0.1",
     "acorn": "^8.11.3",
     "acorn-import-assertions": "^1.9.0",
     "ajv": "^6.12.6",
@@ -90,8 +89,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "lodash-es": "^4.17.21",
-    "velocity-animate": "^1.5.2"
+    "lodash-es": "^4.17.21"
   },
   "scripts": {
     "start": "webpack serve --open --mode development",
