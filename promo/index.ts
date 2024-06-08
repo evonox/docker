@@ -99,17 +99,17 @@ dockManager.registerPanelType("lineChart", "singleton", LineChartFactoryFn);
 async function performDocking() {
 
     try {
-        const babylonJSPanel = await dockManager.createPanel("babylonJS");
-        const creditsPanel = await dockManager.createPanel("creditsView");
-        const dockModelPanel = await dockManager.createPanel("dockModelView");
+        const babylonJSPanel = dockManager.createPanel("babylonJS");
+        const creditsPanel = dockManager.createPanel("creditsView");
+        const dockModelPanel = dockManager.createPanel("dockModelView");
 
         // Create TabbedPanelContainer for Charts
-        const chartView = await dockManager.createTabbedPanel("chartView");
-        const barChart = await dockManager.createPanel("barChart");
-        const pieChart = await dockManager.createPanel("pieChart");
-        const doughnutChart = await dockManager.createPanel("doughnutChart");
-        const stackedChart = await dockManager.createPanel("stackedChart");
-        const lineChart = await dockManager.createPanel("lineChart");
+        const chartView = await dockManager.createTabbedPanelAsync("chartView");
+        const barChart = await dockManager.createPanelAsync("barChart");
+        const pieChart = await dockManager.createPanelAsync("pieChart");
+        const doughnutChart = await dockManager.createPanelAsync("doughnutChart");
+        const stackedChart = await dockManager.createPanelAsync("stackedChart");
+        const lineChart = await dockManager.createPanelAsync("lineChart");
         chartView.addContainer(barChart);
         chartView.addContainer(pieChart);
         chartView.addContainer(doughnutChart);
@@ -117,22 +117,22 @@ async function performDocking() {
         chartView.addContainer(lineChart);
 
         // Construct Code Editors
-        const pythonEditor = await dockManager.createPanel("aceEditor", {
+        const pythonEditor = dockManager.createPanel("aceEditor", {
             title: "Python Editor",
             mode: "python",
             url: "/code/example.py"
         });
-        const javascriptEditor = await dockManager.createPanel("aceEditor", {
+        const javascriptEditor = dockManager.createPanel("aceEditor", {
             title: "JavaScript Editor",
             mode: "javascript",
             url: "/code/example.js"
         });
-        const typescriptEditor = await dockManager.createPanel("aceEditor", {
+        const typescriptEditor = dockManager.createPanel("aceEditor", {
             title: "TypeScript Editor",
             mode: "typescript",
             url: "/code/example.ts"
         });
-        const javaEditor = await dockManager.createPanel("aceEditor", {
+        const javaEditor = dockManager.createPanel("aceEditor", {
             title: "Java Editor",
             mode: "java",
             url: "/code/example.java"

@@ -270,7 +270,60 @@ export class DockManager {
         });
     }
 
-    async createPanel(panelTypeName: string, options: any = {}): Promise<PanelContainer> {
+    createPanel(panelTypeName: string, options: any = {}): PanelContainer {    
+        // Create the panel
+        const panelContainer = this.createPanelInternal(panelTypeName, options);
+        // Invoke the constructor function and wait for its completion
+        const panelTypeContract = this.gainPanelApiContract(panelTypeName);;
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new PanelStateAdapter(panelContainer);
+        // Do not wait for its completion
+        panelTypeContract.initialize(apiAdapter, initOptions).then(domContentElement => {
+            panelContainer.setContentElement(domContentElement);
+        });
+        // Finally return the panel container
+        return panelContainer;
+    }
+
+    async createPanelAsync(panelTypeName: string, options: any = {}): Promise<PanelContainer> {    
+        // Create the panel
+        const panelContainer = this.createPanelInternal(panelTypeName, options);
+        // Invoke the constructor function and wait for its completion
+        const panelTypeContract = this.gainPanelApiContract(panelTypeName);;
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new PanelStateAdapter(panelContainer);
+        const domContentElement = await panelTypeContract.initialize(apiAdapter, initOptions);
+        panelContainer.setContentElement(domContentElement);
+        // Finally return the panel container
+        return panelContainer;
+    }
+
+    createTabbedPanel(panelTypeName: string, options: any = {}): TabbedPanelContainer {    
+        // Create the tabbed  panel container
+        const panelContainer = this.createTabbedPanelInternal(panelTypeName, options);
+        // Invoke the constructor function
+        const panelTypeContract = this.gainPanelApiContract(panelTypeName);
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
+        // We use synch function, do NOT wait for the completion of initializatin
+        panelTypeContract.initialize(apiAdapter, initOptions);
+        // Finally return the panel
+        return panelContainer;
+    }
+
+    async createTabbedPanelAsync(panelTypeName: string, options: any = {}): Promise<TabbedPanelContainer> {    
+        // Create the tabbed  panel container
+        const panelContainer = this.createTabbedPanelInternal(panelTypeName, options);
+        // Invoke the constructor function
+        const panelTypeContract = this.gainPanelApiContract(panelTypeName);
+        const initOptions = new PanelInitConfig(options);
+        const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
+        await panelTypeContract.initialize(apiAdapter, initOptions);
+        // Finally return the panel
+        return panelContainer;
+    }
+
+    private createPanelInternal(panelTypeName: string, options: any = {}): PanelContainer {
         if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
             throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
         
@@ -284,17 +337,11 @@ export class DockManager {
         const panelTypeContract = metadata.factoryFn(this) as IPanelAPI;
         // Create the panel container
         const panelContainer = new PanelContainer(this, panelTypeName, panelTypeContract);        
-        // Invoke the constructor function
-        const initOptions = new PanelInitConfig(options);
-        const apiAdapter = new PanelStateAdapter(panelContainer);
-        const domContentElement = await panelTypeContract.initialize(apiAdapter, initOptions);
-        panelContainer.setContentElement(domContentElement);
-        
-        // Return finally the panel container
+        // Return the panel container
         return panelContainer;
     }
 
-    async createTabbedPanel(panelTypeName: string, options: any = {}): Promise<TabbedPanelContainer> {
+    private createTabbedPanelInternal(panelTypeName: string, options: any = {}): TabbedPanelContainer {
         if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
             throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
         
@@ -308,15 +355,9 @@ export class DockManager {
         const panelTypeContract = metadata.factoryFn(this) as ITabbedPanelAPI;
         // Create the panel container
         const panelContainer = new TabbedPanelContainer(this, panelTypeName, panelTypeContract);        
-        // Invoke the constructor function
-        const initOptions = new PanelInitConfig(options);
-        const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
-        await panelTypeContract.initialize(apiAdapter, initOptions);
-        
         // Return finally the panel container
         return panelContainer;
     }
-
 
     /**
      * Docking Facilities & Wrapper Methods
