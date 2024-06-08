@@ -5,9 +5,7 @@ import { ComponentEventHandler, ComponentEventManager, ComponentEventSubscriptio
 import { TabHandle } from "../tabview/TabHandle";
 import { TabHostStrip } from "../tabview/TabHostStrip";
 import { DOM } from "../utils/DOM";
-import { DOMRegistry } from "../utils/DOMRegistry";
 import { AnimationHelper, IAnimation } from "../utils/animation-helper";
-import { MathHelper } from "../utils/math-helper";
 import { TabReorderIndexMap } from "./TabReorderIndexMap";
 
 /**
@@ -36,6 +34,7 @@ export class TabReorderOperation implements IEventEmitter {
     private indexMap: TabReorderIndexMap;
 
     private domTabHandles: DOM<HTMLElement>[] = [];
+    private domTabHandleContainer: DOM<HTMLElement>;
 
     private lastAnimation: IAnimation;
 
@@ -86,7 +85,7 @@ export class TabReorderOperation implements IEventEmitter {
 
         const boundsDraggedHandle = this.domTabHandles[this.fromIndex].getBoundingClientRect();
         this.dragOffset = {
-            x: event.pageX - boundsDraggedHandle.left,
+            x: event.pageX - boundsDraggedHandle.left + this.tabStripScrollLeft,
             y: event.pageY - boundsDraggedHandle.top
         };
 
@@ -111,9 +110,6 @@ export class TabReorderOperation implements IEventEmitter {
         // Initialize reorder index map
         this.indexMap = new TabReorderIndexMap(this.domTabHandles.length);
 
-        // Initialize drag and drop bounds
-        this.dragMinimumLeft = this.domTabHandles[0].getBoundingClientRect().left;
-        this.dragMaximumRight = this.domTabHandles[this.domTabHandles.length - 1].getBoundingClientRect().right;
 
         // Perform their positioning for drag-and-drop operation
         const zIndex = this.dockManager.config.zIndexes.zIndexTabReorderOperation;
@@ -122,6 +118,10 @@ export class TabReorderOperation implements IEventEmitter {
         const domTabStrip = DOM.from(this.tabStrip.getDOM());
         this.tabStripScrollLeft = this.tabStrip.getTabHandleContainerDOM().get().scrollLeft;
         
+        // Initialize drag and drop bounds
+        this.dragMinimumLeft = this.domTabHandles[0].getBoundingClientRect().left + this.tabStripScrollLeft;
+        this.dragMaximumRight = this.domTabHandles[this.domTabHandles.length - 1].getBoundingClientRect().right + this.tabStripScrollLeft;
+
         const boundsTabStrip = domTabStrip.getBoundsRect();
         domTabStrip.css("min-width", boundsTabStrip.w + "px");
         domTabStrip.css("min-height", boundsTabStrip.h + "px");
@@ -134,6 +134,14 @@ export class TabReorderOperation implements IEventEmitter {
                 .zIndex(zIndex);
         });
         this.domTabHandles.forEach(dom => dom.css("position", "absolute"));
+
+        // Style the parent element for the scrolling purposes
+        // Note: This CSS styling is required for the tab re-order to work when there
+        // is visible TabStrip Scrolling Control
+        this.domTabHandleContainer = DOM.from(this.domTabHandles[0].get().parentElement);
+        const scrolWidth = this.domTabHandleContainer.get().scrollWidth;
+        this.domTabHandleContainer.width(scrolWidth).css("position", "relative")
+            .left(-this.tabStripScrollLeft);
 
         // Initialize indexes
         this.fromIndex = this.toIndex = this.tabStrip.queryAttachedHandles().indexOf(this.draggedHandle);
@@ -156,6 +164,13 @@ export class TabReorderOperation implements IEventEmitter {
             dom.css("position", "").css("left", "").css("top", "").zIndex("");
         });
 
+        // Unstyle the parent element for the scrolling purposes
+        // Note: This CSS styling is required for the tab re-order to work when there
+        // is visible TabStrip Scrolling Control
+        this.domTabHandleContainer.width("").css("position", "").left("");
+        this.domTabHandleContainer = undefined;
+
+        // Remove tabStrip CSS decoration
         const domTabStrip = this.tabStrip.getDOM();
         DOM.from(domTabStrip).css("min-width", "").css("min-height", "");
         this.tabStrip.getTabHandleContainerDOM().get().scrollLeft = this.tabStripScrollLeft;
@@ -169,7 +184,7 @@ export class TabReorderOperation implements IEventEmitter {
     private adjustDraggedTabHandlePosition(event: MouseEvent): boolean {
         const domDraggedHandle = this.domTabHandles[this.fromIndex];
         // Adjust position by mouse drag offset
-        let left = event.pageX - this.dragOffset.x;
+        let left = event.pageX - this.dragOffset.x + this.tabStripScrollLeft;
         // Drag-n-drop bounds checking
         let isOutOfBounds: boolean = false;
         if(left < this.dragMinimumLeft) {
@@ -249,7 +264,7 @@ export class TabReorderOperation implements IEventEmitter {
         
         let newLeft;
         if(neighbourIndex < 0) {
-            newLeft = this.tabStrip.getDOM().getBoundingClientRect().left;
+            newLeft = this.tabStrip.getDOM().getBoundingClientRect().left - this.tabStripScrollLeft;
         } else {
             const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBoundingClientRect();
             newLeft = boundsNeighbourHandle.right;
@@ -281,7 +296,7 @@ export class TabReorderOperation implements IEventEmitter {
 
         let newLeft;
         if(neighbourIndex < 0) {
-            newLeft = this.dragMaximumRight - boundsTranslateHandle.width;
+            newLeft = this.dragMaximumRight - boundsTranslateHandle.width - this.tabStripScrollLeft;
         } else {
             const boundsNeighbourHandle = this.domTabHandles[neighbourIndex].getBoundingClientRect();
             newLeft = boundsNeighbourHandle.left - boundsTranslateHandle.width
