@@ -8,7 +8,7 @@ import { TabOrientation } from "./common/enumerations";
 
 DebugHelper.enableOptimizations(false);
 
-const dockManager = new DockManager(document.getElementById("main"));
+const dockManager = new DockManager(document.getElementById("main"), {enableLiveResize: false});
 dockManager.initialize();
 
 dockManager.registerPanelType("panel1", "singleton", (dockManager) => {

@@ -225,7 +225,9 @@ export class SplitterPanel extends Component {
         this.containerSizes[prevIndex] = payload.prevSize;
         this.containerSizes[nextIndex] = payload.nextSize;
 
-        this.applyChildContainerSizes();
+        if(payload.performResize) {
+            this.applyChildContainerSizes();
+        }
     }
 
     private adjustContainerSizesToNewDimensions() {

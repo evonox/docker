@@ -4,6 +4,7 @@
  */
 
 export interface IDockConfig {
+    enableLiveResize?: boolean;
     enableCollapsers?: boolean;
     collapserMarginSize?: number;
     collapserSlidingDimRatio?: number;
@@ -47,6 +48,7 @@ export interface IDockConfig {
 }
 
 export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
+    enableLiveResize: true,
     enableCollapsers: true,
     collapserMarginSize: 26,
     collapserSlidingDimRatio: 0.25,

@@ -61,6 +61,7 @@
     "randombytes": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-tree-graph": "^8.0.2",
     "safe-buffer": "^5.2.1",
     "schema-utils": "^3.3.0",
     "semver": "^7.6.2",

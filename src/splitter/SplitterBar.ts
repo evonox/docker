@@ -13,6 +13,7 @@ export interface ResizedPayload {
     next: IDockContainer;
     prevSize: number;
     nextSize: number;
+    performResize: boolean;
 }
 
 /**
@@ -123,7 +124,8 @@ export class SplitterBar extends Component {
         // Trigger Resize Event
         const payload: ResizedPayload = {
             prev: this.prevContainer, next: this.nextContainer,
-            prevSize: newPrevWidth, nextSize: newNextWidth
+            prevSize: newPrevWidth, nextSize: newNextWidth,
+            performResize: true
         };
 
         this.triggerEvent("onResized", payload);
@@ -162,7 +164,8 @@ export class SplitterBar extends Component {
         // Trigger Resize Event
         const payload: ResizedPayload = {
             prev: this.prevContainer, next: this.nextContainer,
-            prevSize: newPrevHeight, nextSize: newNextHeight
+            prevSize: newPrevHeight, nextSize: newNextHeight,
+            performResize: true
         };
 
         this.triggerEvent("onResized", payload);
