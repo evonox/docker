@@ -41,9 +41,8 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
                 setTimeout(() => {
                     api.enableProgressLoader(false);
                     resolve(domRootElement);
-                }, 5 * 1000);
+                }, 2 * 1000);
             })
-
         }
     }
 });
