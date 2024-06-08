@@ -1,4 +1,4 @@
-import _ from "lodash-es";
+import { EventHelper } from "../src/utils/event-helper";
 
 const FPS = 120;
 
@@ -13,7 +13,7 @@ export async function startBabylonDemo(canvas, createScene) {
         }
     }
 
-    var renderSceneDebounced = _.throttle(renderScene, 1000 / FPS, { leading: true, trailing: true });
+    var renderSceneDebounced = EventHelper.throttle(renderScene, 1000 / FPS, { leading: true, trailing: true });
 
     var startRenderLoop = function (engine, canvas) {
         engine.runRenderLoop(function () {
@@ -50,7 +50,7 @@ export async function startBabylonDemo(canvas, createScene) {
 
     });
 
-    const resizeEngine = _.throttle(() => {
+    const resizeEngine = EventHelper.throttle(() => {
         engine.resize();
         sceneToRender.render();
     }, 1000 / FPS, { leading: true, trailing: true });

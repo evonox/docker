@@ -2,11 +2,11 @@ import { IRect, ISize } from "../../common/dimensions";
 import { PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, PANEL_ACTION_TOGGLE_PIN } from "../../core/panel-default-buttons";
 import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
+import { EventHelper } from "../../utils/event-helper";
 import { RectHelper } from "../../utils/rect-helper";
 import { PanelContainer } from "../PanelContainer";
 import { IGenericPanelState } from "./IPanelState";
 import { SharedStateConfig } from "./SharedStateConfig";
-import * as _ from "lodash-es";
 
 export interface IHeaderButtonConfiguration {
     expand: boolean;
@@ -35,7 +35,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         protected config: SharedStateConfig
     ) {
         // We reduce the invocation of the resize notifications to maximum 60 FPS now
-        this.invokeClientResizeEvent = _.throttle(this.invokeClientResizeEvent.bind(this), 
+        this.invokeClientResizeEvent = EventHelper.throttle(this.invokeClientResizeEvent.bind(this), 
             1000 / this.RESIZE_FRAME_RATE, {leading: true, trailing: true});
     }
 

@@ -6,7 +6,7 @@ import { DOM } from "../utils/DOM";
 import { DockWheelItem } from "./DockWheelItem";
 import { IPoint, IRect } from "../common/dimensions";
 import { AnimationHelper, IAnimation } from "../utils/animation-helper";
-import * as _ from "lodash-es";
+import { EventHelper } from "../utils/event-helper";
 
 /**
  * DockWheel - navigation control for docking a floating dialog
@@ -183,7 +183,7 @@ export class DockWheel {
     }
 
     private previewOff: boolean = true;
-    private removeDOMPreviewDbc = _.debounce(this.removeDOMPreview, 350, {leading: false, trailing: true});
+    private removeDOMPreviewDbc = EventHelper.debounce(this.removeDOMPreview, 350, {leading: false, trailing: true});
 
     private removeDOMPreview() {
         AnimationHelper.animateFadeOut(this.domPanelPreview.get()).then(() => {

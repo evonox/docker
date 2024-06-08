@@ -1,4 +1,4 @@
-import _ from "lodash-es";
+import { EventHelper } from "../src/utils/event-helper";
 
 export async function initBabylonDemo(canvas) {
 
@@ -14,7 +14,7 @@ export async function initBabylonDemo(canvas) {
         }
     }
 
-    var renderSceneDebounced = _.throttle(renderScene, 1000 / 1000);
+    var renderSceneDebounced = EventHelper.throttle(renderScene, 1000 / 1000);
 
     var startRenderLoop = function (engine, canvas) {
         engine.runRenderLoop(function () {
@@ -130,7 +130,7 @@ export async function initBabylonDemo(canvas) {
                         
     });
 
-    const resizeEngine = _.throttle(() => {
+    const resizeEngine = EventHelper.throttle(() => {
         engine.resize();
     }, 1000 / 30, {leading: true, trailing: true});
 

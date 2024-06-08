@@ -13,7 +13,6 @@ import { TabPage } from "../tabview/TabPage";
 import { DockPanelTypeRegistry } from "./DockPanelTypeRegistry";
 import { PanelInitConfig } from "../api/PanelInitConfig";
 import { PanelStateAdapter } from "../api/PanelStateAdapter";
-import * as _ from "lodash-es";
 import { DOCK_CONFIG_DEFAULTS, IDockConfig } from "../common/configuration";
 import { SplitterDockContainer } from "../splitter/SplitterDockContainer";
 import { ContainerType, DockKind, OrientationKind } from "../common/enumerations";
@@ -27,6 +26,8 @@ import { DebugHelper } from "../utils/DebugHelper";
 import { TabbedPanelStateAdapter } from "../api/TabbedPanelStateAdapter";
 import { RectHelper } from "../utils/rect-helper";
 import { CollapserMargin } from "../collapsers/CollapserMargin";
+import { ObjectHelper } from "../utils/object-helper";
+import { EventHelper } from "../utils/event-helper";
 
 
 /**
@@ -73,7 +74,7 @@ export class DockManager {
     private collapserMargins: CollapserMargin[] = [];
 
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
-        this._config = _.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
+        this._config = ObjectHelper.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
         DOM.from(this.container).css("position", "relative")
             .css("display", "grid")
             .css("overflow", "hidden")
@@ -103,7 +104,7 @@ export class DockManager {
         
 
         // Lets contrain the resize logic to double rate than FPS to prevent flickering
-        this.handleContainerResized = _.throttle(this.handleContainerResized.bind(this),
+        this.handleContainerResized = EventHelper.throttle(this.handleContainerResized.bind(this),
             1000 / (this.config.dragAndDropFrameRate * 2), {leading: true, trailing: true}
         );
         

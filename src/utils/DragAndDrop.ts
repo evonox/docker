@@ -1,5 +1,5 @@
 import { DOM } from "./DOM";
-import * as  _ from "lodash-es";
+import { EventHelper } from "./event-helper";
 import { IPoint } from "./overlay-helper";
 
 export enum DetectionMode {
@@ -79,7 +79,7 @@ export class DragAndDrop {
 
         }
 
-        handleMouseMove = _.throttle(handleMouseMove, 1000 / this.FRAME_RATE, {leading: true, trailing: false});
+        handleMouseMove = EventHelper.throttle(handleMouseMove, 1000 / this.FRAME_RATE, {leading: true, trailing: false});
 
         const handleMouseUp = (e: MouseEvent) => {
             event.preventDefault();
