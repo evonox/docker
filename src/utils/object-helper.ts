@@ -10,4 +10,12 @@ export class ObjectHelper {
     static defaultsDeep(...args: any[]): any {
         return defaultsDeep(...args);
     }
+
+    static bindAllFunctionsToContext(fnObject: any, thisObj: any) {
+        for(let propertyName in fnObject) {
+            if(typeof fnObject[propertyName] === "function") {
+                fnObject[propertyName] = fnObject[propertyName].bind(thisObj);
+            }
+        }
+    }
 }

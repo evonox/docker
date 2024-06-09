@@ -492,7 +492,7 @@ export class PanelContainer extends Component implements IDockContainer {
      */
 
     static async loadFromState(state: IState, dockManager: DockManager): Promise<PanelContainer> {
-        const api = dockManager.gainPanelApiContract(state.panelName);
+        const api = dockManager.createNewPanelApiContract(state.panelName);
         const container = new PanelContainer(dockManager, state.panelName, api);
         const contentElement = await api.initialize(new PanelStateAdapter(container), null);
         container.setContentElement(contentElement);

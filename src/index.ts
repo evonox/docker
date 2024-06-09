@@ -202,11 +202,12 @@ dockManager.registerPanelType("panel6", "transient", (dockManager) => {
 
 dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) => {
 
-    let tabbedApi: ITabbedPanelStateAPI;
-
     return {
-        initialize: (api, options) => {
-            tabbedApi = api;
+        initialize: function(api, options)  {
+            console.log("--- API ---");
+            console.dir(this);
+            this["api"] = api;
+            console.dir(this);
             return new Promise<void>((resolve) => {
                 api.setPanelFAIcon("fa fa-plus");
                 api.setPanelTitle("Tabbed View");
@@ -240,15 +241,16 @@ dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) =>
             })
 
         },
-        onActionInvoked: (actionName) => {
+        onActionInvoked: function(actionName) {
+            console.dir(this);
             if(actionName === "Top") {
-                tabbedApi.setTabOrientation("top");
+                this.api.setTabOrientation("top");
             } else if(actionName === "Bottom") {
-                tabbedApi.setTabOrientation("bottom");
+                this.api.setTabOrientation("bottom");
             } else if(actionName === "Left") {
-                tabbedApi.setTabOrientation("left");
+                this.api.setTabOrientation("left");
             } else if(actionName === "Right") {
-                tabbedApi.setTabOrientation("right");
+                this.api.setTabOrientation("right");
             }
         }
     }

@@ -1,7 +1,7 @@
 import { DockLayoutEngine } from "./DockLayoutEngine";
 import {  IDeltaPoint, IDeltaRect, IPoint, IRect } from "../common/dimensions";
 import { EventKind, EventPayload } from "../common/events-api";
-import { IChannel, IPanelAPI, ISubscriptionAPI, ITabbedPanelAPI, PanelFactoryFunction, TabbedPanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
+import { IChannel, IPanelAPI, ISubscriptionAPI, ITabbedPanelAPI, ITabbedPanelStateAPI, PanelFactoryFunction, TabbedPanelFactoryFunction, ViewInstanceType } from "../common/panel-api";
 import { PanelContainer } from "../containers/PanelContainer";
 import { DockWheel } from "../docking-wheel/DockWheel";
 import { Dialog } from "../floating/Dialog";
@@ -240,7 +240,7 @@ export class DockManager {
      * Panel Type Management
      */
 
-    gainPanelApiContract(panelTypeName: string): IPanelAPI {
+    createNewPanelApiContract(panelTypeName: string): IPanelAPI {
         if(this.panelTypeRegistry.isPanelTypeRegistered(panelTypeName) === false)
             throw new Error(`ERROR: Panel Type with name ${panelTypeName} is not registered.`);
         // We get metadata about the panel type
@@ -275,7 +275,8 @@ export class DockManager {
         // Create the panel
         const panelContainer = this.createPanelInternal(panelTypeName, options);
         // Invoke the constructor function and wait for its completion
-        const panelTypeContract = this.gainPanelApiContract(panelTypeName);;
+        const panelTypeContract = panelContainer.getAPI() as IPanelAPI;
+        ObjectHelper.bindAllFunctionsToContext(panelTypeContract, {});
         const initOptions = new PanelInitConfig(options);
         const apiAdapter = new PanelStateAdapter(panelContainer);
         // Do not wait for its completion
@@ -290,7 +291,8 @@ export class DockManager {
         // Create the panel
         const panelContainer = this.createPanelInternal(panelTypeName, options);
         // Invoke the constructor function and wait for its completion
-        const panelTypeContract = this.gainPanelApiContract(panelTypeName);;
+        const panelTypeContract = panelContainer.getAPI() as IPanelAPI;
+        ObjectHelper.bindAllFunctionsToContext(panelTypeContract, {});
         const initOptions = new PanelInitConfig(options);
         const apiAdapter = new PanelStateAdapter(panelContainer);
         const domContentElement = await panelTypeContract.initialize(apiAdapter, initOptions);
@@ -303,7 +305,8 @@ export class DockManager {
         // Create the tabbed  panel container
         const panelContainer = this.createTabbedPanelInternal(panelTypeName, options);
         // Invoke the constructor function
-        const panelTypeContract = this.gainPanelApiContract(panelTypeName);
+        const panelTypeContract = panelContainer.getAPI() as ITabbedPanelAPI;
+        ObjectHelper.bindAllFunctionsToContext(panelTypeContract, {});
         const initOptions = new PanelInitConfig(options);
         const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
         // We use synch function, do NOT wait for the completion of initializatin
@@ -316,7 +319,8 @@ export class DockManager {
         // Create the tabbed  panel container
         const panelContainer = this.createTabbedPanelInternal(panelTypeName, options);
         // Invoke the constructor function
-        const panelTypeContract = this.gainPanelApiContract(panelTypeName);
+        const panelTypeContract = panelContainer.getAPI() as ITabbedPanelAPI;
+        ObjectHelper.bindAllFunctionsToContext(panelTypeContract, {});
         const initOptions = new PanelInitConfig(options);
         const apiAdapter = new TabbedPanelStateAdapter(panelContainer);
         await panelTypeContract.initialize(apiAdapter, initOptions);
