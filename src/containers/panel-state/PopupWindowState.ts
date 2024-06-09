@@ -32,6 +32,7 @@ export class PopupWindowState extends PanelStateBase {
 
         this.subscriptionOnClose = this.panel.on("onClose", () => {
             // Perform clean up when the panel is closed from the popup panel
+            this.popupWindow.onresize = undefined;
             this.popupWindow.onunload = undefined;
             this.popupWindow.close();
             this.autoDock.dispose();
@@ -50,6 +51,7 @@ export class PopupWindowState extends PanelStateBase {
         this.subscriptionOnClose.unsubscribe();
         this.autoDock.dispose();
         this.adoptedPopupElements = [];
+        this.popupWindow.onresize = undefined;
         this.popupWindow.onunload = undefined;
         this.popupWindow = undefined;
 
@@ -92,11 +94,12 @@ export class PopupWindowState extends PanelStateBase {
 
         // Compute the new window position and dimensions
         const windowRect = this.computePopupWindowRect(targetElement.get());
-                this.popupWindow = BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), dependentElements, {
+        this.popupWindow = BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), dependentElements, {
             title: this.panel.getTitle(),
             windowRect: windowRect,
             onPopupWindowClosed: () => this.panel.hidePopupWindow()
-        })
+        });
+        this.popupWindow.onresize = () => this.panel.updateState();
     }
 
     private computePopupWindowRect(targetElement: HTMLElement): IRect {
