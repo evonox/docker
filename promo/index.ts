@@ -25,6 +25,8 @@ dockManager.initialize();
 
 dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
 
+    let engineApi: any;
+
     return {
         initialize: async (api, options) => {
             api.setPanelFAIcon("fa-brands fa-unity");
@@ -35,16 +37,19 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
                 const domRootElement = document.createElement("div");
                 domRootElement.style.overflow = "hidden";
                 const domCanvas = document.createElement("canvas");
+                domCanvas.style.width = "100%";
+                domCanvas.style.height = "100%";
                 domRootElement.appendChild(domCanvas);            
                 domRootElement.classList.add("renderCanvas")
                 domCanvas.classList.add("canvasZone");
-                await startBabylonDemo(domCanvas, createVillageScene)
+                engineApi = await startBabylonDemo(domCanvas, createVillageScene)
                 setTimeout(() => {
                     api.enableProgressLoader(false);
                     resolve(domRootElement);
                 }, 2 * 1000);
             })
-        }
+        },
+        onResize: () => engineApi?.resize()
     }
 });
 

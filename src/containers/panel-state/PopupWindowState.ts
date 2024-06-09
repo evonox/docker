@@ -3,6 +3,7 @@ import { IRect } from "../../common/dimensions";
 import { DockKind } from "../../common/enumerations";
 import { ComponentEventSubscription } from "../../framework/component-events";
 import { DockNode } from "../../model/DockNode";
+import { DOM } from "../../utils/DOM";
 import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
 import { BrowserPopupHelper } from "../../utils/browser-popup-helper";
 import { PanelContainer } from "../PanelContainer";
@@ -101,8 +102,25 @@ export class PopupWindowState extends PanelStateBase {
             windowRect: windowRect,
             onPopupWindowClosed: () => this.panel.hidePopupWindow()
         });
-        this.popupWindow.onresize = () => this.panel.updateState();
+        this.popupWindow.onresize = () => {
+            this.adjustPanelContentSize();
+            this.panel.updateState();
+        }
     }
+
+    private adjustPanelContentSize() {        
+        this.notifyIfSizeChanged();
+        // const rect = this.panel.getContentHostDOM().getBoundsRect();
+
+        // // Note: In TabbedContainer this may trigger another ResizeObserver, we need to delegate it
+        // // to requestAnimationFrame
+        // // Note: Solution - ResizeObserver only on EMPTY ELEMENTS
+        // requestAnimationFrame(() => {
+        //     this.panel.getContentFrameDOM().applyRect(rect);
+        //     this.notifyIfSizeChanged();
+        // })
+    }
+
 
     private computePopupWindowRect(targetElement: HTMLElement): IRect {
         // Get configuration and popup window sizing options

@@ -59,4 +59,8 @@ export async function startBabylonDemo(canvas, createScene) {
         resizeEngine();
     });
     resizeObserver.observe(canvas, { box: "border-box" });
+
+    return {
+        resize: () => resizeEngine()
+    }
 }

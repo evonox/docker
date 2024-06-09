@@ -154,6 +154,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
         // We round down to whole pixels to prevent vain resize notifications
         rect = RectHelper.floor(rect); 
         if(this.hasSizeChanged(rect)) {
+            console.log("NOTIFYING RESIZE CHANGE");
             this._lastNotifiedSize = {w: rect.w, h: rect.h};
             // Invoke the throttled method for resizing
             this.invokeClientResizeEvent(rect);
