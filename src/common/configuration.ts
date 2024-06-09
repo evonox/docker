@@ -25,6 +25,14 @@ export interface IDockConfig {
     defaultMinWidth?: number,
     defaultMinHeight?: number;
     dragAndDropFrameRate?: number;
+    popupWindows?: {
+        minWindowWidth?: number,
+        minWindowHeight?: number,
+        maxWindowWidth?: number,
+        maxWindowHeight?: number,
+        windowOffsetX?: number,
+        windowOffsetY?: number,
+    },
     labels?: {
         collapseLabel?: string;
         expandLabel?: string;
@@ -59,6 +67,14 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     collapserVerticalSlidingRatio: 0.4,
     collapserMaxHorizontalNonSlidingDim: 300,
     collapserMaxVerticalNonSlidingDim: 800,
+    popupWindows: {
+        minWindowWidth: 300,
+        minWindowHeight: 200,
+        maxWindowWidth: 800,
+        maxWindowHeight: 550,
+        windowOffsetX: 10,
+        windowOffsetY: 10,
+    },
     labels: {
         collapseLabel: "Collapse Panel",
         expandLabel: "Expand Panel",

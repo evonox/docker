@@ -1,4 +1,5 @@
 import { IDockInfo } from "../../common/declarations";
+import { IRect } from "../../common/dimensions";
 import { DockKind } from "../../common/enumerations";
 import { DockNode } from "../../model/DockNode";
 import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
@@ -74,14 +75,39 @@ export class PopupWindowState extends PanelStateBase {
             return (container as PanelContainer).getContentFrameDOM().get();
         });
         this.adoptedPopupElements = [targetElement.get()].concat(dependentElements);
-        
-        this.popupWindow = BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), dependentElements, {
+
+        // Compute the new window position and dimensions
+        const windowRect = this.computePopupWindowRect(targetElement.get());
+                this.popupWindow = BrowserPopupHelper.showElementInBrowserWindow(targetElement.get(), dependentElements, {
             title: this.panel.getTitle(),
-            windowOffset: {
-                x: 0,
-                y: 0
-            },
+            windowRect: windowRect,
             onPopupWindowClosed: () => this.panel.hidePopupWindow()
         })
+    }
+
+    private computePopupWindowRect(targetElement: HTMLElement): IRect {
+        // Get configuration and popup window sizing options
+        const popupWindowOpts = this.dockManager.config.popupWindows;
+        const targetBounds = targetElement.getBoundingClientRect();
+
+        // Constrain window width in min-max range
+        const windowWidth = Math.min(
+            Math.max(targetBounds.width, popupWindowOpts.minWindowWidth),
+            popupWindowOpts.maxWindowWidth
+        )
+        // Constrain window height in min-max range
+        const windowHeight = Math.min(
+            Math.max(targetBounds.height, popupWindowOpts.minWindowHeight),
+            popupWindowOpts.maxWindowHeight
+        )
+
+        // Construct the window positioning rect
+        const windowBounds: IRect = {
+            x: targetBounds.left + popupWindowOpts.windowOffsetX + window.screenX + window.outerWidth - window.innerWidth,
+            y: targetBounds.top + popupWindowOpts.windowOffsetY + window.screenY + window.outerHeight - window.innerHeight,
+            w: windowWidth,
+            h: windowHeight
+        };
+        return windowBounds;
     }
 }

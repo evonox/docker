@@ -1,4 +1,4 @@
-import { IRect } from "../common/dimensions";
+import { IRect, ISize } from "../common/dimensions";
 import { IPoint } from "./overlay-helper";
 
 /**
@@ -25,7 +25,7 @@ const DEFAULT_POPUP_WINDOW_STYLE = `
  */
 export interface IBrowserPopupHelperOptions {
     title: string;
-    windowOffset: IPoint;
+    windowRect: IRect;
     onClosed?: () => void;
     onPopupWindowClosed?: () => void;
     onFocused?: (e: FocusEvent) => void;
@@ -38,18 +38,9 @@ export interface IBrowserPopupHelperOptions {
 export class BrowserPopupHelper {
 
     static showElementInBrowserWindow(targetElement: HTMLElement, dependentElements: HTMLElement[] , 
-        options: IBrowserPopupHelperOptions): Window {
-        // Compute the new window position and dimensions
-        const targetBounds = targetElement.getBoundingClientRect();
-        const windowBounds: IRect = {
-            x: targetBounds.left + options.windowOffset.x,
-            y: targetBounds.top + options.windowOffset.y,
-            w: targetBounds.width,
-            h: targetBounds.height
-        };
-        
+        options: IBrowserPopupHelperOptions): Window {       
         // Open the popup window
-        const popupWindow = this.openPopupWindow(windowBounds);
+        const popupWindow = this.openPopupWindow(options.windowRect);
         // Attach onFocus and onBlur handlers as well as onUnload 
         popupWindow.onfocus = e => options.onFocused?.(e);
         popupWindow.onblur = e => options.onBlurred?.(e);
