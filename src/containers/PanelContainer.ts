@@ -571,7 +571,7 @@ export class PanelContainer extends Component implements IDockContainer {
     async performClose(shouldRequestClone: boolean = true) {
         // Invoke API if present for instance to unmount React component
         await this.api.onClose?.();
-        // Trigger for dialog close
+        // Trigger for dialog close + some states need to react this
         this.triggerEvent("onClose");
         // Relayout the DockManager after closing the panel
         if(shouldRequestClone) {

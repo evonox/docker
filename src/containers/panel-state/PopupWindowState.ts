@@ -1,6 +1,7 @@
 import { IDockInfo } from "../../common/declarations";
 import { IRect } from "../../common/dimensions";
 import { DockKind } from "../../common/enumerations";
+import { ComponentEventSubscription } from "../../framework/component-events";
 import { DockNode } from "../../model/DockNode";
 import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
 import { BrowserPopupHelper } from "../../utils/browser-popup-helper";
@@ -16,6 +17,8 @@ export class PopupWindowState extends PanelStateBase {
     private autoDock: IAutoDock;
     private adoptedPopupElements: HTMLElement[] = [];
 
+    private subscriptionOnClose: ComponentEventSubscription;
+
     public async enterState(initialState: boolean): Promise<void> {
         await super.enterState(initialState);
         this.configureButtons({
@@ -27,6 +30,15 @@ export class PopupWindowState extends PanelStateBase {
         this.undockPanel();
         this.panel.updateState();
 
+        this.subscriptionOnClose = this.panel.on("onClose", () => {
+            // Perform clean up when the panel is closed from the popup panel
+            this.popupWindow.onunload = undefined;
+            this.popupWindow.close();
+            this.autoDock.dispose();
+            this.adoptedPopupElements = [];
+            this.popupWindow = undefined;
+        });
+
         // TODO: WHY THIS???
         setTimeout(() => {
             this.openWindowInPopup();
@@ -35,8 +47,10 @@ export class PopupWindowState extends PanelStateBase {
 
     public async leaveState(): Promise<void> {
         // Perform clean up
+        this.subscriptionOnClose.unsubscribe();
         this.autoDock.dispose();
         this.adoptedPopupElements = [];
+        this.popupWindow.onunload = undefined;
         this.popupWindow = undefined;
 
         this.panel.enableDefaultContextMenu(true);
