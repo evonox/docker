@@ -108,11 +108,16 @@ export class BrowserPopupHelper {
     // Transfers all the CSS styles from the main window
     private static transferAllCSSStyles(popupWindow: Window) {
         // Query all CSS link elements
-        const cssStyles = [...document.head.querySelectorAll('link')].map(x => x.cloneNode());
+        const cssStyles = [...document.head.querySelectorAll('link')].map(x => x.cloneNode(true));
         // Adopt the cloned CSS styles into the popup window
         for (const cssStyle of cssStyles) {
             popupWindow.document.head.appendChild(popupWindow.document.adoptNode(cssStyle));
         }
+        // Query all inline CSS styles
+        const cssInlineStyles = [...document.head.querySelectorAll("style")].map(x => x.cloneNode(true));
+        cssInlineStyles.forEach(cssStyle => {
+            popupWindow.document.head.appendChild(popupWindow.document.adoptNode(cssStyle));
+        })
         // Inject the default CSS popup window style
         const  cssDefaultStyle = popupWindow.document.createElement("style");
         cssDefaultStyle.innerText = DEFAULT_POPUP_WINDOW_STYLE;
