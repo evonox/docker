@@ -64,7 +64,6 @@ export class AnimationHelper {
             animate(domDialog, {height: headerHeight}, {
                 duration: 250,
                 easing: "easeInSine",
-                complete: () => resolve()
             });
             animate(domContent, {height: 0}, {
                 duration: 250,
@@ -79,7 +78,6 @@ export class AnimationHelper {
             animate(domDialog, {height: dialogHeight}, {
                 duration: 400,
                 easing: "easeOutCubic",
-                complete: () => resolve()
             });
             animate(domContent, {height: contentHeight}, {
                 duration: 400,
