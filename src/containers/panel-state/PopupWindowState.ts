@@ -28,6 +28,7 @@ export class PopupWindowState extends PanelStateBase {
 
         this.autoDock = AutoDockHelper.scanDockInfo(this.dockManager, this.panel);
         this.undockPanel();
+        this.panel.setHeaderVisibility(true);
         this.panel.updateState();
 
         this.subscriptionOnClose = this.panel.on("onClose", () => {
@@ -43,6 +44,7 @@ export class PopupWindowState extends PanelStateBase {
         // TODO: WHY THIS???
         setTimeout(() => {
             this.openWindowInPopup();
+            this.panel.updateState();
         });
     }
 

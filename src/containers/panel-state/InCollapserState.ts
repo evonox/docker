@@ -24,6 +24,7 @@ export class InCollapserState extends PanelStateBase {
         this.autoDock = AutoDockHelper.scanDockInfo(this.dockManager, this.panel);
         this.dockManager.requestUndock(this.panel);
         this.panel.updateState();
+        this.panel.setHeaderVisibility(true);
         this.panel.setVisible(false);
 
         const collapserDock = this.autoDock.getCollapserDockKind();
