@@ -672,15 +672,15 @@ export class DockManager {
     }
 
     invalidate() {
-        const startTime = DebugHelper.startMeasuring();
-        // We force any pending updates before resizing the layout
-        DOMUpdateInitiator.forceAllEnqueuedUpdates();
-        // Get the current container bounds and resize the dock layout accordingly
-        const rect = RectHelper.fromDOMRect(this.getContainerElement().getBoundingClientRect());
-        this.resize(rect);
-        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        // const startTime = DebugHelper.startMeasuring();
+        // // We force any pending updates before resizing the layout
+        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        // // Get the current container bounds and resize the dock layout accordingly
+        // const rect = RectHelper.fromDOMRect(this.getContainerElement().getBoundingClientRect());
+        // this.resize(rect);
+        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
 
-        DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
+        // DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
     }
 
     private updateState() {

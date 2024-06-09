@@ -68,7 +68,6 @@ class Animation implements IAnimationAPI {
         const elapsed = (timestamp - this.zeroTime) / this.options.duration;
         if(elapsed < 1) {
             const cssCurrentFrame = this.computeNewFrameValues(elapsed);
-            console.dir(cssCurrentFrame);
             this.applyFrameStyle(cssCurrentFrame);
             this.options.progress?.();
             this.handleRAF = window.requestAnimationFrame(this.animationTick);

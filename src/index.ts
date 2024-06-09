@@ -204,10 +204,7 @@ dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) =>
 
     return {
         initialize: function(api, options)  {
-            console.log("--- API ---");
-            console.dir(this);
-            this["api"] = api;
-            console.dir(this);
+            this.api = api;
             return new Promise<void>((resolve) => {
                 api.setPanelFAIcon("fa fa-plus");
                 api.setPanelTitle("Tabbed View");
@@ -242,7 +239,6 @@ dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) =>
 
         },
         onActionInvoked: function(actionName) {
-            console.dir(this);
             if(actionName === "Top") {
                 this.api.setTabOrientation("top");
             } else if(actionName === "Bottom") {

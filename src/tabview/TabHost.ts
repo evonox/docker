@@ -125,8 +125,6 @@ export class TabHost extends Component {
         // Save selected tab index
         let selectedTabIndex = this.tabPages.indexOf(this.selectedTab);
 
-        console.dir(children);
-
         // Remove old tab pages
         const tabPages = [...this.tabPages];
         for(const tabPage of tabPages) {
