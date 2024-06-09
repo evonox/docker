@@ -1,4 +1,5 @@
 import { Collapser } from "../../collapsers/Collapser";
+import { ComponentEventSubscription } from "../../framework/component-events";
 import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
 import { PanelStateBase } from "./PanelStateBase";
 
@@ -45,6 +46,7 @@ export class InCollapserState extends PanelStateBase {
 
     public dispose(): void {
         this.autoDock.dispose();
+        this.collapser.dispose();
     }
 
     async pinPanel(): Promise<boolean> {
