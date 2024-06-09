@@ -38,9 +38,9 @@ function constructTreeGraph(node: DockNode): TreeNode {
 
 function DockModelView({dockManager}: {dockManager: DockManager}) {
 
-    const [model, setModel] = React.useState<any>(null);
+    const [model, setModel] = React.useState<any>({});
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         setTimeout(() => {
             const model = constructTreeGraph(dockManager.getModelContext().model.rootNode);
             setModel(model);   
@@ -49,9 +49,7 @@ function DockModelView({dockManager}: {dockManager: DockManager}) {
 
     return (
         <div style={{height: "100%", background: "#444", overflow: "auto", stroke: "#888", fill: "#888"}}>
-            { model !== null && (
-                <AnimatedTree  data={model} width={800} height={600} />
-            )}
+                {/* <AnimatedTree key={model}  data={model} width={600} height={600} /> */}
 
         </div>
     );

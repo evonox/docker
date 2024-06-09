@@ -13,6 +13,7 @@ import { DockModelViewFactoryFn } from "./panels/DockModelView";
 import { BarChartFactoryFn, DoughnutChartFactoryFn, LineChartFactoryFn, PieChartFactoryFn, StackedChartFactoryFn } from "./panels/chart-panels";
 import { createVillageScene } from "./village-demo";
 import { DebugHelper } from "../src/utils/DebugHelper";
+import { NotificationFactoryFn } from "./panels/notification-view";
 
 declare var ace: any;
 
@@ -48,6 +49,9 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
 });
 
 dockManager.registerPanelType("creditsView", "singleton", CreditsFactoryFn);
+
+dockManager.registerPanelType("notificationView", "singleton", NotificationFactoryFn);
+
 
 dockManager.registerPanelType("dockModelView", "singleton", DockModelViewFactoryFn);
 
@@ -107,6 +111,7 @@ async function performDocking() {
         const babylonJSPanel = dockManager.createPanel("babylonJS");
         const creditsPanel = dockManager.createPanel("creditsView");
         const dockModelPanel = dockManager.createPanel("dockModelView");
+        const notificationPanel = await dockManager.createPanelAsync("notificationView");
 
         // Create TabbedPanelContainer for Charts
         const chartView = await dockManager.createTabbedPanelAsync("chartView");
@@ -154,6 +159,7 @@ async function performDocking() {
         dockManager.dockLeft(documentNode, babylonJSPanel, 0.35);
         const nodeCredits = dockManager.dockDown(documentNode, creditsPanel, 0.35);
         dockManager.dockFill(nodeCredits, chartView);
+        dockManager.dockFill(nodeCredits, notificationPanel);
         dockManager.dockRight(documentNode, dockModelPanel, 0.45);
     }
     catch(err) {
