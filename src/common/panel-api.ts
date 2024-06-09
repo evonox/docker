@@ -98,7 +98,9 @@ export interface IPanelStateAPI {
 
     addHeaderButton(button: IHeaderButton): void;
     removeHeaderButton(actionName: string): void;
-    showHeaderButton(actionName: string, flag: boolean): void;
+
+    allowAction(actionName: string): void;
+    denyAction(actionName: string): void;
 
     listenTo(eventName: string, handler: (payload?: any) => void): ISubscriptionAPI;
 }

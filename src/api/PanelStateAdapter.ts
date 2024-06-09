@@ -70,8 +70,12 @@ export class PanelStateAdapter implements IPanelStateAPI {
         this.panelContainer.removeHeaderButton(actionName);
     }
 
-    showHeaderButton(actionName: string, isVisible: boolean): void {
-        this.panelContainer.showHeaderButton(actionName, isVisible);
+    allowAction(actionName: string): void {
+        this.panelContainer.allowAction(actionName);
+    }
+
+    denyAction(actionName: string): void {
+        this.panelContainer.denyAction(actionName);
     }
 
     listenTo(eventName: string, handler: (payload?: any) => void): ISubscriptionAPI {

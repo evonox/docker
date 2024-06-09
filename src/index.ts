@@ -5,6 +5,7 @@ import { IPanelAPI, IPanelStateAPI, ITabbedPanelStateAPI } from "./common/panel-
 import { DOM } from "./utils/DOM";
 import { DebugHelper } from "./utils/DebugHelper";
 import { TabOrientation } from "./common/enumerations";
+import { PANEL_ACTION_CLOSE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_SHOW_POPUP } from "./core/panel-default-buttons";
 
 DebugHelper.enableOptimizations(false);
 
@@ -25,8 +26,8 @@ dockManager.registerPanelType("panel1", "singleton", (dockManager) => {
                 actionName: "AddDocument",
                 visible: true
             });
-            api.showHeaderButton("AddDocument", false);
-            api.removeHeaderButton("AddDocument");
+            api.denyAction("AddDocument");
+            api.allowAction("AddDocument");
             
             const domElement = document.createElement("h1");
             domElement.innerText = "DockerTS Panel One";
@@ -148,6 +149,11 @@ dockManager.registerPanelType("panel5", "singleton", (dockManager) => {
             domElement.innerText = "Docked Bottom";
             api.setPanelFAIcon("fa fa-cross");
             api.setPanelTitle("Bottom View");
+            api.denyAction(PANEL_ACTION_MINIMIZE);
+            api.denyAction(PANEL_ACTION_SHOW_POPUP);
+            setTimeout(() => {
+                api.allowAction(PANEL_ACTION_SHOW_POPUP);
+            }, 5000);
             return domElement;
         },
         onQueryContextMenu: (config) => {
@@ -199,10 +205,13 @@ dockManager.registerTabbedPanelType("tabbedPanel", "singleton", (dockManager) =>
     let tabbedApi: ITabbedPanelStateAPI;
 
     return {
-        initialize: async (api, options) => {
-            api.setPanelFAIcon("fa fa-plus");
-            api.setPanelTitle("Tabbed View");
-            tabbedApi = api
+        initialize: (api, options) => {
+            tabbedApi = api;
+            return new Promise<void>((resolve) => {
+                api.setPanelFAIcon("fa fa-plus");
+                api.setPanelTitle("Tabbed View");
+                resolve();
+            })
         },
         onQueryContextMenu: (config) => {
             config.appendMenuItem({
@@ -259,7 +268,7 @@ async function performDocking() {
         const containerBottom = await dockManager.createPanel("panel5");
         const containerFloat = await dockManager.createPanel("panel6", {key: "BOTTOM"});
         const containerFloat2 = await dockManager.createPanel("panel6", {key: "FLOATING"});
-        const tabbedContainer = await dockManager.createTabbedPanel("tabbedPanel");
+        const tabbedContainer = await dockManager.createTabbedPanelAsync("tabbedPanel");
         tabbedContainer.addContainer(containerThree1);
         tabbedContainer.addContainer(containerThree2);
         tabbedContainer.addContainer(containerThree3);

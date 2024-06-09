@@ -1,5 +1,5 @@
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
-import { CLOSE_BUTTON_ICON, COLLAPSE_BUTTON_ICON, EXPAND_BUTTON_ICON, MAXIMIZE_BUTTON_ICON, MINIMIZE_BUTTON_ICON, PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, RESTORE_BUTTON_ICON } from "../core/panel-default-buttons";
+import { CLOSE_BUTTON_ICON, COLLAPSE_BUTTON_ICON, EXPAND_BUTTON_ICON, MAXIMIZE_BUTTON_ICON, MINIMIZE_BUTTON_ICON, PANEL_ACTION_CLOSE, PANEL_ACTION_COLLAPSE, PANEL_ACTION_EXPAND, PANEL_ACTION_MAXIMIZE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_RESTORE, PANEL_ACTION_SHOW_POPUP, PANEL_ACTION_TOGGLE_PIN, PIN_PANEL_ICON, POPUP_WINDOW_ICON, RESTORE_BUTTON_ICON } from "../core/panel-default-buttons";
 import { PanelContainer } from "./PanelContainer";
 
 export class ContextMenuFactory {
@@ -60,6 +60,24 @@ export class ContextMenuFactory {
                 icon: COLLAPSE_BUTTON_ICON,
                 title: labelConfiguration.collapseLabel,
                 actionName: PANEL_ACTION_COLLAPSE
+            });            
+        }
+        // Check Show in Popup Window Action
+        if(panel.isActionAllowed(PANEL_ACTION_SHOW_POPUP)) {
+            config.appendMenuItem({
+                displayOrder: 700,
+                icon: POPUP_WINDOW_ICON,
+                title: labelConfiguration.showInPopupLabel,
+                actionName: PANEL_ACTION_SHOW_POPUP
+            });            
+        }
+        // Check Toggle Pin / Unpin Panel
+        if(panel.isActionAllowed(PANEL_ACTION_TOGGLE_PIN)) {
+            config.appendMenuItem({
+                displayOrder: 800,
+                icon: PIN_PANEL_ICON,
+                title: labelConfiguration.togglePinLabel,
+                actionName: PANEL_ACTION_TOGGLE_PIN
             });            
         }
 

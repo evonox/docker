@@ -38,6 +38,8 @@ export class PopupWindowState extends PanelStateBase {
         this.adoptedPopupElements = [];
         this.popupWindow = undefined;
 
+        this.panel.enableDefaultContextMenu(true);
+
         await super.leaveState();
     }
 

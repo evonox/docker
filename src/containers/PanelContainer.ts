@@ -21,6 +21,7 @@ import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 import { ContextMenuFactory } from "./ContextMenuFactory";
 import { EventHelper } from "../utils/event-helper";
+import { ArrayUtils } from "../utils/ArrayUtils";
 
 export class PanelContainer extends Component implements IDockContainer {
 
@@ -61,6 +62,8 @@ export class PanelContainer extends Component implements IDockContainer {
 
     protected state: PanelStateMachine;
 
+    private deniedActionsByUser: string[] = [];
+
     private previousContentZIndex: number;
     private _loadedSize: ISize;
 
@@ -70,6 +73,7 @@ export class PanelContainer extends Component implements IDockContainer {
         private api: IGenericPanelAPI
     ) {
         super();
+        this.handleContextMenuAction = this.handleContextMenuAction.bind(this);
         this.initializeComponent();
     }
 
@@ -363,8 +367,26 @@ export class PanelContainer extends Component implements IDockContainer {
         this.buttonBar.removeUserButton(actionName);
     }
 
+    allowAction(actionName: string): void {
+        this.buttonBar.allowAction(actionName);
+        if(this.deniedActionsByUser.includes(actionName)) {
+            ArrayUtils.removeItem(this.deniedActionsByUser, actionName);
+        }
+    }
+
+    denyAction(actionName: string): void {        
+        this.buttonBar.denyAction(actionName);
+        if(this.deniedActionsByUser.includes(actionName) === false) {
+            this.deniedActionsByUser.push(actionName);
+        }
+    }
+
+    isActionDeniedByUser(actionName: string) {
+        return this.deniedActionsByUser.includes(actionName);
+    }
+
     showHeaderButton(actionName: string, flag: boolean): void {
-        if(flag) {
+        if(flag) {            
             this.buttonBar.allowAction(actionName);
         } else {
             this.buttonBar.denyAction(actionName);
@@ -372,7 +394,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     isActionAllowed(actionName: string): boolean {
-        return this.buttonBar.isActionAllowed(actionName);
+        return this.buttonBar.isActionAllowed(actionName) && this.isActionDeniedByUser(actionName) === false;
     }
 
     async handleDefaultPanelAction(actionName: string) {

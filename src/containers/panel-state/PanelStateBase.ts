@@ -131,13 +131,20 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     protected configureButtons(config: IHeaderButtonConfiguration): void {
-        this.panel.showHeaderButton(PANEL_ACTION_MINIMIZE, config.minimize);
-        this.panel.showHeaderButton(PANEL_ACTION_MAXIMIZE, config.maximize);
-        this.panel.showHeaderButton(PANEL_ACTION_RESTORE, config.restore);
-        this.panel.showHeaderButton(PANEL_ACTION_EXPAND, config.expand);
-        this.panel.showHeaderButton(PANEL_ACTION_COLLAPSE, config.collapse);
-        this.panel.showHeaderButton(PANEL_ACTION_SHOW_POPUP, config.popup);
-        this.panel.showHeaderButton(PANEL_ACTION_TOGGLE_PIN, config.pin);
+        this.toggleButtonVisibility(PANEL_ACTION_MINIMIZE, config.minimize);
+        this.toggleButtonVisibility(PANEL_ACTION_MAXIMIZE, config.maximize);
+        this.toggleButtonVisibility(PANEL_ACTION_RESTORE, config.restore);
+        this.toggleButtonVisibility(PANEL_ACTION_EXPAND, config.expand);
+        this.toggleButtonVisibility(PANEL_ACTION_COLLAPSE, config.collapse);
+        this.toggleButtonVisibility(PANEL_ACTION_SHOW_POPUP, config.popup);
+        this.toggleButtonVisibility(PANEL_ACTION_TOGGLE_PIN, config.pin);
+    }
+
+    private toggleButtonVisibility(actionName: string, flag: boolean) {
+        if(this.panel.isActionDeniedByUser(actionName)) {
+            flag = false;
+        }
+        this.panel.showHeaderButton(actionName, flag);
     }
 
     updateState(): void {
