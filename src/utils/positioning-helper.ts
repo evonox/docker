@@ -17,9 +17,9 @@ const AUTOMATIC_MY_POSITIONS: IOverlayAutoPosition = [
 
 export class AutoPositioningHelper {
    
-    static computeAutomaticallyOverlayPosition(overlay: HTMLElement, anchor: IPoint): IPoint {
+    static computeAutomaticallyOverlayPosition(targetElement: HTMLElement, overlay: HTMLElement, anchor: IPoint): IPoint {
         // To check the overlay is in viewport, add it to <body>
-        document.body.appendChild(overlay);
+        targetElement.ownerDocument.body.appendChild(overlay);
 
         let finalPoint: IPoint;
         for(const position of AUTOMATIC_MY_POSITIONS) {
@@ -47,10 +47,13 @@ export class AutoPositioningHelper {
         overlay.style.setProperty("left", "");
         overlay.style.setProperty("top", "");
 
+        // Get the document element, we must work even in popup windows
+        const documentElement = overlay.ownerDocument.documentElement;
+
         // Check window boundaries
         return overlayBounds.left > 0 
                 && overlayBounds.top > 0 
-                && overlayBounds.right < window.innerWidth 
-                && overlayBounds.bottom < window.innerHeight;
+                && overlayBounds.right < documentElement.clientWidth 
+                && overlayBounds.bottom < documentElement.clientHeight;
     }
 }

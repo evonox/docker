@@ -27,11 +27,11 @@ export class ContextMenu extends Component {
         // we need to perform all enqueued DOM updates
         DOMUpdateInitiator.forceAllEnqueuedUpdates();
             
+        const targetElement = event.target as HTMLElement;
         const contextMenuPosition = AutoPositioningHelper.computeAutomaticallyOverlayPosition(
-            this.domContextMenu.get(), {x: event.pageX, y: event.pageY}
+            targetElement, this.domContextMenu.get(), {x: event.pageX, y: event.pageY}
         );
 
-        const targetElement = event.target as HTMLElement;
         this.domContextMenu.addClass("DockerTS-ContextMenu--Visible")
             .left(contextMenuPosition.x).top(contextMenuPosition.y)
             .zIndex(zIndex).appendTo(targetElement.ownerDocument.body);
