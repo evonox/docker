@@ -1,5 +1,5 @@
-import { IRect, ISize } from "../common/dimensions";
-import { IPoint } from "./overlay-helper";
+import { IRect } from "../common/dimensions";
+import { ArrayUtils } from "./ArrayUtils";
 
 /**
  * Default Popup Window CSS style
@@ -37,6 +37,9 @@ export interface IBrowserPopupHelperOptions {
  */
 export class BrowserPopupHelper {
 
+    private static isUnloadHandlerAttached = false;
+    private static openedPopupWindows: Window[] = [];
+
     static showElementInBrowserWindow(targetElement: HTMLElement, dependentElements: HTMLElement[] , 
         options: IBrowserPopupHelperOptions): Window {       
         // Open the popup window
@@ -44,7 +47,10 @@ export class BrowserPopupHelper {
         // Attach onFocus and onBlur handlers as well as onUnload 
         popupWindow.onfocus = e => options.onFocused?.(e);
         popupWindow.onblur = e => options.onBlurred?.(e);
-        popupWindow.onunload = () => options.onPopupWindowClosed?.();
+        popupWindow.onunload = () => {
+            ArrayUtils.removeItem(this.openedPopupWindows, popupWindow);            
+            options.onPopupWindowClosed?.()
+        }
         // Transfer all the necessary CSS styles
         this.transferAllCSSStyles(popupWindow);
         // Apply the window title
@@ -65,7 +71,31 @@ export class BrowserPopupHelper {
             popupWindow.document.body.appendChild(element);
         });
 
+        // Add the popup window to the list
+        this.openedPopupWindows.push(popupWindow);
+        // Finally attach the unload handlers to close all popups
+        this.attachMainWindowUnloadHandler();
+
         return popupWindow;
+    }
+
+    // Main window unload handler
+    private static attachMainWindowUnloadHandler() {
+        if(this.isUnloadHandlerAttached)
+            return;
+        this.isUnloadHandlerAttached = true;
+        window.addEventListener("unload", () => this.closeAllOpenedPopupWindows());
+    }
+
+    // Close all popup windows
+    private static closeAllOpenedPopupWindows() {
+        const popupWindows = [...this.openedPopupWindows];
+        for(const popupWindow of popupWindows) {
+            // Note: We need to prevent the record behavior
+            popupWindow.onunload = undefined;
+            popupWindow.close();
+        }
+        this.openedPopupWindows = [];
     }
 
     // Creates the <title> element with the panel container title
