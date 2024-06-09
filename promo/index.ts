@@ -149,7 +149,6 @@ async function performDocking() {
         });
 
 
-        dockManager.setActivePanel(babylonJSPanel);
 
         const documentNode = dockManager.getDocumentNode();
         dockManager.dockFill(documentNode, pythonEditor);
@@ -161,6 +160,9 @@ async function performDocking() {
         dockManager.dockFill(nodeCredits, chartView);
         dockManager.dockFill(nodeCredits, notificationPanel);
         dockManager.dockRight(documentNode, dockModelPanel, 0.45);
+        dockManager.setActivePanel(chartView);
+
+        dockManager.setActivePanel(babylonJSPanel);
     }
     catch(err) {
         console.dir(err);

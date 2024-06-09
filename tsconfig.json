@@ -5,7 +5,9 @@
     "module": "es6",
     "target": "es6",
     "allowJs": true,
+    "strict": false,
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "jsx": "react"

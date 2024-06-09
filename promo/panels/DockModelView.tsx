@@ -2,12 +2,10 @@ import * as React from "react";
 import { Root, createRoot } from "react-dom/client";
 import { DockManager } from "../../src/facade/DockManager";
 import { IPanelAPI } from "../../src/common/panel-api";
-import { TreeNode } from "primereact/treenode";
 import { DockNode } from "../../src/model/DockNode";
 import { ContainerType } from "../../src/common/enumerations";
-import { AnimatedTree } from "react-tree-graph";
+import Tree, { RawNodeDatum } from 'react-d3-tree';
 
-import 'react-tree-graph/dist/style.css'
 import "./Scrollbars.css";
 
 
@@ -29,7 +27,7 @@ function createTreeNode(node: DockNode): any {
     }
 }
 
-function constructTreeGraph(node: DockNode): TreeNode {
+function constructTreeGraph(node: DockNode): any {
     const childNodes =  node.childNodes.map(child => constructTreeGraph(child));
     const treeNode = createTreeNode(node);
     treeNode.children = childNodes;
@@ -38,7 +36,7 @@ function constructTreeGraph(node: DockNode): TreeNode {
 
 function DockModelView({dockManager}: {dockManager: DockManager}) {
 
-    const [model, setModel] = React.useState<any>({});
+    const [model, setModel] = React.useState<RawNodeDatum>({name: "Loading...."});
 
     React.useEffect(() => {
         setTimeout(() => {
@@ -48,9 +46,8 @@ function DockModelView({dockManager}: {dockManager: DockManager}) {
     }, []);
 
     return (
-        <div style={{height: "100%", background: "#444", overflow: "auto", stroke: "#888", fill: "#888"}}>
-                {/* <AnimatedTree key={model}  data={model} width={600} height={600} /> */}
-
+        <div style={{height: "100%", overflow: "hidden"}}>
+            <Tree data={model} orientation="vertical" zoom={0.65} translate={{x: 200, y: 50}}  />
         </div>
     );
 }
