@@ -33,6 +33,8 @@ export class InCollapserState extends PanelStateBase {
 
         this.collapser.on("onShowPanel", () => this.handlePanelShown());
         this.collapser.on("onHidePanel", () => this.handlePanelHidden());
+        
+        this.dockManager.notifyOnUnpinned(this.panel);
     }
 
     public async leaveState(): Promise<void> {
@@ -40,8 +42,9 @@ export class InCollapserState extends PanelStateBase {
         this.autoDock.dispose();
 
         this.collapser.dispose();
-
         await super.leaveState();
+
+        this.dockManager.notifyOnPinned(this.panel);
     }
 
     public dispose(): void {

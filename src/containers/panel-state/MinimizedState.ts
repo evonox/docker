@@ -22,6 +22,9 @@ export class MinimizedState extends PanelStateBase {
         this.isCapturedInMinimizingSlot = true;
         this.minimizingSlotId = this.dockManager.requestMinimizeSlot();
         this.updateMinimizedSlotPosition();
+
+        // Notify the event
+        this.dockManager.notifyOnMinimized(this.panel);
     }
 
     public async leaveState(): Promise<void> {

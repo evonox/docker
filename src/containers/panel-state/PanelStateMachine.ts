@@ -147,6 +147,9 @@ export class PanelStateMachine implements IPanelStateAPI {
         // No state set during transition operation due to the calls of 'update' function
         this.currentState = undefined; 
 
+        // Store the previous state
+        this.config.set("previousState", this.containerState);
+
         // Trigger the state transition
         const transition = StateTransitionFactory.create(this.dockManager, this.panel, this.config, 
                 this.containerState, newState);

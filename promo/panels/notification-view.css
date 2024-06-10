@@ -1,0 +1,11 @@
+
+
+.NotificationView {
+    font-family: monospace;
+    font-size: 13px;
+    color: whitesmoke;
+    background: #444;
+    height: 100%;
+    padding: 5px;
+    overflow-y: auto;
+}

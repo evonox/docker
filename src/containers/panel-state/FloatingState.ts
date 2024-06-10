@@ -50,6 +50,12 @@ export class FloatingState extends PanelStateBase {
 
         const domDialogFrame = this.dialog.getDialogFrameDOM();
         this.observeElement(domDialogFrame, () => this.adjustPanelContentState());
+
+        // Notify the event
+        const previousState = this.config.get("previousState");
+        if(previousState === PanelContainerState.Maximized || previousState === PanelContainerState.Minimized) {
+            this.dockManager.notifyOnRestored(this.panel);
+        }
     }
 
     public async leaveState(): Promise<void> {
@@ -125,6 +131,9 @@ export class FloatingState extends PanelStateBase {
 
         // Enable resizing behavior on the dialog frame
         this.panel.triggerEvent("onEnableResize", true);
+
+        // Notify about the event
+        this.dockManager.notifyOnExpanded(this.panel);
     }
 
     public async collapse(doAnimation?: boolean): Promise<boolean> {
@@ -158,6 +167,9 @@ export class FloatingState extends PanelStateBase {
 
         // Final CSS style setting and cleanup
         DOM.from(domDialogFrame).height(headerHeight);
+
+        // Notify about the event
+        this.dockManager.notifyOnCollapsed(this.panel);
     }
 
     updateState(): void {

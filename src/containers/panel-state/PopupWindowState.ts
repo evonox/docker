@@ -46,6 +46,7 @@ export class PopupWindowState extends PanelStateBase {
         setTimeout(() => {
             this.openWindowInPopup();
             this.panel.updateState();
+            this.dockManager.notifyOnUndockToPopup(this.panel);
         });
     }
 
@@ -61,6 +62,7 @@ export class PopupWindowState extends PanelStateBase {
         this.panel.enableDefaultContextMenu(true);
 
         await super.leaveState();
+        this.dockManager.notifyOnDockFromPopup(this.panel);
     }
 
     async hidePopup(): Promise<boolean> {

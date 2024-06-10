@@ -24,6 +24,9 @@ export class MaximizedState extends PanelStateBase {
         // Observe container element for resize changes
         const containerElement = this.dockManager.getContainerElement();
         this.observeElement(containerElement, () => this.adjustMaximizedElementRect());
+
+        // Notify the event
+        this.dockManager.notifyOnMaximized(this.panel);
     }
 
     public async leaveState(): Promise<void> {

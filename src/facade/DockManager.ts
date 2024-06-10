@@ -890,29 +890,13 @@ export class DockManager {
         return this.activeDocument;
     }
 
-    /**
-     * TODO: REWORK
-     */
     setActivePanel(panel: PanelContainer) {
         if(this.activePanel !== panel) {
+            const previousActive = this.activePanel;
             this.activePanel = panel;
             this.updateState();
-            /**
-             * 1. Zjistit posledni aktivni panel, ktery neni dialog
-             * 2. Uchovat si posledni aktivni panel
-             * 3. Deaktivovat posledni aktivni panel, odejmout CSS a TabPage, pokud existuje 
-             *      (aktivita, ne selection)
-             * 4. Nastavit aktivni panel
-             * 5. Uchovat posledni dokument
-             *      Pokud je posledni panel Dokument, nastavit jej
-             * 6. Nejaky kod pro poslednim aktivnim panelem - CO TO JE?
-             * 7. NOTIFIKACE O ZMENE PANELU, POKUD ZMENA DOKUMENTU, NOTIFIKACE O ZMENE DOKUMENTU
-             * 8. Pokud je hodnota aktivniho panelu?
-             *      1) NASTAVIT CSS NA HEADER AKTIVNIHO PANELU
-             *      2) NASTAVIT TABPAGE V TABHOSTu JAKO ACTIVE, POKUD JE V PARENT FILL DOCKERU
-             */
+            this.notifyOnActivePanelChange(this.activePanel, previousActive);
         } else {
-            // TODO: SET ACTIVE PANEL IN THE TABHOST - IS IT NECESSARY????
         }
     }
 
@@ -926,6 +910,9 @@ export class DockManager {
 
     private triggerEvent<K extends EventKind>(eventName: K, payload: EventPayload<K>): void {
         this.eventManager.triggerEvent(eventName, payload);
+        if(eventName !== "onLayoutChanged") {
+            this.notifyOnLayoutChanged();
+        }
     }
 
     suspendLayout(panel: IDockContainer) {
@@ -980,21 +967,67 @@ export class DockManager {
         this.triggerEvent("onTabChange", {dockManager: this, tabPage: tabPage});      
     }
 
-    notifyOnActivePanelChange(panel: PanelContainer, oldActive: PanelContainer) {
+    notifyOnActivePanelChange(newActivePanel: PanelContainer, oldActivePanel: PanelContainer) {
+        oldActivePanel.triggerEvent("onDeactivated");
+        newActivePanel.triggerEvent("onActivated");
+
         this.triggerEvent("onActivePanelChange", {
             dockManager: this, 
-            previousActivePanel: oldActive,
-            activePanel: panel
+            previousActivePanel: oldActivePanel,
+            activePanel: newActivePanel
         });      
     }
     
-    notifyOnActiveDocumentChange(panel: PanelContainer, oldActive: PanelContainer) {
+    notifyOnActiveDocumentChange(newActivePanel: PanelContainer, oldActivePanel: PanelContainer) {
+        oldActivePanel.triggerEvent("onDeactivated");
+        newActivePanel.triggerEvent("onActivated");
+
         this.triggerEvent("onActiveDocumentChange", {
             dockManager: this, 
-            previousActivePanel: oldActive,
-            activePanel: panel
+            previousActivePanel: oldActivePanel,
+            activePanel: newActivePanel
         });      
-    }   
+    }
+
+    notifyOnUnpinned(panel: PanelContainer) {
+        this.triggerEvent("onUnpinned", {dockManager: this, container: panel});
+    }
+
+    notifyOnPinned(panel: PanelContainer) {
+        this.triggerEvent("onPinned", {dockManager: this, container: panel})
+    }
+
+    notifyOnUndockToPopup(panel: PanelContainer) {
+        this.triggerEvent("onUndockToPopup", {dockManager: this, container: panel})
+    }
+
+    notifyOnDockFromPopup(panel: PanelContainer) {
+        this.triggerEvent("onDockFromPopup", {dockManager: this, container: panel})
+    }
+
+    notifyOnMinimized(panel: PanelContainer) {
+        this.triggerEvent("onMinimized", {dockManager: this, container: panel})
+    }
+
+    notifyOnRestored(panel: PanelContainer) {
+        this.triggerEvent("onRestored", {dockManager: this, container: panel})
+    }
+
+    notifyOnMaximized(panel: PanelContainer) {
+        this.triggerEvent("onMaximized", {dockManager: this, container: panel})
+    }
+
+    notifyOnCollapsed(panel: PanelContainer) {
+        this.triggerEvent("onCollapsed", {dockManager: this, container: panel})
+    }
+
+    notifyOnExpanded(panel: PanelContainer) {
+        this.triggerEvent("onExpanded", {dockManager: this, container: panel})
+    }
+
+    notifyOnLayoutChanged() {
+        this.triggerEvent("onLayoutChanged", {dockManager: this});
+    }
     
     /**
      * PERSISTENCE API

@@ -61,7 +61,18 @@ export interface EventPayloadMap {
     "onChangeDialogPosition": DialogPositionPayload,
     "onContainerResized": ContainerPayload,
     "onActivePanelChange": ActivePanelChanged,
-    "onActiveDocumentChange": ActivePanelChanged 
+    "onActiveDocumentChange": ActivePanelChanged,
+    /////////
+    "onLayoutChanged": GenericPayload,
+    "onPinned": ContainerPayload,
+    "onUnpinned": ContainerPayload,
+    "onUndockToPopup": ContainerPayload,
+    "onDockFromPopup": ContainerPayload,
+    "onMinimized": ContainerPayload,
+    "onRestored": ContainerPayload,
+    "onMaximized": ContainerPayload,
+    "onCollapsed": ContainerPayload,
+    "onExpanded": ContainerPayload
 }
 
 /**
