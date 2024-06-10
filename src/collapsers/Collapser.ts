@@ -114,8 +114,8 @@ export class Collapser extends Component {
         this.panel.updateState();
 
         this.mouseLeaveGuard = new MouseLeaveGuard([
-            this.domPanelPlaceholder.get(), this.header.getDOM()
-        ], () => this.hidePanel());
+            this.domPanelPlaceholder.get(), this.header.getDOM(),
+        ], () => this.hidePanel(), this.dockManager.config.collapsers.collapserHideDelay);
 
         this.animationRunning = false;
     }

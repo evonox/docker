@@ -1,3 +1,4 @@
+import { EventHelper } from "./event-helper";
 
 /**
  * Triggers the handler when the mouse leaves all the elements given
@@ -5,9 +6,16 @@
 export class MouseLeaveGuard {
 
     private handlerTriggered: boolean = false;
-
-    constructor(private elements: HTMLElement[], private mouseLeaveHandler: () => void) {
+    private delayedMouseLeaveHandler: any;
+    
+    constructor(private elements: HTMLElement[], private mouseLeaveHandler: () => void, hideDelay: number) {
         this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.delayedMouseLeaveHandler = EventHelper.debounce(
+            () => {
+                this.handlerTriggered = true;
+                mouseLeaveHandler();
+            }, hideDelay, {leading: false, trailing: true}
+        );
         window.addEventListener("mousemove", this.handleMouseMove);
     }
 
@@ -22,9 +30,10 @@ export class MouseLeaveGuard {
         }
         if(flag === false) {
             if(! this.handlerTriggered) {
-                this.handlerTriggered = true;
-                this.mouseLeaveHandler();
+                this.delayedMouseLeaveHandler();
             }
+        } else {
+            this.delayedMouseLeaveHandler.cancel();
         }
     }
 
