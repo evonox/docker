@@ -1,3 +1,4 @@
+import { DockManager } from "../docking-library";
 import { ButtonBar } from "./ButtonBar";
 import { PANEL_DEFAULT_BUTTONS } from "./panel-default-buttons";
 
@@ -14,8 +15,8 @@ export class PanelButtonBar extends ButtonBar {
     // @property({defaultValue: true})
     // visible: boolean;
 
-    constructor() {
-        super();
+    constructor(dockeManager: DockManager) {
+        super(dockeManager);
         // this.handleActionTriggered = this.handleActionTriggered.bind(this)
         // this.initializeComponent();
     }

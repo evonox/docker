@@ -47,6 +47,9 @@ export interface IDockConfig {
         restoreLabel?: string;
         showInPopupLabel?: string;
         togglePinLabel?: string;
+        scrollLeftLabel?: string;
+        scrollRightLabel?: string;
+        showTabsLabel?: string;
     },
     zIndexes?: {
         zIndexWheelItem?: number;
@@ -90,8 +93,11 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         minimizeLabel: "Minimize Panel",
         maximizeLabel: "Maximize Panel",
         restoreLabel: "Restore Panel",
-        showInPopupLabel: "Show in Popup Window",
-        togglePinLabel: "Pin / Unpin Panel"
+        showInPopupLabel: "Show in new window",
+        togglePinLabel: "Pin / Unpin Panel",
+        scrollLeftLabel: "Scroll Left",
+        scrollRightLabel: "Scroll Right",
+        showTabsLabel: "Show Tabs"
     },
     minimumDefaultWidth: 400,
     minimumDefaultHeight: 200,

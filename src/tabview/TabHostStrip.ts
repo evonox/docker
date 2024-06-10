@@ -84,7 +84,7 @@ export class TabHostStrip extends Component {
     }
 
     protected onInitialized(): void {
-        this.buttonBar = new TabStripButtonBar();
+        this.buttonBar = new TabStripButtonBar(this.dockManager);
     }
 
     protected onDisposed(): void {

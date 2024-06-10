@@ -92,56 +92,56 @@ export const PANEL_DEFAULT_BUTTONS: IHeaderButton[] = [
     {
         displayOrder: 11000,
         icon:  CLOSE_BUTTON_ICON,
-        title: "Close",
+        title: "##_closeLabel",
         actionName: PANEL_ACTION_CLOSE,
         visible: true
     },
     {
         displayOrder: 10000,
         icon: MAXIMIZE_BUTTON_ICON,
-        title: "Maximize",
+        title: "##_maximizeLabel",
         actionName: PANEL_ACTION_MAXIMIZE,
         visible: true
     },
     {
         displayOrder: 9000,
         icon: RESTORE_BUTTON_ICON,
-        title: "Restore",
+        title: "##_restoreLabel",
         actionName: PANEL_ACTION_RESTORE,
         visible: true
     },
     {
         displayOrder: 8000,
         icon: MINIMIZE_BUTTON_ICON,
-        title: "Minimize",
+        title: "##_minimizeLabel",
         actionName: PANEL_ACTION_MINIMIZE,
         visible: true
     },
     {
         displayOrder: 7000,
         icon: POPUP_WINDOW_ICON,
-        title: "Show in new window",
+        title: "##_showInPopupLabel",
         actionName: PANEL_ACTION_SHOW_POPUP,
         visible: true
     },
     {
         displayOrder: 6000,
         icon: PIN_PANEL_ICON,
-        title: "Pin / Unpin Panel",
+        title: "##_togglePinLabel",
         actionName: PANEL_ACTION_TOGGLE_PIN,
         visible: true
     },
     {
         displayOrder: 5000,
         icon: EXPAND_BUTTON_ICON,
-        title: "Expand",
+        title: "##_expandLabel",
         actionName: PANEL_ACTION_EXPAND,
         visible: true
     },
     {
         displayOrder: 4000,
         icon: COLLAPSE_BUTTON_ICON,
-        title: "Collapse",
+        title: "##_collapseLabel",
         actionName: PANEL_ACTION_COLLAPSE,
         visible: true
     }
@@ -151,21 +151,21 @@ export const TAB_STRIP_DEFAULT_BUTTONS: IHeaderButton[] = [
     {
         displayOrder: 1000,
         icon: SCROLL_LEFT_ICON,
-        title: "Scroll Left",
+        title: "##_scrollLeftLabel",
         actionName: TABSTRIP_SCROLL_LEFT,
         visible: true
     },
     {
         displayOrder: 2000,
         icon: SCROLL_RIGHT_ICON,
-        title: "Scroll Right",
+        title: "##_scrollRightLabel",
         actionName: TABSTRIP_SCROLL_RIGHT,
         visible: true
     },
     {
         displayOrder: 3000,
         icon: TAB_STRIP_CONTEXT_MENU_ICON,
-        title: "Show Tabs",
+        title: "##_showTabsLabel",
         actionName: TABSTRIP_SHOW_MENU,
         visible: true
     }

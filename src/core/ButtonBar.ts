@@ -6,6 +6,7 @@ import { IconButton } from "./IconButton";
 import { isPanelDefaultAction } from "./panel-default-buttons";
 
 import "./ButtonBar.css";
+import { DockManager } from "../docking-library";
 
 /**
  * Class managing a generic button bar - the list of row-aligned buttons
@@ -18,7 +19,7 @@ export class ButtonBar extends Component {
     @property({defaultValue: true})
     visible: boolean;
 
-    constructor() {
+    constructor(private dockManager: DockManager) {
         super();
         this.handleActionTriggered = this.handleActionTriggered.bind(this)
         this.initializeComponent();
@@ -85,8 +86,17 @@ export class ButtonBar extends Component {
     protected constructButtonFromConfig(config: IHeaderButton): IconButton {
         const iconButton = new IconButton(config.actionName, config.displayOrder);;
         iconButton.icon = config.icon;
-        iconButton.title = config.title;
         iconButton.visible = config.visible;
+        // Check if the title of the button should be queried from the central DockManager configuration
+        let buttonTitle = config.title;
+        if(buttonTitle.startsWith("##_")) {
+            buttonTitle = buttonTitle.slice("##_".length);
+            buttonTitle = this.dockManager.config.labels?.[buttonTitle];
+            if(typeof buttonTitle !== "string")
+                throw new Error(`ERROR: Cannot find label for the placeholder: ${config.title}`);
+        }
+        iconButton.title = buttonTitle;
+
 
         iconButton.on("onPressed", payload => this.triggerEvent("onPressed", payload));
         iconButton.on("onReleased", payload => this.triggerEvent("onReleased", payload));

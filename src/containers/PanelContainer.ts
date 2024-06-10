@@ -451,7 +451,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domTitleText = DOM.create("div");
 
         // Create the Header Button Bar
-        this.buttonBar = new PanelButtonBar();
+        this.buttonBar = new PanelButtonBar(this.dockManager);
         this.buttonBar.on("onAction", this.handleDefaultPanelAction.bind(this));
 
         this.domFrameHeader.appendChild(this.domTitle);
