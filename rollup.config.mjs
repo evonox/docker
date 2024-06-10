@@ -5,6 +5,17 @@ import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
 import imageInliner from 'postcss-image-inliner';
 import cssnano from "cssnano";
+import fs from "fs";
+import _ from "lodash-es";
+import dtsBundle from 'rollup-plugin-dts-bundle';
+
+let typescriptOptions = JSON.parse(fs.readFileSync("./tsconfig.json").toString());
+typescriptOptions = _.defaultsDeep({}, typescriptOptions, {
+	compilerOptions: {
+		declaration: true,
+		declarationDir: "./typings"
+	}
+});
 
 
 export default {
@@ -16,8 +27,6 @@ export default {
 		}
 	],
     plugins: [
-		typescript(), 
-		terser(), 
 		cssbundle({
             transform: code => postcss([autoprefixer])
 				.use(imageInliner({
@@ -26,6 +35,17 @@ export default {
 				  }))
 				.use(cssnano({preset: "default"}))
 				.process(code, {})
-		})
+		}),
+		typescript(typescriptOptions), 
+		terser(),
+		dtsBundle({
+			bundle: {
+				name: 'docker-ts',
+				main: './dist-esm/typings/src/docking-library.d.ts',
+				out: '../../docking-library.d.ts',
+				exclude: /\.css$/
+			},
+			deleteOnComplete: ['./dist-esm/typings']
+		})		
 	]    
 };

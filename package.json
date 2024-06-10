@@ -51,6 +51,7 @@
     "json-parse-even-better-errors": "^2.3.1",
     "json-schema-traverse": "^0.4.1",
     "loader-runner": "^4.3.0",
+    "lodash-es": "^4.17.21",
     "merge-stream": "^2.0.0",
     "micromatch": "^4.0.5",
     "mime-db": "^1.52.0",
@@ -72,6 +73,7 @@
     "react-dom": "^18.3.1",
     "rollup": "^4.18.0",
     "rollup-plugin-css-bundle": "^1.0.4",
+    "rollup-plugin-dts-bundle": "^1.0.0",
     "safe-buffer": "^5.2.1",
     "schema-utils": "^3.3.0",
     "semver": "^7.6.2",
@@ -102,7 +104,7 @@
   "scripts": {
     "start": "webpack serve --open --mode development",
     "build": "webpack --mode production",
-    "build:esm": "rollup -c ./rollup.config.mjs",
+    "build:esm": "rollup -c ./rollup.config.mjs && bash -c ./remove-css-imports.sh",
     "start:promo": "webpack serve --open --mode development --config ./webpack.promo.config.cjs",
     "build:promo": "webpack --mode production --config ./webpack.promo.config.cjs",
     "test": "jest"
