@@ -1,0 +1,19 @@
+
+/* custom-tree.css */
+
+.node__root > circle {
+    fill: #444;
+  }
+  
+  .node__branch > circle {
+    fill: darkcyan;
+  }
+  
+  .node__leaf > circle {
+    fill: darkslategray;
+    r: 10
+  }
+
+  .node__leaf .rd3t-label__attributes {
+    fill: orangered;
+  }
