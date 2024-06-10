@@ -968,8 +968,8 @@ export class DockManager {
     }
 
     notifyOnActivePanelChange(newActivePanel: PanelContainer, oldActivePanel: PanelContainer) {
-        oldActivePanel.triggerEvent("onDeactivated");
-        newActivePanel.triggerEvent("onActivated");
+        oldActivePanel?.triggerEvent("onDeactivated");
+        newActivePanel?.triggerEvent("onActivated");
 
         this.triggerEvent("onActivePanelChange", {
             dockManager: this, 
@@ -979,8 +979,8 @@ export class DockManager {
     }
     
     notifyOnActiveDocumentChange(newActivePanel: PanelContainer, oldActivePanel: PanelContainer) {
-        oldActivePanel.triggerEvent("onDeactivated");
-        newActivePanel.triggerEvent("onActivated");
+        oldActivePanel?.triggerEvent("onDeactivated");
+        newActivePanel?.triggerEvent("onActivated");
 
         this.triggerEvent("onActiveDocumentChange", {
             dockManager: this, 
