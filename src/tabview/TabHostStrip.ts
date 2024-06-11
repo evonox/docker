@@ -110,6 +110,8 @@ export class TabHostStrip extends Component {
             .css("visibility", "hidden")
             .appendChild(this.buttonBar.getDOM()).appendTo(this.domTabStrip);
 
+        this.bind(this.domTabHandleContainer.get(), "wheel", this.handleWheelScroll.bind(this));
+
         this.buttonBar.on("onPressed", ({actionName, event}) => {
             if(actionName === TABSTRIP_SCROLL_LEFT) {
                 this.handleBeginScrollingToStart();
@@ -190,6 +192,16 @@ export class TabHostStrip extends Component {
             this.domTabHandleContainer.get().scrollBy({left: 0, top: scrollOffset, behavior: "instant"})
         }
         this.handleRAFScroll = window.requestAnimationFrame(() => this.handleScrollingTick());
+    }
+
+    private handleWheelScroll(event: WheelEvent) {
+        const domNode = this.domTabHandleContainer.get();
+        const scrollOffset = Math.sign(event.deltaY) * Math.max((domNode.scrollWidth - domNode.clientWidth) / 10, 50);
+        if(this.orientation === TabOrientation.Top || this.orientation === TabOrientation.Bottom) {            
+            this.domTabHandleContainer.get().scrollBy({left: scrollOffset, top: 0, behavior: "instant"})
+        } else {
+            this.domTabHandleContainer.get().scrollBy({left: 0, top: scrollOffset, behavior: "instant"})
+        }
     }
 
     /**
