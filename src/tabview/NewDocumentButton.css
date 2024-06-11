@@ -1,0 +1,34 @@
+
+
+.NewDocumentButton {
+    width: 1.5rem;
+    height: 1.45rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--docker-ts-inactive-color);
+    fill: var(--docker-ts-inactive-on-color);
+
+    border-radius: 3px;
+
+    cursor: pointer;
+
+    display: none;
+}
+
+.NewDocumentButton--Visible {
+    display: flex;
+}
+
+.NewDocumentButton:hover {
+    background: var(--docker-ts-primary-color);
+    fill: var(--docker-ts-primary-on-color);
+}
+
+.NewDocumentButton svg {
+    width: 1em;
+    height: 1em;
+}

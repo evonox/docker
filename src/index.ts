@@ -281,6 +281,9 @@ async function performDocking() {
         dockManager.dockFill(dockLeftNode, containerBottom);
         const node = dockManager.dockDown(dockManager.getDocumentNode(), containerFloat, 0.4);
         dockManager.dockFill(node, containerFloat2);
+        dockManager.enableAddDocumentButton(true, () => {
+            dockManager.setActivePanel(containerLeft);
+        })
 
         // dockManager.floatDialog(containerFloat2, {x: 50, y: 50, w: 500, h: 200});
     }

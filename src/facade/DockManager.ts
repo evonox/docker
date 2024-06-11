@@ -28,6 +28,7 @@ import { RectHelper } from "../utils/rect-helper";
 import { CollapserMargin } from "../collapsers/CollapserMargin";
 import { ObjectHelper } from "../utils/object-helper";
 import { EventHelper } from "../utils/event-helper";
+import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
 
 
 /**
@@ -72,6 +73,9 @@ export class DockManager {
 
     // Collapser Margin Support
     private collapserMargins: CollapserMargin[] = [];
+
+    // Handler triggered when the new document button is clicked
+    private newDocumentEventHandler: () => void;
 
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
         this._config = ObjectHelper.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
@@ -234,6 +238,20 @@ export class DockManager {
 
     getLayoutEngine(): DockLayoutEngine {
         return this.layoutEngine;
+    }
+
+    enableAddDocumentButton(flag: boolean, handler?: () => void) {
+        if(handler !== undefined) {
+            this.newDocumentEventHandler = handler;
+        }
+        const documentManager = this.getDocumentNode().container;
+        if(documentManager instanceof DocumentManagerContainer) {
+            documentManager.enableAddDocumentButton(flag)
+        }
+    }
+
+    triggerAddDocumentHandler() {
+        this.newDocumentEventHandler?.();
     }
 
     /**

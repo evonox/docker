@@ -1,16 +1,16 @@
 import { ContextMenuConfig } from "../api/ContextMenuConfig";
-import { IPoint } from "../common/dimensions";
 import { TabOrientation } from "../common/enumerations";
 import { ContextMenu } from "../core/ContextMenu";
 import { TabStripButtonBar } from "../core/TabStripButtonBar";
 import { TABSTRIP_SCROLL_LEFT, TABSTRIP_SCROLL_RIGHT, TABSTRIP_SHOW_MENU } from "../core/panel-default-buttons";
 import { DockManager } from "../facade/DockManager";
 import { Component } from "../framework/Component";
+import { property } from "../framework/decorators";
 import { TabDualOperation } from "../operations/TabDualOperation";
-import { TabReorderOperation } from "../operations/TabReorderOperation";
 import { DOM } from "../utils/DOM";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { EventHelper } from "../utils/event-helper";
+import { NewDocumentButton } from "./NewDocumentButton";
 import { TabHandle } from "./TabHandle";
 import { TabHost } from "./TabHost";
 
@@ -23,6 +23,7 @@ import "./TabHostStrip.css";
  * Events:
  *      onTabActivated  - triggered when a tab is activated from the context menu
  *      onTabReordered  - trigger when user requested tab reorder
+ *      onNewDocument   - triggered when the NewDocument Button is clicked
  */
 export class TabHostStrip extends Component {
 
@@ -32,11 +33,15 @@ export class TabHostStrip extends Component {
 
     private tabHandles: TabHandle[] = [];
     private buttonBar: TabStripButtonBar;
+    private newDocumentButton: NewDocumentButton;
 
     private resizeObserver: ResizeObserver;
 
     private _tabReorderingEnabled = true;
     private isButtonBarVisible = false;
+
+    @property({defaultValue: false})
+    enableNewDocumentButton: boolean;
 
     constructor(
         private dockManager: DockManager,
@@ -85,6 +90,10 @@ export class TabHostStrip extends Component {
 
     protected onInitialized(): void {
         this.buttonBar = new TabStripButtonBar(this.dockManager);
+
+        this.newDocumentButton = new NewDocumentButton();
+        this.newDocumentButton.title = this.dockManager.config.labels.addNewDocumentLabel;
+        this.newDocumentButton.on("onClicked", () => this.triggerEvent("onNewDocument"));
     }
 
     protected onDisposed(): void {
@@ -92,6 +101,7 @@ export class TabHostStrip extends Component {
         this.resizeObserver.disconnect();
         this.resizeObserver = undefined;
 
+        this.newDocumentButton.dispose();
         this.buttonBar.dispose();
     }
 
@@ -104,8 +114,12 @@ export class TabHostStrip extends Component {
                     this.orientation === TabOrientation.Left || this.orientation === TabOrientation.Right
             }).cacheBounds(false);
 
+        const domTabHandleWrapper = DOM.create("div")
+            .addClass("DockerTS-TabStrip__TabHandleWrapper").appendTo(this.domTabStrip);
         this.domTabHandleContainer = DOM.create("div").addClass("DockerTS-TabStrip__TabHandleContainer")
-            .appendTo(this.domTabStrip);
+            .appendTo(domTabHandleWrapper);
+        domTabHandleWrapper.appendChild(this.newDocumentButton.getDOM());
+
         this.domButtonBarContainer = DOM.create("div").addClass("DockerTS-TabStrip__ButtonBar")
             .css("visibility", "hidden")
             .appendChild(this.buttonBar.getDOM()).appendTo(this.domTabStrip);
@@ -137,7 +151,9 @@ export class TabHostStrip extends Component {
         return this.domTabStrip.get();
     }
 
-    protected onUpdate(element: HTMLElement): void {}
+    protected onUpdate(element: HTMLElement): void {
+        this.newDocumentButton.visible = this.enableNewDocumentButton;
+    }
 
     private checkTabStripOverflowStatus() {
         if(this.isButtonBarVisible === false && this.isTabStripOverflown() === true) {

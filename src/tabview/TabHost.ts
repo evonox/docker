@@ -9,12 +9,19 @@ import { TabHostStrip } from "./TabHostStrip";
 
 import "./TabHost.css";
 import { ArrayUtils } from "../utils/ArrayUtils";
-import { state } from "../framework/decorators";
+import { property, state } from "../framework/decorators";
 import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
 import { TabHandle } from "./TabHandle";
 import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 
+/**
+ * TabHost Class
+ * 
+ * Events:
+ *      onNewDocument   - triggered when the NewDocument Button is clicked
+ * 
+ */
 export class TabHost extends Component {
 
     @state()
@@ -34,6 +41,9 @@ export class TabHost extends Component {
     private tabStrip: TabHostStrip;
     private domSeparator: DOM<HTMLElement>;
     private domContent: DOM<HTMLElement>;
+
+    @property({defaultValue: false})
+    enableNewDocumentButton: boolean;
 
     constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
         super();
@@ -223,6 +233,7 @@ export class TabHost extends Component {
         this.tabStrip.on("onTabReordered", ({from, to}) => {
             this.handleReorderTabs(from, to);
         });
+        this.tabStrip.on("onNewDocument", () => this.triggerEvent("onNewDocument"));
     }
 
     protected onDisposed(): void {
@@ -259,6 +270,7 @@ export class TabHost extends Component {
 
     protected onUpdate(element: HTMLElement): void {
         this.domSeparator.toggleClass("DockerTS-TabStrip__Separator--Focused", this.isFocused);
+        this.tabStrip.enableNewDocumentButton = this.enableNewDocumentButton;
     }
 
     private handleReorderTabs(from: number, to: number) {

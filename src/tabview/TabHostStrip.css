@@ -16,10 +16,16 @@
     grid-template-rows: 1fr auto;
 }
 
+.DockerTS-TabStrip__TabHandleWrapper {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
 .DockerTS-TabStrip__TabHandleContainer {
     position: relative;
-    
-    flex: 1;
+    box-sizing: border-box;
+
     display: flex;
     flex-wrap: nowrap;
     overflow: hidden;

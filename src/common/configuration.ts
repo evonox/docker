@@ -50,6 +50,7 @@ export interface IDockConfig {
         scrollLeftLabel?: string;
         scrollRightLabel?: string;
         showTabsLabel?: string;
+        addNewDocumentLabel?: string;
     },
     zIndexes?: {
         zIndexWheelItem?: number;
@@ -97,7 +98,8 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
         togglePinLabel: "Pin / Unpin Panel",
         scrollLeftLabel: "Scroll Left",
         scrollRightLabel: "Scroll Right",
-        showTabsLabel: "Show Tabs"
+        showTabsLabel: "Show Tabs",
+        addNewDocumentLabel: "Add New Document"
     },
     minimumDefaultWidth: 400,
     minimumDefaultHeight: 200,

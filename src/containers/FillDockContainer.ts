@@ -17,11 +17,11 @@ import { DOMUpdateInitiator } from "../utils/DOMUpdateInitiator";
 export class FillDockContainer implements IDockContainer {
 
     private domContainer: DOM<HTMLElement>;
-    private tabHost: TabHost;
+    protected tabHost: TabHost;
     private _loadedSize: ISize;
     private childContainers: IDockContainer[] = [];
 
-    constructor(private dockManager: DockManager, private tabStripDirection: TabOrientation) {
+    constructor(protected dockManager: DockManager, private tabStripDirection: TabOrientation) {
         this.domContainer = DOM.create("div").addClass("DockerTS-FillDockContainer").cacheBounds(false);
         this.tabHost = new TabHost(this.dockManager, this.tabStripDirection);
         this.domContainer.appendChild(this.tabHost.getDOM());
