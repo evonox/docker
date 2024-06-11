@@ -62,7 +62,6 @@ export interface EventPayloadMap {
     "onContainerResized": ContainerPayload,
     "onActivePanelChange": ActivePanelChanged,
     "onActiveDocumentChange": ActivePanelChanged,
-    /////////
     "onLayoutChanged": GenericPayload,
     "onPinned": ContainerPayload,
     "onUnpinned": ContainerPayload,
