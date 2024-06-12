@@ -6,6 +6,7 @@ import { TabHandle } from "../tabview/TabHandle";
 import { TabHostStrip } from "../tabview/TabHostStrip";
 import { DOM } from "../utils/DOM";
 import { AnimationHelper, IAnimation } from "../utils/animation-helper";
+import { MathHelper } from "../utils/math-helper";
 import { TabReorderIndexMap } from "./TabReorderIndexMap";
 
 /**
@@ -123,25 +124,29 @@ export class TabReorderOperation implements IEventEmitter {
         this.dragMaximumRight = this.domTabHandles[this.domTabHandles.length - 1].getBoundingClientRect().right + this.tabStripScrollLeft;
 
         const boundsTabStrip = domTabStrip.getBoundsRect();
-        domTabStrip.css("min-width", boundsTabStrip.w + "px");
+        domTabStrip.css("min-width", boundsTabStrip.w  + "px");
         domTabStrip.css("min-height", boundsTabStrip.h + "px");
-
-        this.domTabHandles.forEach(dom => {
-            const parentBounds = dom.getOffsetParent().getBoundingClientRect(); 
-            const bounds = dom.getBoundingClientRect();
-            dom.left(bounds.left - parentBounds.left + this.tabStripScrollLeft)
-                .top(bounds.top - parentBounds.top)
-                .zIndex(zIndex);
-        });
-        this.domTabHandles.forEach(dom => dom.css("position", "absolute"));
 
         // Style the parent element for the scrolling purposes
         // Note: This CSS styling is required for the tab re-order to work when there
         // is visible TabStrip Scrolling Control
         this.domTabHandleContainer = DOM.from(this.domTabHandles[0].get().parentElement);
-        const scrolWidth = this.domTabHandleContainer.get().scrollWidth;
-        this.domTabHandleContainer.width(scrolWidth).css("position", "relative")
+        const containerBoundingRect = this.domTabHandleContainer.getBoundingClientRect();
+        // We need to get SubPixel Precision Value of ScrollWidth to prevent TabStrip flickering
+        const tabContainerScrollWidth = this.domTabHandleContainer.get().scrollWidth + containerBoundingRect.width
+            - Math.round(containerBoundingRect.width);
+        this.domTabHandleContainer.width(tabContainerScrollWidth).css("position", "relative")
             .left(-this.tabStripScrollLeft);
+
+        this.domTabHandles.forEach(dom => {
+            const parentBounds = dom.getOffsetParent().getBoundingClientRect(); 
+            const bounds = dom.getBoundingClientRect();
+            dom.left(bounds.left - parentBounds.left)
+                .top(bounds.top - parentBounds.top)
+                .zIndex(zIndex);
+        });
+        this.domTabHandles.forEach(dom => dom.css("position", "absolute"));
+
 
         // Initialize indexes
         this.fromIndex = this.toIndex = this.tabStrip.queryAttachedHandles().indexOf(this.draggedHandle);

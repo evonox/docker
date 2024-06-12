@@ -1,5 +1,6 @@
 import { IRect } from "../common/dimensions";
 import { ArrayUtils } from "./ArrayUtils";
+import { ResizeObserverHelper } from "./resize-observer-helper";
 
 /**
  * Default Popup Window CSS style
@@ -58,16 +59,14 @@ export class BrowserPopupHelper {
 
         // TODO: BACKUP WEB-COMPONENT CSS STYLES & ADOPT THEM
 
-        // Adopt & Append the target element to the popup window document
+        // Remove & Append the target element to the popup window document
         targetElement.remove();
-        targetElement = popupWindow.document.adoptNode(targetElement)
         targetElement.setAttribute("style", "left: 0; top: 0; width: 100%; height: 100%");
         popupWindow.document.body.appendChild(targetElement);
 
-        // Adopt & Append Dependent Elements - e.g. Nested Containers of TabbedPanelContainer
+        // Remove & Append Dependent Elements - e.g. Nested Containers of TabbedPanelContainer
         dependentElements.forEach(element => {
             element.remove()
-            element = popupWindow.document.adoptNode(element);
             popupWindow.document.body.appendChild(element);
         });
 

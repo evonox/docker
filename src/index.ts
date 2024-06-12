@@ -9,7 +9,11 @@ import { PANEL_ACTION_CLOSE, PANEL_ACTION_MINIMIZE, PANEL_ACTION_SHOW_POPUP } fr
 
 DebugHelper.enableOptimizations(false);
 
-const dockManager = new DockManager(document.getElementById("main"), {enableLiveResize: false});
+const dockManager = new DockManager(document.getElementById("main"), {
+    enableCollapsers: false,
+    enablePopupWindows: false,
+    enableUndock: false
+});
 dockManager.initialize();
 
 dockManager.registerPanelType("panel1", "singleton", (dockManager) => {

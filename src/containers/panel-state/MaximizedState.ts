@@ -51,5 +51,6 @@ export class MaximizedState extends PanelStateBase {
     private adjustMaximizedElementRect() {
         const dockContainerBounds = this.dockManager.getRelativeFullWindowRect();
         this.panel.getContentFrameDOM().applyRect(dockContainerBounds);
+        this.notifyIfSizeChanged();
     }
 }

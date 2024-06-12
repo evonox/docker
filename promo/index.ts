@@ -43,6 +43,7 @@ dockManager.registerPanelType("babylonJS", "singleton", (dockManager) => {
                 domRootElement.classList.add("renderCanvas")
                 domCanvas.classList.add("canvasZone");
                 engineApi = await startBabylonDemo(domCanvas, createVillageScene)
+                domCanvas.removeAttribute("tabIndex");
                 setTimeout(() => {
                     api.enableProgressLoader(false);
                     resolve(domRootElement);
@@ -107,7 +108,7 @@ dockManager.registerPanelType("barChart", "singleton", BarChartFactoryFn);
 dockManager.registerPanelType("pieChart", "singleton", PieChartFactoryFn);
 dockManager.registerPanelType("doughnutChart", "singleton", DoughnutChartFactoryFn);
 dockManager.registerPanelType("stackedChart", "singleton", StackedChartFactoryFn);
-dockManager.registerPanelType("lineChart", "singleton", LineChartFactoryFn);
+dockManager.registerPanelType("lineChart", "transient", LineChartFactoryFn);
 
 
 async function performDocking() {
@@ -125,6 +126,7 @@ async function performDocking() {
         const doughnutChart = await dockManager.createPanelAsync("doughnutChart");
         const stackedChart = await dockManager.createPanelAsync("stackedChart");
         const lineChart = await dockManager.createPanelAsync("lineChart");
+        const lineChart2 = await dockManager.createPanelAsync("lineChart");
         chartView.addContainer(barChart);
         chartView.addContainer(pieChart);
         chartView.addContainer(doughnutChart);
@@ -164,6 +166,7 @@ async function performDocking() {
         const nodeCredits = dockManager.dockDown(documentNode, creditsPanel, 0.35);
         dockManager.dockFill(nodeCredits, chartView);
         dockManager.dockFill(nodeCredits, notificationPanel);
+        dockManager.dockFill(nodeCredits, lineChart2);
         dockManager.dockRight(documentNode, dockModelPanel, 0.45);
         dockManager.setActivePanel(chartView);
 

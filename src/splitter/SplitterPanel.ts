@@ -10,6 +10,7 @@ import { MathHelper } from "../utils/math-helper";
 import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
 import { DOMRegistry } from "../utils/DOMRegistry";
+import { IResizeObservedElement, ResizeObserverHelper } from "../utils/resize-observer-helper";
 
 /**
  * SplitterPanel Component takes care of resizing child containers either vertically or horizontally
@@ -23,7 +24,7 @@ export class SplitterPanel extends Component {
 
     private containerSizes: number[] = [];
 
-    private splitterPanelRO: ResizeObserver;
+    private splitterPanelRO: IResizeObservedElement;
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
         super();
@@ -85,14 +86,13 @@ export class SplitterPanel extends Component {
         this.computeInitialSize();
 
         if(this.splitterPanelRO === undefined) {
-            this.splitterPanelRO = new ResizeObserver(() => {
+            // Prevent recursive callback in case of content overflow
+            this.domSplitterPanel.css("overflow", "hidden"); 
+            this.splitterPanelRO = ResizeObserverHelper.observeElement(this.domSplitterPanel.get(), () => {
                 this.adjustContainerSizesToNewDimensions();
                 this.adjustSizesIfMinimumSizesOverflows();
                 this.applyChildContainerSizes();
-            });
-            // Prevent recursive callback in case of content overflow
-            this.domSplitterPanel.css("overflow", "hidden"); 
-            this.splitterPanelRO.observe(this.domSplitterPanel.get());
+            })
         }
     }
 
@@ -102,7 +102,7 @@ export class SplitterPanel extends Component {
     }
 
     private removeFromDOM() {
-        this.splitterPanelRO?.disconnect();
+        this.splitterPanelRO?.unobserve();
         this.splitterPanelRO = undefined;
 
         this.childContainers.forEach(container => {

@@ -10,6 +10,7 @@
 
     column-gap: 4px;
 
+    box-sizing: border-box;
     border: 1px solid gray;
 
     background: linear-gradient(to bottom, var(--docker-ts-inactive-color), var(--docker-ts-primary-inactive-color));
@@ -55,14 +56,13 @@
 .DockerTS-TabHandle--HasChanges {
     position: relative;
     font-style: italic;
-    padding-right: 4px;
-    margin-right: 8px;
+    padding-right: 12px;
 }
 
 .DockerTS-TabHandle--HasChanges::after {
     position: absolute;
     content: '*';
-    right: 0;
+    right: 8px;
     top: 0;
     transform: translate(100%, 0);
 }

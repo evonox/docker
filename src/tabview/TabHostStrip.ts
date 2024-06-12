@@ -10,6 +10,7 @@ import { TabDualOperation } from "../operations/TabDualOperation";
 import { DOM } from "../utils/DOM";
 import { DetectionMode, DragAndDrop } from "../utils/DragAndDrop";
 import { EventHelper } from "../utils/event-helper";
+import { IResizeObservedElement, ResizeObserverHelper } from "../utils/resize-observer-helper";
 import { NewDocumentButton } from "./NewDocumentButton";
 import { TabHandle } from "./TabHandle";
 import { TabHost } from "./TabHost";
@@ -35,7 +36,7 @@ export class TabHostStrip extends Component {
     private buttonBar: TabStripButtonBar;
     private newDocumentButton: NewDocumentButton;
 
-    private resizeObserver: ResizeObserver;
+    private resizeObserver: IResizeObservedElement;
 
     private _tabReorderingEnabled = true;
     private isButtonBarVisible = false;
@@ -97,8 +98,7 @@ export class TabHostStrip extends Component {
     }
 
     protected onDisposed(): void {
-        this.resizeObserver.unobserve(this.domTabStrip.get());
-        this.resizeObserver.disconnect();
+        this.resizeObserver.unobserve();
         this.resizeObserver = undefined;
 
         this.newDocumentButton.dispose();
@@ -144,9 +144,12 @@ export class TabHostStrip extends Component {
             }
         });
 
-        this.resizeObserver = new ResizeObserver(() => this.checkTabStripOverflowStatus());
-        this.domTabStrip.css("overflow", "hidden"); // Prevent recursive callback in case of content overflow
-        this.resizeObserver.observe(this.domTabStrip.get(), {box: "border-box"});
+        // Prevent recursive callback in case of content overflow
+        this.domTabStrip.css("overflow", "hidden"); 
+        this.resizeObserver = ResizeObserverHelper.observeElement(this.domTabStrip.get(), () => {
+            this.checkTabStripOverflowStatus();
+        })
+
 
         return this.domTabStrip.get();
     }

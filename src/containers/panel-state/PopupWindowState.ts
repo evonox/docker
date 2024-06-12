@@ -45,7 +45,11 @@ export class PopupWindowState extends PanelStateBase {
         // TODO: WHY THIS???
         setTimeout(() => {
             this.openWindowInPopup();
-            this.panel.updateState();
+            this.notifyIfSizeChanged();
+            setTimeout(() => {
+                this.panel.updateState();
+                this.notifyIfSizeChanged();
+            }, 1000);
             this.dockManager.notifyOnUndockToPopup(this.panel);
         });
     }
@@ -91,10 +95,20 @@ export class PopupWindowState extends PanelStateBase {
 
     private openWindowInPopup() {
         const targetElement = this.panel.getContentFrameDOM();
+        const targetContentElement = this.panel.getContentElement();
+        this.panel.removeContentElement();
+
         const nestedContainers = this.panel.getChildContainers();
         const dependentElements = nestedContainers.map(container => {            
             return (container as PanelContainer).getContentFrameDOM().get();
         });
+        const nestedContentElements = nestedContainers.map(child => {
+            const panelContainer = child as PanelContainer;
+            const contentElement = panelContainer.getContentElement();
+            panelContainer.removeContentElement();
+            return contentElement;
+        });
+
         this.adoptedPopupElements = [targetElement.get()].concat(dependentElements);
 
         // Compute the new window position and dimensions
@@ -104,10 +118,19 @@ export class PopupWindowState extends PanelStateBase {
             windowRect: windowRect,
             onPopupWindowClosed: () => this.panel.hidePopupWindow()
         });
+        
         this.popupWindow.onresize = () => {
             this.adjustPanelContentSize();
             this.panel.updateState();
         }
+
+        this.panel.setContentElement(targetContentElement);
+        for(let i = 0; i < nestedContentElements.length; i++) {
+            const panelContainer = nestedContainers[i] as PanelContainer;
+            panelContainer.setContentElement(nestedContentElements[i]);
+        }
+
+        this.notifyIfSizeChanged();
     }
 
     private adjustPanelContentSize() {        

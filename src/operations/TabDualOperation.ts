@@ -27,8 +27,12 @@ export class TabDualOperation implements IEventEmitter {
         private draggedHandle: TabHandle,
     ) {
         // Start with TabReorderOperation
+        let isUndockEnabled = this.draggedHandle.getUndockEnabled();
+        if(this.dockManager.config.enableUndock === false) {
+            isUndockEnabled = false;
+        }
         this.tabReorderOperation = new TabReorderOperation(
-            this.dockManager, this.tabStrip, this.draggedHandle, this.draggedHandle.getUndockEnabled()
+            this.dockManager, this.tabStrip, this.draggedHandle, isUndockEnabled
         );
         
         // Register some redirected events

@@ -29,6 +29,7 @@ import { CollapserMargin } from "../collapsers/CollapserMargin";
 import { ObjectHelper } from "../utils/object-helper";
 import { EventHelper } from "../utils/event-helper";
 import { DocumentManagerContainer } from "../containers/DocumentManagerContainer";
+import { ResizeObserverHelper } from "../utils/resize-observer-helper";
 
 
 /**
@@ -77,35 +78,32 @@ export class DockManager {
     // Handler triggered when the new document button is clicked
     private newDocumentEventHandler: () => void;
 
+    private mergedConfig: IDockConfig;
+
     constructor(private container: HTMLElement, private _config: IDockConfig = {}) {
-        this._config = ObjectHelper.defaultsDeep({}, DOCK_CONFIG_DEFAULTS, this._config);
+        this.mergedConfig = ObjectHelper.defaultsDeep(this._config, DOCK_CONFIG_DEFAULTS);
         DOM.from(this.container).css("position", "relative")
             .css("display", "grid")
             .css("overflow", "hidden")
             .cacheBounds(false);
 
-        if(this.config.enableCollapsers === false) {
-            this.dockContentContainer = DOM.from(this.container);            
-        } else {
-            this.dockContentContainer = DOM.create("div")
-                .css("position", "absolute").css("display", "grid")
-                .left(0).top(0).right(0).bottom(0)
-                .css("overflow", "visible")
-                .cacheBounds(false)
-                .addClass("DockerTS-DockContent")
-                .appendTo(this.container);
-            DOM.from(this.container).addClass("DockerTS-DockContainer");
+        this.dockContentContainer = DOM.create("div")
+            .css("position", "absolute").css("display", "grid")
+            .left(0).top(0).right(0).bottom(0)
+            .css("overflow", "visible")
+            .cacheBounds(false)
+            .addClass("DockerTS-DockContent")
+            .appendTo(this.container);
+        DOM.from(this.container).addClass("DockerTS-DockContainer");
 
-            this.collapserMargins.push(new CollapserMargin(this, DockKind.Left));
-            this.collapserMargins.push(new CollapserMargin(this, DockKind.Right));
-            this.collapserMargins.push(new CollapserMargin(this, DockKind.Down));
+        this.collapserMargins.push(new CollapserMargin(this, DockKind.Left));
+        this.collapserMargins.push(new CollapserMargin(this, DockKind.Right));
+        this.collapserMargins.push(new CollapserMargin(this, DockKind.Down));
 
-            this.collapserMargins.forEach(margin => this.container.appendChild(margin.getDOM()));
+        this.collapserMargins.forEach(margin => this.container.appendChild(margin.getDOM()));
 
-            const marginThickness = this.config.collapserMarginSize;
-            this.container.style.setProperty("--docker-ts-margin-thickness", `${marginThickness}px`);
-        }
-        
+        const marginThickness = this.config.collapserMarginSize;
+        this.container.style.setProperty("--docker-ts-margin-thickness", `${marginThickness}px`);       
 
         // Lets contrain the resize logic to double rate than FPS to prevent flickering
         this.handleContainerResized = EventHelper.throttle(this.handleContainerResized.bind(this),
@@ -134,12 +132,11 @@ export class DockManager {
         this.panelTypeRegistry = new DockPanelTypeRegistry();
 
         // Initialize ResizeObserver
-        this.resizeObserver = new ResizeObserver(() => {
-            this.handleContainerResized();
-        });
         // Prevent recursive callback in case of content overflow
         DOM.from(this.container).css("overflow", "hidden"); 
-        this.resizeObserver.observe(this.container, {box: "border-box"});
+        ResizeObserverHelper.observeElement(this.container, () => {
+            this.handleContainerResized();
+        })
 
         // Init other MISC attributes
         this.lastZIndex = this.config.zIndexes.zIndexCounter;
@@ -155,7 +152,7 @@ export class DockManager {
      */
 
     get config(): Readonly<IDockConfig> {
-        return this._config;
+        return this.mergedConfig;
     }
 
     getCollapserMargin(collapseKind: DockKind): CollapserMargin {

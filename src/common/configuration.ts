@@ -6,6 +6,8 @@
 export interface IDockConfig {
     enableLiveResize?: boolean;
     enableCollapsers?: boolean;
+    enablePopupWindows?: boolean;
+    enableUndock?: boolean;
     collapsers?: {
         collapserHideDelay?: number;
     },
@@ -72,6 +74,8 @@ export const DOCK_CONFIG_DEFAULTS: IDockConfig = {
     },
     enableLiveResize: true,
     enableCollapsers: true,
+    enableUndock: true,
+    enablePopupWindows: true,
     collapserMarginSize: 26,
     collapserHorizontalSlidingRatio: 0.3,
     collapserVerticalSlidingRatio: 0.4,

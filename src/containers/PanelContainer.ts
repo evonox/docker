@@ -63,6 +63,7 @@ export class PanelContainer extends Component implements IDockContainer {
     protected state: PanelStateMachine;
 
     private deniedActionsByUser: string[] = [];
+    private actionsAllowedByState: string[] = [];
 
     private previousContentZIndex: number;
     private _loadedSize: ISize;
@@ -347,6 +348,12 @@ export class PanelContainer extends Component implements IDockContainer {
         this.contentPanelMouseDown.bind("mousedown", this.handleMouseDownOnPanel.bind(this), {capture: true});
     }
 
+    public removeContentElement() {
+        this.contentPanelMouseDown?.unbind();
+        this.domContent.remove();
+        this.domContent = undefined;
+    }
+
     public getContentElement(): HTMLElement {
         return this.domContent;
     }
@@ -368,16 +375,26 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     allowAction(actionName: string): void {
-        this.buttonBar.allowAction(actionName);
         if(this.deniedActionsByUser.includes(actionName)) {
             ArrayUtils.removeItem(this.deniedActionsByUser, actionName);
+        }
+        const flag = this.isActionAllowed(actionName);
+        if(flag) {
+            this.buttonBar.allowAction(actionName);
+        } else {
+            this.buttonBar.denyAction(actionName);
         }
     }
 
     denyAction(actionName: string): void {        
-        this.buttonBar.denyAction(actionName);
         if(this.deniedActionsByUser.includes(actionName) === false) {
             this.deniedActionsByUser.push(actionName);
+        }
+        const flag = this.isActionAllowed(actionName);
+        if(flag) {
+            this.buttonBar.allowAction(actionName);
+        } else {
+            this.buttonBar.denyAction(actionName);
         }
     }
 
@@ -393,8 +410,33 @@ export class PanelContainer extends Component implements IDockContainer {
         }
     }
 
+    setActionAllowedByState(actionName: string, flag: boolean): void {
+        if(flag === true) {
+            if(this.actionsAllowedByState.includes(actionName) === false) {
+                this.actionsAllowedByState.push(actionName);
+            }
+        } else {
+            if(this.actionsAllowedByState.includes(actionName)) {
+                ArrayUtils.removeItem(this.actionsAllowedByState, actionName);
+            }
+        }
+    }
+
+    isActionAllowedByState(actionName: string) {
+        return this.actionsAllowedByState.includes(actionName);
+    }
+
     isActionAllowed(actionName: string): boolean {
-        return this.buttonBar.isActionAllowed(actionName) && this.isActionDeniedByUser(actionName) === false;
+        if(actionName === PANEL_ACTION_TOGGLE_PIN) {
+            if(this.dockManager.config.enableCollapsers === false) {
+                return false;
+            }
+        } else if(actionName === PANEL_ACTION_SHOW_POPUP) {
+            if(this.dockManager.config.enablePopupWindows === false) {
+                return false;
+            }
+        }
+        return this.isActionAllowedByState(actionName) && this.isActionDeniedByUser(actionName) === false;
     }
 
     async handleDefaultPanelAction(actionName: string) {
@@ -474,7 +516,7 @@ export class PanelContainer extends Component implements IDockContainer {
         this.domPanelPlaceholder = DOM.create("div").attr("tabIndex", "-1")
                 .addClass("DockerTS-PanelPlaceholder").cacheBounds(false);
 
-        this.bind(this.domContentFrame.get(), "mousedown", this.handleMouseDownOnPanel.bind(this));
+        this.bind(this.domContentFrame.get(), "pointerdown", this.handleMouseDownOnPanel.bind(this), {capture: true});
 
         this.state = new PanelStateMachine(this.dockManager, this, PanelContainerState.Docked);
 
@@ -609,7 +651,7 @@ export class PanelContainer extends Component implements IDockContainer {
         if(this.state.getCurrentState() === PanelContainerState.Docked) {
             let isUndockStarted = false;
             DragAndDrop.start(event, async (event) => {
-                if(isUndockStarted === false) {
+                if(isUndockStarted === false && this.dockManager.config.enableUndock === true) {
                     isUndockStarted = true;
                     const headerBounds = this.domFrameHeader.getBoundsRect();
                     const dragOffset: IPoint = {
@@ -629,6 +671,7 @@ export class PanelContainer extends Component implements IDockContainer {
     }
 
     private handleMouseDownOnPanel(event: MouseEvent) {
+        console.log("CAPTURED PANEL");
         this.triggerEvent("onFocused");
         this.activatePanel();
     }

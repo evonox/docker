@@ -125,8 +125,8 @@ export class TabbedPanelContainer extends PanelContainer {
     }
 
     setActiveChild(container: IDockContainer): void {
-        this.updateState();
         this.tabHost.focusActiveTab(container);
+        this.updateState();
     }    
 
     getMinWidth(): number {

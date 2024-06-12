@@ -4,6 +4,7 @@ import { DockManager } from "../../facade/DockManager";
 import { Dialog } from "../../floating/Dialog";
 import { EventHelper } from "../../utils/event-helper";
 import { RectHelper } from "../../utils/rect-helper";
+import { IResizeObservedElement, ResizeObserverHelper } from "../../utils/resize-observer-helper";
 import { PanelContainer } from "../PanelContainer";
 import { IGenericPanelState } from "./IPanelState";
 import { SharedStateConfig } from "./SharedStateConfig";
@@ -26,8 +27,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
     private _lastNotifiedSize: ISize = {w: -1, h: -1};
     private readonly RESIZE_FRAME_RATE = 60;
 
-    private resizeObserver: ResizeObserver;
-    private elementObservers: Map<Element, Function> = new Map<Element, Function>();
+    private observedElements: IResizeObservedElement[] = [];
 
     constructor(
         protected dockManager: DockManager, 
@@ -39,16 +39,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
             1000 / this.RESIZE_FRAME_RATE, {leading: true, trailing: true});
     }
 
-    async enterState(initialState: boolean): Promise<void> {
-        this.resizeObserver = new ResizeObserver((entries) => {
-            for(const entry of entries) {
-                if(this.elementObservers.has(entry.target)) {
-                    const handler = this.elementObservers.get(entry.target);
-                    handler();
-                }
-            }
-        });
-    }
+    async enterState(initialState: boolean): Promise<void> {}
 
     async leaveState(): Promise<void> {
         this.disposeResizeObserver();
@@ -59,13 +50,8 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     private disposeResizeObserver() {
-        if(this.resizeObserver !== undefined) {
-            for(const element of this.elementObservers.keys()) {
-                this.unobserveElement(element as HTMLElement);
-            }
-            this.resizeObserver.disconnect();
-            this.resizeObserver = undefined;
-        }
+        this.observedElements.forEach(element => element.unobserve());
+        this.observedElements = [];
     }
 
     // Transition State methods - by default returning "false" - means that given transition is not allowed
@@ -113,18 +99,9 @@ export abstract class PanelStateBase implements IGenericPanelState {
         return false;
     }
 
-
-    protected observeElement(element: HTMLElement, handler: Function) {
-        this.elementObservers.set(element, handler);
-        // NOTE: DEBUG ERROR - We need for some elements to have overflows ALLOWED!!!!
-        // Prevent recursive callbacks when the content overflows
-        // DOM.from(element).css("overflow", "hidden");
-        this.resizeObserver.observe(element);
-    }
-
-    protected unobserveElement(element: HTMLElement) {
-        this.resizeObserver.unobserve(element);
-        this.elementObservers.delete(element);
+    protected observeElement(element: HTMLElement, handler: () =>  void) {
+        const api = ResizeObserverHelper.observeElement(element, handler);
+        this.observedElements.push(api);
     }
 
     protected configureButtons(config: IHeaderButtonConfiguration): void {
@@ -138,10 +115,9 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     private toggleButtonVisibility(actionName: string, flag: boolean) {
-        if(this.panel.isActionDeniedByUser(actionName)) {
-            flag = false;
-        }
-        this.panel.showHeaderButton(actionName, flag);
+        this.panel.setActionAllowedByState(actionName, flag);
+        const finalFlag = this.panel.isActionAllowed(actionName);
+        this.panel.showHeaderButton(actionName, finalFlag);
     }
 
     updateState(): void {
@@ -154,7 +130,6 @@ export abstract class PanelStateBase implements IGenericPanelState {
         // We round down to whole pixels to prevent vain resize notifications
         rect = RectHelper.floor(rect); 
         if(this.hasSizeChanged(rect)) {
-            console.log("NOTIFYING RESIZE CHANGE");
             this._lastNotifiedSize = {w: rect.w, h: rect.h};
             // Invoke the throttled method for resizing
             this.invokeClientResizeEvent(rect);
