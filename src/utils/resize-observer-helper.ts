@@ -18,16 +18,12 @@ export class ResizeObserverHelper {
     private static resizeObserver = new ResizeObserver(entries => this.handleResizeObserverChanges(entries));
 
     private static  handleResizeObserverChanges(entries: ResizeObserverEntry[]) {
-        console.log("BEGIN RESIZE OBSERVER");
-        console.dir(entries);
-        entries.forEach(entry => console.dir(entry.target));
         for(const entry of entries) {
             if(this.observedElementsMap.has(entry.target)) {
                 const handler = this.observedElementsMap.get(entry.target);
                 handler?.();
             }
         }
-        console.log("END RESIZE OBSERVER");
     }
 
     static observeElement(element: HTMLElement, handler: () => void): IResizeObservedElement {

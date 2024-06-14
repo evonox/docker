@@ -73,6 +73,7 @@ export class DockedState extends PanelStateBase {
     }
 
     private adjustPanelContentSize() {
+        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
         let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
         const bounds = this.dockManager.getContentBoundingRect();
         rect.x -= bounds.x;
