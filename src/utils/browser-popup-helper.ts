@@ -17,6 +17,13 @@ const DEFAULT_POPUP_WINDOW_STYLE = `
         padding: 0;
         margin: 0;
         display: grid;
+        opacity: 0;
+    }
+
+    body.PopupWindowBody--Visible {
+        opacity: 1;
+        transition: opacity 500ms;
+        transition-delay: 500ms;
     }
 `;
 
@@ -75,6 +82,10 @@ export class BrowserPopupHelper {
         this.attachMainWindowUnloadHandler();
 
         return popupWindow;
+    }
+
+    static triggerShowAnimation(popupWindow: Window) {
+        popupWindow.document.body.classList.add("PopupWindowBody--Visible");
     }
 
     // Main window unload handler

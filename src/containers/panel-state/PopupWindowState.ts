@@ -46,10 +46,6 @@ export class PopupWindowState extends PanelStateBase {
         setTimeout(() => {
             this.openWindowInPopup();
             this.notifyIfSizeChanged();
-            setTimeout(() => {
-                this.panel.updateState();
-                this.notifyIfSizeChanged();
-            }, 1000);
             this.dockManager.notifyOnUndockToPopup(this.panel);
         });
     }
@@ -131,6 +127,7 @@ export class PopupWindowState extends PanelStateBase {
         }
 
         this.notifyIfSizeChanged();
+        BrowserPopupHelper.triggerShowAnimation(this.popupWindow);
     }
 
     private adjustPanelContentSize() {        
