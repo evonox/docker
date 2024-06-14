@@ -9,7 +9,7 @@ export interface IPanelStateAPI {
     dispose(): void;
 
     // State Transition Methods - return true if the state transition is allowed
-    dockPanel(): Promise<boolean>;
+    dockPanel(dockingFn?: () => void): Promise<boolean>;
     floatPanel(dialog: Dialog): Promise<boolean>;
 
     minimize(): Promise<boolean>;

@@ -3,7 +3,7 @@ import { DockManager } from "../../facade/DockManager";
 import { PanelContainer } from "../PanelContainer";
 import { SharedStateConfig } from "./SharedStateConfig";
 import { TransitionBase } from "./TransitionBase";
-import { MaximizeAnimationTransition, MinimizeAnimationTransition, NoActionTransition, RestoreAnimationTransition } from "./state-transitions";
+import { InvokeActionTransition, MaximizeAnimationTransition, MinimizeAnimationTransition, NoActionTransition, RestoreAnimationTransition } from "./state-transitions";
 
 /**
  * State Transition Constructor Function Type
@@ -63,7 +63,7 @@ const STATE_TRANSITIONS: TransitionDefinition[] = [
     },
     {
         fromState: PanelContainerState.Floating, toState: PanelContainerState.Docked,
-        transitionCtor: NoActionTransition
+        transitionCtor: InvokeActionTransition
     },
     {
         fromState: PanelContainerState.Docked, toState: PanelContainerState.PopupWindow,

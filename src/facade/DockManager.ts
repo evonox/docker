@@ -542,7 +542,7 @@ export class DockManager {
         const newNode = new DockNode(container);
         if(container.getContainerType() === ContainerType.Panel) {
             const panel = container as PanelContainer;
-            panel.prepareForDocking();
+            // panel.prepareForDocking();
             // TODO: FIND THE CORRECT PLACE FOR THIS OPERATION
             panel.getDOM().remove();
         }
@@ -596,51 +596,53 @@ export class DockManager {
     ) {
         const panel = dialog.getPanel();
         const newNode = new DockNode(panel);
-        await panel.prepareForDocking();
-        // TODO: RESET ELEMENT CONTENT CONTAINER Z-INDEX - MOVE SOMEWHERE
-        dialog.destroy();
 
-        // Get original ratios and splitter - for further computations
-        let ratios: number[] = null;
-        let oldSplitter: SplitterDockContainer;
-        if(referenceNode.parent && referenceNode.parent.container.getContainerType() !== ContainerType.FillLayout) {
-            oldSplitter = referenceNode.parent.container as SplitterDockContainer;
-            ratios = oldSplitter.getRatios();   
-        }
-
-        // TODO: ORIENTATION
-        const dockBounds = this.layoutEngine.getDockBounds(referenceNode, panel, OrientationKind.Row, dockedToPrevious);
-
-        layoutFn(referenceNode, newNode);
-
-        // Update correct ratios
-        if(ratio && newNode.parent 
-            && (
-                newNode.parent.container.getContainerType() === ContainerType.ColumnLayout ||
-                newNode.parent.container.getContainerType() === ContainerType.RowLayout
-            )
-        ) {
-            // TODO: ORIENTATION
-            const splitter = newNode.parent.container as SplitterDockContainer;
-            const size = this.layoutEngine.getVaryingDimension(splitter, OrientationKind.Row);
-            splitter.setContainerRatio(panel, dockBounds.w / size);
-            return;
-
-            if(ratios && splitter === oldSplitter) {
-                if(dockedToPrevious) {
-                    for(let i = 0; i < ratios.length; i++) {
-                        ratios[i] = ratios[i] + ratios[i] * ratio;
-                    }
-                    ratios.push(ratio);
-                } else {
-                    ratios[0] = ratios[0] - ratio;
-                    ratios.unshift(ratio);
-                }
-                splitter.setRatios(ratios);
-            } else {
-                splitter.setContainerRatio(panel, ratio);
+        panel.performDock(() => {
+            dialog.destroy();
+    
+            // Get original ratios and splitter - for further computations
+            let ratios: number[] = null;
+            let oldSplitter: SplitterDockContainer;
+            if(referenceNode.parent && referenceNode.parent.container.getContainerType() !== ContainerType.FillLayout) {
+                oldSplitter = referenceNode.parent.container as SplitterDockContainer;
+                ratios = oldSplitter.getRatios();   
             }
-        }
+    
+            // TODO: ORIENTATION
+            const dockBounds = this.layoutEngine.getDockBounds(referenceNode, panel, OrientationKind.Row, dockedToPrevious);
+    
+            layoutFn(referenceNode, newNode);
+    
+            // Update correct ratios
+            if(ratio && newNode.parent 
+                && (
+                    newNode.parent.container.getContainerType() === ContainerType.ColumnLayout ||
+                    newNode.parent.container.getContainerType() === ContainerType.RowLayout
+                )
+            ) {
+                // TODO: ORIENTATION
+                const splitter = newNode.parent.container as SplitterDockContainer;
+                const size = this.layoutEngine.getVaryingDimension(splitter, OrientationKind.Row);
+                splitter.setContainerRatio(panel, dockBounds.w / size);
+                return;
+    
+                if(ratios && splitter === oldSplitter) {
+                    if(dockedToPrevious) {
+                        for(let i = 0; i < ratios.length; i++) {
+                            ratios[i] = ratios[i] + ratios[i] * ratio;
+                        }
+                        ratios.push(ratio);
+                    } else {
+                        ratios[0] = ratios[0] - ratio;
+                        ratios.unshift(ratio);
+                    }
+                    splitter.setRatios(ratios);
+                } else {
+                    splitter.setContainerRatio(panel, ratio);
+                }
+            }
+        });
+
 
         // Refresh Layout
         this.rebuildLayout(this.context.model.rootNode);
@@ -683,26 +685,29 @@ export class DockManager {
 
     rebuildLayout(node: DockNode) {
         node.childNodes.forEach(childNode => this.rebuildLayout(childNode));
-        node.performLayout(false);
+        node.performLayout(true);
     }
 
     invalidate() {
-        // const startTime = DebugHelper.startMeasuring();
-        // // We force any pending updates before resizing the layout
-        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
-        // // Get the current container bounds and resize the dock layout accordingly
-        // const rect = RectHelper.fromDOMRect(this.getContainerElement().getBoundingClientRect());
-        // this.resize(rect);
-        // DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        const startTime = DebugHelper.startMeasuring();
+        // We force any pending updates before resizing the layout
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        // Update state performs all the necessary update calculations
+        this.updateState();
+        // Force again all updates
+        DOMUpdateInitiator.forceAllEnqueuedUpdates();
 
-        // DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
+        DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
     }
 
     private updateState() {
+        // We only need to udpate the root container, it will trigger down the update of all panels
         this.context.model.rootNode.container.updateState();
+        // Update all dialogs
         for(const dialog of this.context.model.dialogs) {
             dialog.getPanel().updateState();
         }
+        // Update all panels in collapsers
         for(const collapser of this.context.model.collapsers) {
             collapser.getPanel().updateState();
         }

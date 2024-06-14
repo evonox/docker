@@ -220,6 +220,7 @@ export class Dialog implements IEventEmitter {
 
     private handleResizeEvent(rect: IRect) {
         this.resize(rect);
+        this.panel.updateState();
     }
 
     private handleOnFocus() {

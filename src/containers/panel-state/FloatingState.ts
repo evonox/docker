@@ -54,6 +54,7 @@ export class FloatingState extends PanelStateBase {
         // Notify the event
         const previousState = this.config.get("previousState");
         if(previousState === PanelContainerState.Maximized || previousState === PanelContainerState.Minimized) {
+            this.panel.updateState();
             this.dockManager.notifyOnRestored(this.panel);
         }
     }
@@ -68,7 +69,10 @@ export class FloatingState extends PanelStateBase {
         await super.leaveState();
     }
 
-    async dockPanel(): Promise<boolean> {
+    async dockPanel(dockingFn?: () => void): Promise<boolean> {
+        if(typeof dockingFn ==="function") {
+            this.config.set("transitionAction", dockingFn);
+        }
         return true;    
     }
 
@@ -133,6 +137,7 @@ export class FloatingState extends PanelStateBase {
         this.panel.triggerEvent("onEnableResize", true);
 
         // Notify about the event
+        this.panel.updateState();
         this.dockManager.notifyOnExpanded(this.panel);
     }
 
@@ -169,6 +174,7 @@ export class FloatingState extends PanelStateBase {
         DOM.from(domDialogFrame).height(headerHeight);
 
         // Notify about the event
+        this.panel.updateState();
         this.dockManager.notifyOnCollapsed(this.panel);
     }
 

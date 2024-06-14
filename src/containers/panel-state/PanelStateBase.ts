@@ -55,7 +55,7 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     // Transition State methods - by default returning "false" - means that given transition is not allowed
-    async dockPanel(): Promise<boolean> {
+    async dockPanel(dockingFn?: () => void): Promise<boolean> {
         return false;
     }
 
@@ -100,8 +100,8 @@ export abstract class PanelStateBase implements IGenericPanelState {
     }
 
     protected observeElement(element: HTMLElement, handler: () =>  void) {
-        const api = ResizeObserverHelper.observeElement(element, handler);
-        this.observedElements.push(api);
+        // const api = ResizeObserverHelper.observeElement(element, handler);
+        // this.observedElements.push(api);
     }
 
     protected configureButtons(config: IHeaderButtonConfiguration): void {

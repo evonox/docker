@@ -49,8 +49,8 @@ export class PanelStateMachine implements IPanelStateAPI {
     /**
      * State Transition Methods
      */
-    async dockPanel(): Promise<boolean> {
-        const isAllowed = await this.currentState.dockPanel();
+    async dockPanel(dockingFn?: () => void): Promise<boolean> {
+        const isAllowed = await this.currentState.dockPanel(dockingFn);
         if(isAllowed) {
             delete this.dialog;
             await this.changeStateTo(PanelContainerState.Docked);

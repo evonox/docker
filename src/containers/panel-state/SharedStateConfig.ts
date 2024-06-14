@@ -13,4 +13,8 @@ export class SharedStateConfig {
     set(key: string, value: any) {
         this.data[key] = value;
     }
+    
+    delete(key: string) {
+        delete this.data[key];
+    }
 }

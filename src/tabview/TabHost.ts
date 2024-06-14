@@ -166,6 +166,8 @@ export class TabHost extends Component {
             }
         }
 
+        this.updateLayoutState();
+
         if(this.selectedTab === undefined || children.includes(this.selectedTab.getContainer()) === false) {
             this.selectedTab = undefined;
             // Note: if selected tab is removed, we select the preceeding one 
@@ -174,6 +176,7 @@ export class TabHost extends Component {
             this.selectedTab = this.tabPages[selectedTabIndex];
             this.selectedTab.setSelectionState(SelectionState.Selected);
         }
+
     }
 
     resize(rect: IRect) {

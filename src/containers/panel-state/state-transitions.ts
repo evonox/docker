@@ -122,6 +122,23 @@ export class MinimizeAnimationTransition extends TransitionBase {
 }
 
 /**
+ * When we need to trigger a special transition action
+ */
+export class InvokeActionTransition extends TransitionBase {
+
+    async trigger(): Promise<void> {
+        // get and check the transition action to invoke
+        const transitionAction = this.config.get("transitionAction");
+        if(typeof transitionAction !== "function")
+            throw new Error("ERROR: No transition action specified.");
+        // Trigger the action - mostly lambda function
+        await transitionAction();
+        // Note: clean up after processing
+        this.config.delete("transitionAction");
+    }   
+}
+
+/**
  * When we do not need to do anything in the transition
  */
 export class NoActionTransition extends TransitionBase {

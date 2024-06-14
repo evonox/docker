@@ -1,5 +1,4 @@
 import { IRect } from "../../common/dimensions";
-import { PanelContainerState } from "../../common/enumerations";
 import { Dialog } from "../../floating/Dialog";
 import { DOMUpdateInitiator } from "../../utils/DOMUpdateInitiator";
 import { RectHelper } from "../../utils/rect-helper";
@@ -16,15 +15,12 @@ export class DockedState extends PanelStateBase {
             minimize: false, maximize: true, restore: false, expand: false, collapse: false, popup: true, pin: true
         });
 
-        const shouldBeHeaderVisible = this.dockManager.isInsideDocumentManager(this.panel) === false;
-        this.panel.setHeaderVisibility(shouldBeHeaderVisible);
+        const shouldBePanelHeaderVisible = this.dockManager.isInsideDocumentManager(this.panel) === false;
+        this.panel.setHeaderVisibility(shouldBePanelHeaderVisible);
 
         const domContentFrame = this.panel.getContentFrameDOM();
         domContentFrame.zIndex(1);
         this.panel.updateState();
-
-        const domPlaceholderDOM = this.panel.getPlaceholderDOM().get();
-        this.observeElement(domPlaceholderDOM, () => this.adjustPanelContentSize());
     }
 
     public async leaveState(): Promise<void> {
@@ -54,8 +50,8 @@ export class DockedState extends PanelStateBase {
     }
 
     async maximize(): Promise<boolean> {
-        this.config.set("restoreState", PanelContainerState.Docked);
-        this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
+        // this.config.set("restoreState", PanelContainerState.Docked);
+        // this.config.set("wasHeaderVisible", this.panel.isHeaderVisible());
         const rect = this.panel.getContentFrameDOM().getComputedRect();
         this.config.set("originalRect", rect);
 
@@ -63,7 +59,7 @@ export class DockedState extends PanelStateBase {
     }
 
     async showPopup(): Promise<boolean> {
-        this.config.set("restoreState", PanelContainerState.Docked);
+        // this.config.set("restoreState", PanelContainerState.Docked);
         return true;
     }
 
@@ -81,13 +77,7 @@ export class DockedState extends PanelStateBase {
         const bounds = this.dockManager.getContentBoundingRect();
         rect.x -= bounds.x;
         rect.y -= bounds.y;
-
-        // Note: In TabbedContainer this may trigger another ResizeObserver, we need to delegate it
-        // to requestAnimationFrame
-        // Note: Solution - ResizeObserver only on EMPTY ELEMENTS
-        requestAnimationFrame(() => {
-            this.panel.getContentFrameDOM().applyRect(rect);
-            this.notifyIfSizeChanged();
-        })
+        this.panel.getContentFrameDOM().applyRect(rect);
+        this.notifyIfSizeChanged();
     }
 }

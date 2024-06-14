@@ -581,19 +581,27 @@ export class PanelContainer extends Component implements IDockContainer {
         return dialog;
     }
 
+    performDock(dockingFn: () => void) {
+        this.state.dockPanel(dockingFn);
+    }
+
+
     performUndock() {
         this.dockManager.requestUndock(this);
     }
 
-    async prepareForDocking() {
-        // if(this.domDialogFrame) {
-        //     this.panelPlaceholderRO.unobserve(this.domDialogFrame);
-        // }
-        this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
-        await this.state.dockPanel();
-        // this.containerState = PanelContainerState.Docked;
-        this.updateState();
-    }
+    // async prepareForDocking() {
+    //     // if(this.domDialogFrame) {
+    //     //     this.panelPlaceholderRO.unobserve(this.domDialogFrame);
+    //     // }
+    //     // this.dockManager.getContainerElement().appendChild(this.domContentFrame.get());
+    //     // this.containerState = PanelContainerState.Docked;
+    //     //this.updateState();
+    // }
+
+    // async onAfterDock() {
+    //     await this.state.dockPanel();
+    // }
 
     /**
      * Closing Facilities

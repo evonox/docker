@@ -115,6 +115,7 @@ export class TabbedPanelContainer extends PanelContainer {
         }
     }
 
+    // TODO: CHECK NO REPETITVE UPDATE STATE INVOCATIONS
     updateState(): void {
         super.updateState();
         this.tabHost.updateContainerState();

@@ -1,6 +1,5 @@
 import { IRect } from "../common/dimensions";
 import { ArrayUtils } from "./ArrayUtils";
-import { ResizeObserverHelper } from "./resize-observer-helper";
 
 /**
  * Default Popup Window CSS style

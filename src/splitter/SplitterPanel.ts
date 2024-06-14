@@ -88,11 +88,11 @@ export class SplitterPanel extends Component {
         if(this.splitterPanelRO === undefined) {
             // Prevent recursive callback in case of content overflow
             this.domSplitterPanel.css("overflow", "hidden"); 
-            this.splitterPanelRO = ResizeObserverHelper.observeElement(this.domSplitterPanel.get(), () => {
-                this.adjustContainerSizesToNewDimensions();
-                this.adjustSizesIfMinimumSizesOverflows();
-                this.applyChildContainerSizes();
-            })
+            // this.splitterPanelRO = ResizeObserverHelper.observeElement(this.domSplitterPanel.get(), () => {
+            //     this.adjustContainerSizesToNewDimensions();
+            //     this.adjustSizesIfMinimumSizesOverflows();
+            //     this.applyChildContainerSizes();
+            // })
         }
     }
 
@@ -152,7 +152,8 @@ export class SplitterPanel extends Component {
         this.adjustSizesIfMinimumSizesOverflows();
         this.applyChildContainerSizes();   
 
-        this.invalidate();
+        this.updateState();
+        //this.invalidate();
     }
 
     updateState() {
@@ -203,6 +204,7 @@ export class SplitterPanel extends Component {
 
         this.adjustSizesIfMinimumSizesOverflows();
         this.applyChildContainerSizes();
+        this.updateState();
         // this.triggerChildContainerResize();
     }
 
@@ -235,6 +237,7 @@ export class SplitterPanel extends Component {
 
         if(payload.performResize) {
             this.applyChildContainerSizes();
+            this.updateState();
         }
     }
 
