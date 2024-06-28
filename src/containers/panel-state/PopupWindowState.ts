@@ -85,6 +85,10 @@ export class PopupWindowState extends PanelStateBase {
         super.updateState();
     }
 
+    public updateLayout(rect?: IRect): void {
+        // TODO: TO BE DONE
+    }
+
     private undockPanel() {
         this.dockManager.requestUndock(this.panel);
     }

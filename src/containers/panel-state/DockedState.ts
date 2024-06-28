@@ -18,9 +18,12 @@ export class DockedState extends PanelStateBase {
         const shouldBePanelHeaderVisible = this.dockManager.isInsideDocumentManager(this.panel) === false;
         this.panel.setHeaderVisibility(shouldBePanelHeaderVisible);
 
-        const domContentFrame = this.panel.getContentFrameDOM();
+        const domContentFrame = this.panel.getContentFrameDOM();        
         domContentFrame.zIndex(1);
         this.panel.updateState();
+        
+        const domPlaceholder = this.panel.getPlaceholderDOM();
+        this.panel.updateLayout(domPlaceholder.getBoundsRect());
     }
 
     public async leaveState(): Promise<void> {
@@ -72,13 +75,19 @@ export class DockedState extends PanelStateBase {
         super.updateState();
     }
 
-    private adjustPanelContentSize() {
-        DOMUpdateInitiator.forceEnqueuedDOMUpdates();
-        let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
-        const bounds = this.dockManager.getContentBoundingRect();
-        rect.x -= bounds.x;
-        rect.y -= bounds.y;
+    public updateLayout(rect?: IRect): void {
+        if(rect === undefined)
+            throw new Error("ERROR: In docked state 'rect' must be provided.");
         this.panel.getContentFrameDOM().applyRect(rect);
         this.notifyIfSizeChanged();
+    }
+
+    private adjustPanelContentSize() {
+        // let rect = this.panel.getPlaceholderDOM().getBoundsRect(); 
+        // const bounds = this.dockManager.getContentBoundingRect();
+        // rect.x -= bounds.x;
+        // rect.y -= bounds.y;
+        // this.panel.getContentFrameDOM().applyRect(rect);
+        // this.notifyIfSizeChanged();
     }
 }

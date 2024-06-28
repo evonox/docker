@@ -186,6 +186,12 @@ export class FloatingState extends PanelStateBase {
         super.updateState();
     }
 
+    public updateLayout(rect?: IRect): void {
+        if(rect === undefined)
+            throw new Error("ERROR: In floating state 'rect' must be provided.");
+        this.panel.getContentFrameDOM().applyRect(rect);
+    }
+
     private adjustPanelContentState() {               
         const rect = DOM.from(this.dialog.getDialogFrameDOM()).getBoundsRect();
         const bounds = this.dockManager.getContentBoundingRect();

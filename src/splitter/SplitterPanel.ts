@@ -11,6 +11,7 @@ import { IRect } from "../common/dimensions";
 import { RectHelper } from "../utils/rect-helper";
 import { DOMRegistry } from "../utils/DOMRegistry";
 import { IResizeObservedElement, ResizeObserverHelper } from "../utils/resize-observer-helper";
+import { DebugHelper } from "../utils/DebugHelper";
 
 /**
  * SplitterPanel Component takes care of resizing child containers either vertically or horizontally
@@ -52,6 +53,7 @@ export class SplitterPanel extends Component {
             ).appendTo(this.domSplitterPanelWrapper).cacheBounds(false);
 
         this.constructSplitterDOMInternals();
+        this.triggerChildContainerResize();
 
         return this.domSplitterPanelWrapper.get();
     }
@@ -149,11 +151,11 @@ export class SplitterPanel extends Component {
         if(previousSizes !== undefined) {
             this.containerSizes = previousSizes;
         }
+        
         this.adjustSizesIfMinimumSizesOverflows();
-        this.applyChildContainerSizes();   
-
+        this.applyChildContainerSizes();
         this.updateState();
-        //this.invalidate();
+        this.triggerChildContainerResize();
     }
 
     updateState() {
@@ -205,16 +207,26 @@ export class SplitterPanel extends Component {
         this.adjustSizesIfMinimumSizesOverflows();
         this.applyChildContainerSizes();
         this.updateState();
-        // this.triggerChildContainerResize();
+        this.triggerChildContainerResize();
     }
 
     resize(rect: IRect) {
-        return;
         if(this.childContainers.length <= 1)
             return;
-        this.domSplitterPanel.applySize(rect);
 
+        // const domSpliterDOM = DOM.from(this.getDOM());
+        // if(RectHelper.isSizeOnly(rect)) {
+        //     rect.x = domSpliterDOM.getLeft();
+        //     rect.y = domSpliterDOM.getTop();
+        // }
+
+        console.dir("--- RESIZE ---")
+        console.dir(rect);
+
+        //this.recomputeContainerSizes(rect);
+        //this.domSplitterPanel.applySize(rect);
         this.recomputeContainerSizes(rect);
+
         this.applyChildContainerSizes();
         this.triggerChildContainerResize();
     }
@@ -237,7 +249,7 @@ export class SplitterPanel extends Component {
 
         if(payload.performResize) {
             this.applyChildContainerSizes();
-            this.updateState();
+            this.triggerChildContainerResize();
         }
     }
 
@@ -274,6 +286,10 @@ export class SplitterPanel extends Component {
         let barSize = this.splitterBars[0].getBarSize();            
         let sizes = [...this.containerSizes];
 
+        console.log("SIZES");
+        console.dir(sizes);
+        DebugHelper.printStackTrace();
+
         const totalChildPanelSize = MathHelper.sum(sizes);
         const barSizeRemainder = this.computeSplitterBarSizeRemainder();
 
@@ -304,6 +320,10 @@ export class SplitterPanel extends Component {
         // Note: we take the non-varying dimension from the splitter panel than container itself
         // Reason: rounding errors
         const splitterBounds = this.domSplitterPanel.getBoundsRect();
+        console.log("--- BOUNDS ---");
+        console.dir(splitterBounds);
+        console.dir(this.containerSizes);
+
         const barSize = this.splitterBars[0].getBarSize();
         let varyingDim = 0;
         for(let i = 0; i < this.childContainers.length; i++) {
@@ -316,9 +336,9 @@ export class SplitterPanel extends Component {
                 childRect = RectHelper.from(
                     MathHelper.roundToPX(varyingDim), containerBounds.y, MathHelper.roundToPX(size), splitterBounds.h);
             } else if(this.orientation === OrientationKind.Column) {
-                childRect = RectHelper.from(containerBounds.x, varyingDim, splitterBounds.w, size);
+                childRect = RectHelper.from(containerBounds.x, MathHelper.roundToPX(varyingDim), splitterBounds.w, MathHelper.roundToPX(size));
             }
-            childContainer.resize(childRect);
+            childContainer.updateLayout(childRect);
 
             varyingDim += size + barSize;
         }

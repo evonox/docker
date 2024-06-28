@@ -693,9 +693,8 @@ export class DockManager {
         // We force any pending updates before resizing the layout
         DOMUpdateInitiator.forceAllEnqueuedUpdates();
         // Update state performs all the necessary update calculations
-        this.updateState();
-        // Force again all updates
-        DOMUpdateInitiator.forceAllEnqueuedUpdates();
+        const containerRect = this.getContentBoundingRect();
+        this.resize(containerRect);
 
         DebugHelper.stopMeasuring(startTime, "DockMananager::invalidate()");
     }
@@ -718,9 +717,13 @@ export class DockManager {
     }
     
     private resize(rect: IRect) {
-        // this.context.model.rootNode.container.resize(rect);
-
-        // TODO: POSITION DIALOGS TO THE CONTAINER VIEWPORT - WHEN THE BROWSER WINDOW GETS SMALLER
+        this.context.model.rootNode.container.updateLayout(rect);
+        for(const dialog of this.context.model.dialogs) {
+            // TODO: INVALIDATE DIALOG - MOVE TO VIEWPORT
+        }
+        for(const collapser of this.context.model.collapsers) {
+            // TODO: INVALIDATE COLLAPSER
+        }
     }
 
     // TODO: WILL BE USED IN THE PERSPECTIVE SWITCH, KEEP MODELS CACHED

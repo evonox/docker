@@ -153,7 +153,9 @@ export class Dialog implements IEventEmitter {
         const bounds = this.dockManager.getContentBoundingRect();
         this.position = {x: x - bounds.x, y: y - bounds.y};
         this.domDialog.left(this.position.x).top(this.position.y); 
-        this.panel.updateState();
+        this.panel.updateLayout({
+            x: this.position.x, y: this.position.y, w: this.domDialog.getWidth(), h: this.domDialog.getHeight()
+        });
 
         this.dockManager.notifyOnChangeDialogPosition(this, x, y);
     }
@@ -161,6 +163,7 @@ export class Dialog implements IEventEmitter {
     resize(rect: IRect) {
         rect = this.dockManager.adjustToFullWindowRelative(rect);
         this.domDialog.left(rect.x).top(rect.y).width(rect.w).height(rect.h);
+        this.panel.updateLayout(rect);
         this.dockManager.notifyOnChangeDialogPosition(this, rect.x, rect.y);
     }
 
@@ -220,7 +223,6 @@ export class Dialog implements IEventEmitter {
 
     private handleResizeEvent(rect: IRect) {
         this.resize(rect);
-        this.panel.updateState();
     }
 
     private handleOnFocus() {

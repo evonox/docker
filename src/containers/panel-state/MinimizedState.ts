@@ -58,9 +58,12 @@ export class MinimizedState extends PanelStateBase {
 
     public updateState(): void {
         super.updateState();
+    }
+
+    public updateLayout(rect?: IRect): void {
         if(this.isCapturedInMinimizingSlot) {
             this.updateMinimizedSlotPosition();
-        }
+        }       
     }
  
     private updateMinimizedSlotPosition() {

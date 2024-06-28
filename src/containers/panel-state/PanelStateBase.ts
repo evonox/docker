@@ -120,6 +120,8 @@ export abstract class PanelStateBase implements IGenericPanelState {
         this.panel.showHeaderButton(actionName, finalFlag);
     }
 
+    public abstract updateLayout(rect?: IRect): void;
+
     updateState(): void {
         this.notifyIfSizeChanged();
         this.updateFrameHeaderSelectionState();

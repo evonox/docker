@@ -1,4 +1,5 @@
 import { Collapser } from "../../collapsers/Collapser";
+import { IRect } from "../../common/dimensions";
 import { ComponentEventSubscription } from "../../framework/component-events";
 import { AutoDockHelper, IAutoDock } from "../../utils/auto-dock-helper";
 import { PanelStateBase } from "./PanelStateBase";
@@ -60,13 +61,22 @@ export class InCollapserState extends PanelStateBase {
         // Note: Not initialized yet
         if(this.collapser === undefined)
             return;
-        const domPanelPlacehoder = this.collapser.getPanelPlaceholderDOM();
+        // const domPanelPlacehoder = this.collapser.getPanelPlaceholderDOM();
         const domFrameContainer = this.panel.getContentFrameDOM();
-        let rect = domPanelPlacehoder.getBoundsRect();
-        rect = this.dockManager.adjustToFullWindowRelative(rect);
-        domFrameContainer.applyRect(rect).zIndex(3);
+        // let rect = domPanelPlacehoder.getBoundsRect();
+        // rect = this.dockManager.adjustToFullWindowRelative(rect);
+        //domFrameContainer.applyRect(rect).zIndex(3);
+        domFrameContainer.zIndex(3);
         super.updateState();
     }
+
+    public updateLayout(rect?: IRect): void {
+        if(this.collapser === undefined)
+            return;
+        const domFrameContainer = this.panel.getContentFrameDOM();
+        domFrameContainer.applyRect(rect);
+    }
+
 
     private handlePanelShown() {
         this.panel.setVisible(true);

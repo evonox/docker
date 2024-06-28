@@ -104,6 +104,10 @@ export class ResizableContainer implements IDockContainer {
         this.adjustResizeHandleZIndexes();
     }
 
+    updateLayout(rect?: IRect): void {
+        this.delegate.updateLayout(rect);
+    }
+
     /**
      * Construct & Destroy Resizing Handles Logic 
      */

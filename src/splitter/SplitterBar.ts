@@ -13,7 +13,7 @@ export interface ResizedPayload {
     next: IDockContainer;
     prevSize: number;
     nextSize: number;
-    performResize: boolean;
+    performResize?: boolean;
 }
 
 /**
@@ -45,6 +45,8 @@ export class SplitterBar extends Component {
     protected onInitialized(): void {}
 
     protected onDisposed(): void {}
+
+    //////
 
     protected onInitialRender(): HTMLElement {
         this.domBar = DOM.create("div")

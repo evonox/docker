@@ -44,6 +44,10 @@ export class DraggableContainer implements IDockContainer {
         this.delegate.updateState();
     }
 
+    updateLayout(rect?: IRect): void {
+        this.delegate.updateLayout(rect);
+    }
+
     setHeaderVisibility(visible: boolean): void {
         this.delegate.setHeaderVisibility(visible);
     }

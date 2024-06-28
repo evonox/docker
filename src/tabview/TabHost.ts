@@ -180,7 +180,6 @@ export class TabHost extends Component {
     }
 
     resize(rect: IRect) {
-        return;
         const domTabHost = DOM.from(this.getDOM());
         if(RectHelper.isSizeOnly(rect)) {
             rect.x = domTabHost.getLeft();
@@ -188,7 +187,7 @@ export class TabHost extends Component {
         }
         domTabHost.applyRect(rect);
         const tabContentRect =  this.computeTabContentRect(rect);
-        this.tabPages.forEach(page => page.getContainer().resize(tabContentRect));
+        this.tabPages.forEach(page => page.getContainer().updateLayout(tabContentRect));
     }
 
     invalidate() {

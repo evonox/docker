@@ -319,6 +319,10 @@ export class PanelContainer extends Component implements IDockContainer {
         this.state.updateState();
     }
 
+    updateLayout(rect?: IRect): void {
+        this.state.updateLayout(rect);
+    }
+
     onDraggingStarted() {
         this.getContentFrameDOM().addClass("DockerTS-ContentFrame--Dragging");
     }

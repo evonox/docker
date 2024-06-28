@@ -24,8 +24,9 @@ export interface IPanelStateAPI {
     pinPanel(): Promise<boolean>;
     unpinPanel(): Promise<boolean>;
 
-    // Central update method
+    // Central update methods
     updateState(): void;
+    updateLayout(rect?: IRect): void;
 }
 
 /**

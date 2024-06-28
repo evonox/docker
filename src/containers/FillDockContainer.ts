@@ -34,6 +34,10 @@ export class FillDockContainer implements IDockContainer {
         this.tabHost.updateLayoutState();
     }
 
+    updateLayout(rect?: IRect): void {
+        this.tabHost.resize(rect);
+    }
+
     setHeaderVisibility(visible: boolean): void {}
 
     isHidden(): boolean {

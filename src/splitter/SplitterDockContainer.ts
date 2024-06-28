@@ -1,23 +1,25 @@
 import { ComponentEventHandler, ComponentEventSubscription } from "../framework/component-events";
 import { IDockContainer } from "../common/declarations";
-import { SplitterPanel } from "./SplitterPanel";
 import { IState } from "../common/serialization";
 import { ContainerType, OrientationKind } from "../common/enumerations";
 import { IContextMenuAPI } from "../common/panel-api";
 import { IRect, ISize } from "../common/dimensions";
+import { SplitterPanelBase } from "./SplitterPanelBase";
 
 /**
  * This class is a pure adapter for the SplitterPanel to apply it easily to the docking facilities
  */
 export abstract class SplitterDockContainer implements IDockContainer {
 
-    private splitterPanel: SplitterPanel;
+    private splitterPanel: SplitterPanelBase;
 
     private loadedSize: ISize;
 
     constructor(private childContainers: IDockContainer[], private orientation: OrientationKind) {
-        this.splitterPanel = new SplitterPanel(this.childContainers, this.orientation);
+        this.splitterPanel = this.createSplitterPanel(this.childContainers);
     }
+
+    protected abstract createSplitterPanel(containers: IDockContainer[]): SplitterPanelBase;
 
     handleContextMenuAction(actionName: string): void {}
 
@@ -78,6 +80,10 @@ export abstract class SplitterDockContainer implements IDockContainer {
     }
 
     resize(rect: IRect): void {
+        this.splitterPanel.resize(rect);
+    }
+
+    updateLayout(rect?: IRect): void {
         this.splitterPanel.resize(rect);
     }
 

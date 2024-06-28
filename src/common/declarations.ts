@@ -43,6 +43,7 @@ export interface IDockContainer extends IEventEmitter {
     isHidden(): boolean;
     setHeaderVisibility(visible: boolean): void;
     updateState(): void;
+    updateLayout(rect?: IRect): void;
 
     // Cleanup
     dispose(): void;
