@@ -105,7 +105,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --open --mode development",
-    "docs": "typedoc ./src/docking-library.ts --out ./api-docs/",
+    "docs": "typedoc ./src/docking-library.ts --out ./docs-api/",
     "build": "webpack --mode production",
     "build:esm": "rollup -c ./rollup.config.mjs && bash -c ./remove-css-imports.sh",
     "start:promo": "webpack serve --open --mode development --config ./webpack.promo.config.cjs",
