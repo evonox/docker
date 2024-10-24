@@ -106,10 +106,11 @@
   "scripts": {
     "start": "webpack serve --open --mode development",
     "docs": "typedoc",
-    "build": "webpack --mode production",
+    "build:lib": "webpack --mode production",
     "build:esm": "rollup -c ./rollup.config.mjs && bash -c ./remove-css-imports.sh",
     "start:promo": "webpack serve --open --mode development --config ./webpack.promo.config.cjs",
     "build:promo": "webpack --mode production --config ./webpack.promo.config.cjs",
+    "build": "webpack --mode production --config ./webpack.promo.config.cjs",
     "test": "jest"
   },
   "keywords": [],
