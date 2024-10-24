@@ -51,7 +51,7 @@ module.exports = {
     },
     output: {
         filename: 'promo-docker-ts.js',
-        path: path.resolve(__dirname, 'docs'),
+        path: path.resolve(__dirname, 'dist'),
         clean: true,
         iife: true
     },
