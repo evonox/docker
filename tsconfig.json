@@ -12,6 +12,9 @@
     "emitDecoratorMetadata": true,
     "jsx": "react"
   },
+  "include": [
+    "./src/**/*.ts"
+  ],
   "exclude": [
     "./public/", "./node_modules/"
   ]
